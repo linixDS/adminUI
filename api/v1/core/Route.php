@@ -53,7 +53,7 @@ class Route{
 							{
 							   if ($method != "GET") {
 											$request_data = file_get_contents('php://input'); 
-											$request = (array)json_decode($request_data);
+											$request = (array)json_decode($request_data, true);
 							   }
 							   switch ($method)
 							   {

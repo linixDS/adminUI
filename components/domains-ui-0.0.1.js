@@ -1,34 +1,36 @@
 
 export default {
   
-  props: {
-		isglobal: '',
-		token: '',
-		serverurl: ''
+  props: 
+  {
+        isglobal: '',
+        token: '',
+        serverurl: ''
   },
   
   data() {
 	  return {
-		  Domains : [],
-		  Services: [],
-		  SearchDomainText: '',
-		  ErrorMessage: '',
-		  showContent: true,
-          showDomainContent: false,
-          showButtonPrev: false,
-		  showSpinLoading: false,
-          createdAdminAccount: false,
-          titlePage: 'Domeny zarejestrowane:',
-          password2: '',
-		  mailUser : '',
-		  mailDomain: '',
-		  
-		  domainObj: {},
-		  adminObj: {},
-		  domainServices: [],
-		  domainChoiceServices: [],
-		  adminChoiceServices: []
-	  }
+              Domains : [],
+              Services: [],
+              SearchDomainText: '',
+              ErrorMessage: '',
+              SuccessMessage: '',
+		          showContent: true,
+              showDomainContent: false,
+              showButtonPrev: false,
+		          showSpinLoading: false,
+              createdAdminAccount: false,
+              titlePage: 'Domeny zarejestrowane:',
+              password2: '',
+              mailUser : '',
+              mailDomain: '',
+              
+              domainObj: {},
+              adminObj: {},
+              domainServices: [],
+              domainChoiceServices: [],
+              adminChoiceServices: []
+	          }
   },
   
   
@@ -40,81 +42,93 @@ export default {
         else
             return this.Domains;
     },
+
+    isDisableInputs: function() {
+        if (this.showSpinLoading)
+          return true;
+        else
+          return false;
+    },
+
 	
-	filterDomainServices: function(){
-		return this.domainServices;
-	},
-	CheckForm:function() {
-		if (this.domainObj.name < 5) return false;
-		if (!this.createdAdminAccount) return true;
-		
-		if (this.adminObj.name.length < 3) return false;
-		if (this.mailUser.length < 3) return false;
-		if (this.mailDomain.length < 3) return false;
-		if (this.adminObj.password.length < 8) return false;
-		if (this.adminObj.password != this.password2) return false;
-		
-		return true;
-	},
+	  filterDomainServices: function(){
+		    return this.domainServices;
+	  },
+	
+    CheckForm:function() {
+        if (this.domainObj.domain < 5) return false;
+        if (!this.createdAdminAccount) return true;
+        
+        if (this.adminObj.name.length < 3) return false;
+        if (this.mailUser.length < 3) return false;
+        if (this.mailDomain.length < 3) return false;
+        if (this.adminObj.password.length < 8) return false;
+        if (this.adminObj.password != this.password2) return false;
+        
+        return true;
+    },
   },  
   
   methods: {
     CheckText(){
-        if (this.domainObj.name.length < 5)
+        if (this.domainObj.domain.length < 5)
         {
             this.createdAdminAccount = false;
         }
-		this.mailDomain = '@'+this.domainObj.name;
+		    this.mailDomain = '@'+this.domainObj.domain;
     },
 	
-	ChangeServicesDomain() {
-		this.domainServices = [];
-		this.adminChoiceServices = [];
-		
-		console.log(this.domainChoiceServices);
-		console.log(this.domainChoiceServices.length);
-		for (const item of this.domainChoiceServices) {
-			const domain = this.Services.filter(service => service.id == item);
-			if (domain.length == 1) {
-				this.domainServices.push(domain[0]);
-				this.adminChoiceServices.push(item);
-			}
-
-		}
-		
-		console.log('Admin chice');
-		console.log(this.adminChoiceServices);
-	},
-    
-	AddNewDomain() {
-		this.password2 = '';
-		this.mailUser = '';
-		this.mailDomain = '';
-		
-		this.domainObj=  {'name':'', 'comment':'','limit_mails':100,'limit_admin':100};
-		this.adminObj=  {'name':'', 'username':'','password':''};
-		this.domainChoiceServices = [];
-		this.adminChoiceServices = [];
-		this.domainServices = [];
-		
-		const temp = this.Services.filter(service => service.com_checked == 1);
-
-		for (const element of temp) {
-			this.domainChoiceServices.push(element.id);
-			this.domainServices.push(element);
-			this.adminChoiceServices.push(element.id);
-		}
-		
-
-        this.createdAdminAccount = false;
-        this.domainName = '';
-        this.domainComment = '';
+    ChangeServicesDomain() {
+      this.domainServices = [];
+      this.adminChoiceServices = [];
       
-        this.titlePage = 'Rejestracja nowej domeny:';
-		this.showContent = false;
-        this.showButtonPrev = true;
-        this.showDomainContent = true;
-	},
+      console.log(this.domainChoiceServices);
+      console.log(this.domainChoiceServices.length);
+      for (const item of this.domainChoiceServices) {
+        const domain = this.Services.filter(service => service.id == item);
+        if (domain.length == 1) {
+          this.domainServices.push(domain[0]);
+          this.adminChoiceServices.push(item);
+        }
+
+      }
+      
+      console.log('Admin chice');
+      console.log(this.adminChoiceServices);
+    },
+    
+    AddNewDomain() {
+      this.showSpinLoading = false;
+      this.ErrorMessage = '';
+      this.SuccessMessage = '';
+      this.password2 = '';
+      this.mailUser = '';
+      this.mailDomain = '';
+      
+      this.domainObj=  {'domain':'', 'comment':'','limit_mails':100,'limit_admins':100};
+      this.adminObj=  {'name':'', 'username':'','password':''};
+      this.domainChoiceServices = [];
+      this.adminChoiceServices = [];
+      this.domainServices = [];
+      
+      const temp = this.Services.filter(service => service.com_checked == 1);
+
+      for (const element of temp) {
+        this.domainChoiceServices.push(element.id);
+        this.domainServices.push(element);
+        this.adminChoiceServices.push(element.id);
+      }
+      
+
+          this.createdAdminAccount = false;
+          this.domainName = '';
+          this.domainComment = '';
+        
+          this.titlePage = 'Rejestracja nowej domeny:';
+      this.showContent = false;
+          this.showButtonPrev = true;
+          this.showDomainContent = true;
+    },
 	
     showAdminAccountPanel(){
         if (this.domainName.length < 5) this.createdAdminAccount = false; 
@@ -126,37 +140,76 @@ export default {
             this.createdAdminAccount = true;  
     },
     
-	ShowDomains() {
-        this.showButtonPrev = false;
-        this.showDomainContent = false;
-		this.showContent = true;
-        this.titlePage = 'Domeny zarejestrowane:';
-	},	
+    ShowDomains() {
+          this.showButtonPrev = false;
+          this.showDomainContent = false;
+      this.showContent = true;
+          this.titlePage = 'Domeny zarejestrowane:';
+    },	
 
-  
-	GetDomains() {
-                    fetch(this.serverurl+'domains.php?token='+this.token)
-						.then(res=>res.json()).then((response) => {
-                           console.log(response.result);
-						   this.Domains = response.result;
+    
+    GetDomains() {
+                      fetch(this.serverurl+'domains.php?token='+this.token)
+              .then(res=>res.json()).then((response) => {
+                            console.log(response.result);
+                this.Domains = response.result;
 
-                        }).catch( (error) => {
-                            console.log(error);
-                            this.ErrorMessage = error;
-                        });		  
-	  },
-	  
-	GetServices() {
-                    fetch(this.serverurl+'services.php?token='+this.token)
-						.then(res=>res.json()).then((response) => {
-                           console.log(response.result);
-						   this.Services = response.result;
+                          }).catch( (error) => {
+                              console.log(error);
+                              this.ErrorMessage = error;
+                          });		  
+      },
+      
+    GetServices() {
+                      fetch(this.serverurl+'services.php?token='+this.token)
+              .then(res=>res.json()).then((response) => {
+                            console.log(response.result);
+                this.Services = response.result;
 
-                        }).catch( (error) => {
-                            console.log(error);
-                            this.ErrorMessage = error;
-                        });		  
-	  }	  
+                          }).catch( (error) => {
+                              console.log(error);
+                              this.ErrorMessage = error;
+                          });		  
+    },
+
+    SaveData() {
+        let accessList = [];
+        for (let serviceId of this.domainChoiceServices) {
+            const temp = this.Services.filter(service => service.id == serviceId);
+            if (temp.length == 1){
+                var obj = temp[0];
+                delete obj.com_checked;
+                delete obj.com_disabled;
+
+                accessList.push(obj);
+            }
+        }
+
+        var data = {  token  : this.token, 
+                      data   : this.domainObj,
+                      access : accessList};
+          
+          
+        this.showSpinLoading = true;
+        console.log('Save domain');
+        console.log(JSON.stringify(data));
+
+        fetch(this.serverurl+'domains.php', {
+                  headers: { 'Content-type': 'application/json' },
+                  method: "POST",
+                  body: JSON.stringify(data)
+              }).then(res=>res.json()).then((response) => {
+                  console.log('Responde OK');
+                  console.log(response.result);
+                  this.SuccessMessage = 'Nowa domena '+response.result.domain+' została zarejestrowana.';
+                  this.Domains.push(response.result);
+              }).catch( (error) => {
+                  console.log(error);
+                  this.ErrorMessage = error;
+        });
+        this.ShowDomains();
+    }
+
 	  
   },
   
@@ -173,7 +226,7 @@ export default {
     <div style="margin-bottom: 25px;">
       <div class="row">
               <div class="col-1" style="width: 50px;" v-if="showButtonPrev">
-                  <button class="btn btn-outline-primary" v-on:click="ShowDomains">
+                  <button class="btn btn-outline-primary" v-on:click="ShowDomains" :disabled="isDisableInputs">
                     <i class="fas fa-chevron-left"></i>
                   </button>
               </div>
@@ -184,13 +237,23 @@ export default {
       <hr style="color: blue;">
    </div>
 
+  <div>
+        <div class="alert alert-danger" v-if="ErrorMessage" style="margin-bottom: 20px;">
+          {{ ErrorMessage }}
+        </div>
+        <!--- Display success message --->
+        <div class="alert alert-success" v-if="SuccessMessage" style="margin-bottom: 20px;">
+          {{ SuccessMessage }}
+        </div>   
+  </div>
+
     <div v-if="showDomainContent">
           <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
             <div class="col-2">
               <label class="col-form-label"><b>Nazwa domeny:</b>  </label>
             </div>
             <div class="col-4">
-              <input type="text" class="form-control" v-model="domainObj.name" @input="CheckText">
+              <input type="text" class="form-control" v-model="domainObj.domain" @input="CheckText" :disabled="isDisableInputs">
             </div>
           </div>
           
@@ -199,7 +262,7 @@ export default {
               <label class="col-form-label">Komentarz: </label>
             </div>
             <div class="col-4">
-              <input type="text" class="form-control" v-model="domainObj.comment">
+              <input type="text" class="form-control" v-model="domainObj.comment" :disabled="isDisableInputs">
             </div>
           </div>
           
@@ -207,9 +270,9 @@ export default {
           
           <div class="row g-3" style="margin-bottom: 20px;">
                 <div class="col-auto">
-                    <div class="list-group" v-for="service in Services">
+                    <div class="list-group" v-for="service in Services" >
                           <label class="list-group-item d-flex gap-2">
-                            <input class="form-check-input flex-shrink-0" type="checkbox" :value="service.id" v-model="domainChoiceServices"  :checked="service.com_checked" :disabled="service.com_disabled" @change="ChangeServicesDomain">
+                            <input class="form-check-input flex-shrink-0" type="checkbox" :value="service.id" v-model="domainChoiceServices"  :checked="service.com_checked" :disabled="service.com_disabled || isDisableInputs" @change="ChangeServicesDomain">
                             <span>
 							{{ service.name }}
                               <small class="d-block text-body-secondary">{{ service.description }}</small>
@@ -226,7 +289,7 @@ export default {
               <label class="col-form-label">Limit kont pocztowych:</label>
             </div>
             <div class="col-2">
-              <input type="number" class="form-control" :value="domainObj.limit_mails" :v-model="domainObj.limit_mails" >
+              <input type="number" class="form-control" :value="domainObj.limit_mails" :v-model="domainObj.limit_mails" :disabled="isDisableInputs">
             </div>
           </div>
 		  
@@ -235,12 +298,12 @@ export default {
               <label class="col-form-label">Limit administratorów:</label>
             </div>
             <div class="col-2">
-              <input type="number" class="form-control" :value="domainObj.limit_admin" :v-model="domainObj.limit_admin">
+              <input type="number" class="form-control" :value="domainObj.limit_admins" :v-model="domainObj.limit_admins" :disabled="isDisableInputs">
             </div>
           </div>			  
           <div class="list-group" style="margin-bottom: 20px;">
                 <label class="list-group-item d-flex gap-2">
-                  <input class="form-check-input flex-shrink-0" type="checkbox" value="" v-model="createdAdminAccount" :disabled="domainObj.name.length < 5">
+                  <input class="form-check-input flex-shrink-0" type="checkbox" v-model="createdAdminAccount" :disabled="domainObj.domain.length < 5 || isDisableInputs">
                   <span>
                     Utwórz administratora
                     <small class="d-block text-body-secondary">Utwórz dedykowanego administratora domeny.</small>
@@ -256,7 +319,7 @@ export default {
                   <label class="col-form-label">Nazwa użytkownia:</label>
                 </div>
                 <div class="col-4">
-                  <input type="text" class="form-control" v-model="adminObj.name">
+                  <input type="text" class="form-control" v-model="adminObj.name" :disabled="isDisableInputs">
                 </div>
             </div>
             <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
@@ -264,7 +327,7 @@ export default {
                   <label class="col-form-label">Adres E-mail:</label>
                 </div>
                 <div class="col-3">
-                  <input type="text" class="form-control" v-model="mailUser">
+                  <input type="text" class="form-control" v-model="mailUser" :disabled="isDisableInputs">
                 </div>                
                 <div class="col-5">
                   <input type="text" class="form-control" v-model="mailDomain" disabled>
@@ -275,7 +338,7 @@ export default {
                   <label class="col-form-label">Hasło:</label>
                 </div>
                 <div class="col-4">
-                  <input type="password" class="form-control" v-model="adminObj.password">
+                  <input type="password" class="form-control" v-model="adminObj.password" :disabled="isDisableInputs">
                 </div>
             </div>
              <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
@@ -284,7 +347,7 @@ export default {
                 </div>
                 <div class="col-4">
 					<div class="input-group-mb-3">
-						<input type="password" class="form-control" v-model="password2">
+						<input type="password" class="form-control" v-model="password2" :disabled="isDisableInputs">
 					</div>
 				</div>
 				
@@ -299,7 +362,7 @@ export default {
 				    <h6 class="text-primary">Uprawnienia administratora dedykowanego:</h6>
 					<div class="list-group" v-for="service in filterDomainServices">
                         <label class="list-group-item d-flex gap-2">
-                            <input class="form-check-input flex-shrink-0" type="checkbox" v-model="adminChoiceServices" :value="service.id" :checked="service.com_checked" :disabled="service.com_disabled">
+                            <input class="form-check-input flex-shrink-0" type="checkbox" v-model="adminChoiceServices" :value="service.id" :checked="service.com_checked" :disabled="service.com_disabled || isDisableInputs">
 							  <span>
 							   {{ service.name }}
                               <small class="d-block text-body-secondary">{{ service.description }}</small>
@@ -314,12 +377,12 @@ export default {
         
         <div class="row g-3 align-items-center">
 			<div class="col-auto">
-				<button class="btn btn-success" v-if="CheckForm">
+				<button class="btn btn-success" v-if="CheckForm" v-on:click="SaveData" :disabled="isDisableInputs">
 					<div v-if="showSpinLoading" class="spinner-border text-white spinner-border-sm" role="status"></div>&nbsp;&nbsp;Zapisz
 				</button>
 			</div>
 			<div class="col-auto">
-				<button class="btn btn-outline-danger" v-on:click="ShowDomains">Zamknij</button>
+				<button class="btn btn-outline-danger" v-on:click="ShowDomains" :disabled="isDisableInputs">Zamknij</button>
 			</div>			
 		</div>
     </div>

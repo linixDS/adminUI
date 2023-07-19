@@ -200,10 +200,7 @@
 			<div class="alert alert-danger" v-if="ErrorMessage" style="margin-bottom: 50px;">
 				  {{ ErrorMessage }}
 			</div>
-			<!--- Display success message --->
-			<div class="alert alert-success" v-if="SuccessMessage" style="margin-bottom: 50px;">
-				  {{ SuccessMessage }}
-			</div>
+
 
 			<domains-ui v-if="showDomainsPage"
 						:token="SessToken"
