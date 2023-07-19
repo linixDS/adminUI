@@ -194,7 +194,7 @@
 		<div class="b-example-divider b-example-vr"></div>
   
 		<!--- Display content main --->
-		<div style="margin: 30px 30px 30px 30px; width: 100%; overflow-x: hidden; overflow-y: auto;">
+		<div style="margin: 30px 30px 30px 30px; width: 100%; overflow-x: hidden; overflow-y: auto;" v-if="showPage">
   
 			<!--- Display error message --->
 			<div class="alert alert-danger" v-if="ErrorMessage" style="margin-bottom: 50px;">
@@ -232,6 +232,7 @@
                         AdminDisplayName: 'Hello World',
                         SessToken: null,
                         IsAdminGlobal: false,
+						showPage: false,
                         showProfile: false,
                         showDomainsPage: false
                         }
@@ -252,6 +253,7 @@
                                     console.log(response.result);
                                             
                                     this.SessToken = response.result.token;
+									this.showPage = true;
                                     this.AdminDisplayName = response.result.user.name;
                                     if (response.result.user.type == "global")
                                         this.IsAdminGlobal = true;
@@ -276,6 +278,7 @@
                                     this.AdminDisplayName = 'Wylogowany';
                                     this.showProfile = false;
                                     this.IsAdminGlobal = false;
+									this.showPage = false;
                                             
                         }).catch( (error) => {
                             console.log(error);
