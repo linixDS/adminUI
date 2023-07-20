@@ -15,6 +15,7 @@ export default {
               SearchDomainText: '',
               ErrorMessage: '',
               SuccessMessage: '',
+              SuccessMessageSlave: '',
 		          showContent: true,
               showDomainContent: false,
               showButtonPrev: false,
@@ -36,88 +37,85 @@ export default {
   
   computed: {
     filterDomainByName: function(){
-        const text = this.SearchDomainText;
-        if (text.length > 0)
-            return this.Domains.filter( domain => domain.domain.toUpperCase().includes(text.toUpperCase()) );
-        else
-            return this.Domains;
+            const text = this.SearchDomainText;
+            if (text.length > 0)
+                return this.Domains.filter( domain => domain.domain.toUpperCase().includes(text.toUpperCase()) );
+            else
+                return this.Domains;
     },
 
     isDisableInputs: function() {
-        if (this.showSpinLoading)
-          return true;
-        else
-          return false;
+            if (this.showSpinLoading)
+              return true;
+            else
+              return false;
     },
 
 	
 	  filterDomainServices: function(){
-		    return this.domainServices;
+            return this.domainServices;
 	  },
 	
     CheckForm:function() {
-        if (this.domainObj.domain < 5) return false;
-        if (!this.createdAdminAccount) return true;
-        
-        if (this.adminObj.name.length < 3) return false;
-        if (this.mailUser.length < 3) return false;
-        if (this.mailDomain.length < 3) return false;
-        if (this.adminObj.password.length < 8) return false;
-        if (this.adminObj.password != this.password2) return false;
-        
-        return true;
+            if (this.domainObj.domain < 5) return false;
+            if (!this.createdAdminAccount) return true;
+            
+            if (this.adminObj.name.length < 3) return false;
+            if (this.mailUser.length < 3) return false;
+            if (this.mailDomain.length < 3) return false;
+            if (this.adminObj.password.length < 8) return false;
+            if (this.adminObj.password != this.password2) return false;
+            
+            return true;
     },
   },  
   
   methods: {
     CheckText(){
-        if (this.domainObj.domain.length < 5)
-        {
-            this.createdAdminAccount = false;
-        }
-		    this.mailDomain = '@'+this.domainObj.domain;
+            if (this.domainObj.domain.length < 5)
+            {
+                this.createdAdminAccount = false;
+            }
+            this.mailDomain = '@'+this.domainObj.domain;
     },
 	
     ChangeServicesDomain() {
-      this.domainServices = [];
-      this.adminChoiceServices = [];
-      
-      console.log(this.domainChoiceServices);
-      console.log(this.domainChoiceServices.length);
-      for (const item of this.domainChoiceServices) {
-        const domain = this.Services.filter(service => service.id == item);
-        if (domain.length == 1) {
-          this.domainServices.push(domain[0]);
-          this.adminChoiceServices.push(item);
-        }
-
-      }
-      
-      console.log('Admin chice');
-      console.log(this.adminChoiceServices);
+          this.domainServices = [];
+          this.adminChoiceServices = [];
+          
+          console.log(this.domainChoiceServices);
+          console.log(this.domainChoiceServices.length);
+          for (const item of this.domainChoiceServices) {
+              const domain = this.Services.filter(service => service.id == item);
+              if (domain.length == 1) {
+                this.domainServices.push(domain[0]);
+                this.adminChoiceServices.push(item);
+              }
+          }
     },
     
     AddNewDomain() {
-      this.showSpinLoading = false;
-      this.ErrorMessage = '';
-      this.SuccessMessage = '';
-      this.password2 = '';
-      this.mailUser = '';
-      this.mailDomain = '';
+          this.showSpinLoading = false;
+          this.ErrorMessage = '';
+          this.SuccessMessage = '';
+          this.SuccessMessageSlave = '';
+          this.password2 = '';
+          this.mailUser = '';
+          this.mailDomain = '';
+          
+          this.domainObj=  {'domain':'', 'comment':'','limit_mails':100,'limit_admins':100};
+          this.adminObj=  {'name':'', 'username':'','password':''};
+          this.domainChoiceServices = [];
+          this.adminChoiceServices = [];
+          this.domainServices = [];
       
-      this.domainObj=  {'domain':'', 'comment':'','limit_mails':100,'limit_admins':100};
-      this.adminObj=  {'name':'', 'username':'','password':''};
-      this.domainChoiceServices = [];
-      this.adminChoiceServices = [];
-      this.domainServices = [];
-      
-      const temp = this.Services.filter(service => service.com_checked == 1);
+          const temp = this.Services.filter(service => service.com_checked == 1);
 
-      for (const element of temp) {
-        this.domainChoiceServices.push(element.id);
-        this.domainServices.push(element);
-        this.adminChoiceServices.push(element.id);
-      }
+          for (const element of temp) {
+            this.domainChoiceServices.push(element.id);
+            this.domainServices.push(element);
+            this.adminChoiceServices.push(element.id);
+          }
       
 
           this.createdAdminAccount = false;
@@ -125,25 +123,25 @@ export default {
           this.domainComment = '';
         
           this.titlePage = 'Rejestracja nowej domeny:';
-      this.showContent = false;
+          this.showContent = false;
           this.showButtonPrev = true;
           this.showDomainContent = true;
     },
 	
     showAdminAccountPanel(){
-        if (this.domainName.length < 5) this.createdAdminAccount = false; 
-      
-        if (this.createdAdminAccount) {
-            this.createdAdminAccount = false;  
-        }
-          else
-            this.createdAdminAccount = true;  
+          if (this.domainName.length < 5) this.createdAdminAccount = false; 
+        
+          if (this.createdAdminAccount) {
+              this.createdAdminAccount = false;  
+          }
+            else
+              this.createdAdminAccount = true;  
     },
     
     ShowDomains() {
           this.showButtonPrev = false;
           this.showDomainContent = false;
-      this.showContent = true;
+          this.showContent = true;
           this.titlePage = 'Domeny zarejestrowane:';
     },	
 
@@ -173,21 +171,9 @@ export default {
     },
 
     SaveData() {
-        let accessList = [];
-        for (let serviceId of this.domainChoiceServices) {
-            const temp = this.Services.filter(service => service.id == serviceId);
-            if (temp.length == 1){
-                var obj = temp[0];
-                delete obj.com_checked;
-                delete obj.com_disabled;
-
-                accessList.push(obj);
-            }
-        }
-
         var data = {  token  : this.token, 
                       data   : this.domainObj,
-                      access : accessList};
+                      services : this.domainChoiceServices};
           
           
         this.showSpinLoading = true;
@@ -195,6 +181,7 @@ export default {
         console.log(JSON.stringify(data));
 
         fetch(this.serverurl+'domains.php', {
+                  mode: 'no-cors',
                   headers: { 'Content-type': 'application/json' },
                   method: "POST",
                   body: JSON.stringify(data)
@@ -244,7 +231,10 @@ export default {
         <!--- Display success message --->
         <div class="alert alert-success" v-if="SuccessMessage" style="margin-bottom: 20px;">
           {{ SuccessMessage }}
-        </div>   
+        </div> 
+        <div class="alert alert-success" v-if="SuccessMessageSlave" style="margin-bottom: 20px;">
+          {{ SuccessMessage }}
+        </div>     
   </div>
 
     <div v-if="showDomainContent">

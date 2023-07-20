@@ -3,6 +3,7 @@
 include("./core/BaseController.php");
 include("./core/DB.php");
 include("./core/Session.php");
+include("./lib/DomainsClass.php");
 
 class Controller extends BaseController
 {
@@ -12,13 +13,11 @@ class Controller extends BaseController
 	}
 	
 	
-	
-	
 	public function GET($args)
     {
         if (!isset($args['token']))
 			return $this->SendError(401, 'Access denied'); 
-        
+     
         $sess = new SessionController();
         $res = $sess->isAuthClient($args['token']);
         if ($res == false)
@@ -56,14 +55,14 @@ class Controller extends BaseController
 			return $this->SendError(401, 'Access denied - token'); 
         if (!isset($args['data']))
 			return $this->SendError(401, 'Access denied - data');
-        if (!isset($args['access']))
+        if (!isset($args['services']))
 			return $this->SendError(401, 'Access denied - access'); 		
-		
+
 		$domain = $args['data'];
+
 		if ( (!isset($domain['domain'])) || (!isset($domain['comment'])) || (!isset($domain['limit_mails'])) || (!isset($domain['limit_admins'])) )
 			return $this->SendError(401, 'Access denied - domain'); 
 		
-		$access = json_encode($args['access']);
 		
         $sess = new SessionController();
         $res = $sess->isAuthClient($args['token']);
@@ -71,8 +70,7 @@ class Controller extends BaseController
             return $this->SendError(401, 'Access denied - wrong token'); 
 		
         $uid = $sess->GetAdminUID();
-		if (!$sess->IsGlobalAdmin())
-			return $this->SendError(401, 'Access denied - global'); 
+		if (!$sess->IsGlobalAdmin()) 	return $this->SendError(401, 'Access denied - global'); 
 
 		$db = new DB();
         $conn = $db->getConnection();
@@ -81,17 +79,41 @@ class Controller extends BaseController
 		
 		$name = $domain['domain'];
 		$comment = $domain['comment'];
+		$services = $args['services'];
 		$limit_mails = $domain['limit_mails'];
 		$limit_admins = $domain['limit_admins'];
+		$query = '';
+
 		try{
-			$query = "INSERT INTO domains (domain,comment,created,limit_admins,limit_mails) VALUES (:domain,:comment,NOW(),:limit_admins,:limit_mails);";
+			$db->BeginTransaction($conn);
+			$query = "INSERT INTO domains (domain,comment,limit_admins,limit_mails) VALUES (:domain,:comment,:limit_admins,:limit_mails);";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute([':domain' => $name, ':comment' => $comment, ':limit_admins' => $limit_admins, ':limit_mails' => $limit_mails]);
-		} catch (PDOException $e){
-			$this->SendError(500, $db->getLastError()); 
+			
+			$domain_id = $db->GetLastInsertId($conn);
+
+			$query = "INSERT INTO domain_services (domain_id,service_id) VALUES ";
+			for ($i=0; $i < count($services); $i++) {
+				$service_id = $services[$i];
+				$query .= '('.$domain_id. ','.$service_id.')';
+				if ($i < count($services)-1 ){
+					$query .= ',';
+				}
+				else
+					$query .= ';';
+			}
+
+			$sth2 = $db->prepare($conn, $query);
+			$sth2->execute();
+
+			$db->Commit($conn);
+		} catch (Exception $e){
+			$db->Rollback($conn);
+			$this->SendError(500,"Error SQL:".$e); 
+			return;
 		}
 		
-		return $this->SendResult(201, $domain);
+		return $this->SendResult(201,$domain );
         
 	}
 

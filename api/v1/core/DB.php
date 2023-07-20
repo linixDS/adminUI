@@ -58,6 +58,23 @@ class DB
         return $sth->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function GetLastInsertId($conn){
+        return $conn->lastInsertId();
+    }
+
+    public function BeginTransaction($conn){
+        return $conn->beginTransaction();
+    }
+
+    public function Commit($conn){
+        return $conn->commit();
+    }
+
+    public function Rollback($conn){
+        return $conn->rollback();
+    }
+    
+
 };
 
 ?>

@@ -18,13 +18,20 @@ class BaseController
 	
     public function SendError($code, $msg)
     {
+		header("Access-Control-Allow-Origin: *");
+        header("Content-Type: application/json; charset=UTF-8");
+
+        http_response_code($code);
+		
 		$result = array();
         $error = array();
 		$error['code'] = $code;
 		$error['message'] = $msg;
 		$result['error'] = $error;
 
-		return $this->SendResult($code, $result);
+		
+        echo json_encode($result);
+        exit();
 	}	
 	
 	public function __construct(){
