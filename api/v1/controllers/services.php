@@ -3,6 +3,7 @@
 include("./core/BaseController.php");
 include("./core/DB.php");
 include("./core/Session.php");
+include("./lib/ServicesClass.php");
 
 class Controller extends BaseController
 {
@@ -12,34 +13,16 @@ class Controller extends BaseController
 	}
 	
 	
-	
-	
 	public function GET($args)
     {
         if (!isset($args['token']))
 			return $this->SendError(401, 'Access denied'); 
         
-        $sess = new SessionController();
-        $res = $sess->isAuthClient($args['token']);
-        if ($res == false)
-            return $this->SendError(401, 'Access denied - wrong token'); 
-        
-		if (!$sess->IsGlobalAdmin())
-			return $this->SendError(401, 'Access denied'); 
-		
-        $db = new DB();
-        
-        $conn = $db->getConnection();
-        if ($conn == null)
-            return $this->SendError(500, $db->getLastError()); 	
-		
-		$query = "SELECT id,name,description,com_checked,com_disabled FROM services WHERE ACTIVE=1 ORDER BY name;";
-		$sth = $db->prepare($conn, $query);
-		$sth->execute();
-
-        $data = $sth->fetchAll(PDO::FETCH_ASSOC);	
-		
-        return $this->SendResult(200, $data); 
+		$class = new ServicesClass($args);
+		if (!isset($args['domain']))
+			$class->getAllServices($args['token']);
+		else
+			$class->getDomainServices($args['token'], $args['domain']);
 	}	
 	
  	public function POST($args){

@@ -1,4 +1,3 @@
-
 export default {
   
   props: 
@@ -12,16 +11,23 @@ export default {
 	  return {
               Domains : [],
               Services: [],
+              
               SearchDomainText: '',
+              
               ErrorMessage: '',
               SuccessMessage: '',
               SuccessMessageSlave: '',
-		          showContent: true,
+		          
+              AdminPanel: true,
+              showDeleteDomainContent: false,
+              showContent: true,
               showDomainContent: false,
               showButtonPrev: false,
 		          showSpinLoading: false,
               createdAdminAccount: false,
+              
               titlePage: 'Domeny zarejestrowane:',
+              
               password2: '',
               mailUser : '',
               mailDomain: '',
@@ -30,8 +36,11 @@ export default {
               adminObj: {},
               domainServices: [],
               domainChoiceServices: [],
-              adminChoiceServices: []
-	          }
+              adminChoiceServices: [],
+              
+              currentDomainObj: [],
+              currentServices: []
+    }
   },
   
   
@@ -59,15 +68,17 @@ export default {
     CheckForm:function() {
             if (this.domainObj.domain < 5) return false;
             if (!this.createdAdminAccount) return true;
-            
+                
             if (this.adminObj.name.length < 3) return false;
-            if (this.mailUser.length < 3) return false;
+            if (this.mailUser.length < 2) return false;
             if (this.mailDomain.length < 3) return false;
             if (this.adminObj.password.length < 8) return false;
             if (this.adminObj.password != this.password2) return false;
-            
+               
             return true;
     },
+
+
   },  
   
   methods: {
@@ -78,23 +89,86 @@ export default {
             }
             this.mailDomain = '@'+this.domainObj.domain;
     },
+
+    SelectDomain(selected) {
+        this.currentDomainObj = selected;
+        console.log('show delete dialog');
+        this.titlePage = "Usuwanie domeny: "+selected.domain;
+        this.showDeleteDomainContent=true;
+        this.showButtonPrev=true;
+        this.showContent=false;
+    },
+
+    IsUpdateDomain() {
+          console.log('Update domain:');
+
+          console.log('Comment: '+this.domainObj.comment+' <> '+this.currentDomainObj.comment );
+          console.log('Limit admins: '+this.domainObj.limit_admins+' <> '+this.currentDomainObj.limit_admins );
+          console.log('Limit mails: '+this.domainObj.limit_mails+' <> '+this.currentDomainObj.limit_mails );
+          if  (  this.domainObj.comment != this.currentDomainObj.comment ||
+                this.domainObj.limit_admins != this.currentDomainObj.limit_admins ||
+                this.domainObj.limit_mails != this.currentDomainObj.limit_mails
+              ) return true;
+            else
+                return false;
+    },
+
 	
     ChangeServicesDomain() {
+
+          console.log('ChangeServicesDomain');
           this.domainServices = [];
           this.adminChoiceServices = [];
           
           console.log(this.domainChoiceServices);
           console.log(this.domainChoiceServices.length);
           for (const item of this.domainChoiceServices) {
+              console.log('Read choice: '+item);
               const domain = this.Services.filter(service => service.id == item);
               if (domain.length == 1) {
+                console.log('Push: '+domain[0]);
                 this.domainServices.push(domain[0]);
                 this.adminChoiceServices.push(item);
               }
           }
     },
     
+
+    EditDomain(selected) {
+        console.log('Edit domain: '+selected.domain);
+        this.GetServicesDomain(selected.domain);
+        this.currentDomainObj = selected;
+        this.AdminPanel = false;
+        console.log('-----------------');
+        console.log(selected);
+        console.log('-----------------');
+        this.showSpinLoading = false;
+        this.ErrorMessage = '';
+        this.SuccessMessage = '';
+        this.SuccessMessageSlave = '';
+        this.password2 = '';
+        this.mailUser = '';
+        this.mailDomain = '';
+        
+        this.domainObj=  selected;
+        this.adminObj=  {'name':'', 'username':'','password':''};
+        this.domainChoiceServices = [];
+        this.adminChoiceServices = [];
+        this.domainServices = [];
+
+
+        this.createdAdminAccount = false;
+
+      
+        this.titlePage = 'Edycja domeny: '+selected.domain;
+        this.showContent = false;
+        this.showButtonPrev = true;
+        this.showDomainContent = true;
+    },
+
+
     AddNewDomain() {
+          this.AdminPanel = true;
           this.showSpinLoading = false;
           this.ErrorMessage = '';
           this.SuccessMessage = '';
@@ -103,8 +177,11 @@ export default {
           this.mailUser = '';
           this.mailDomain = '';
           
-          this.domainObj=  {'domain':'', 'comment':'','limit_mails':100,'limit_admins':100};
+          this.domainObj=  {'domain':'', 'comment':'','limit_mails':100,'limit_admins':5};
           this.adminObj=  {'name':'', 'username':'','password':''};
+
+          this.domainObj.limit_mails = '100';
+          this.domainObj.limit_admins = '5';
           this.domainChoiceServices = [];
           this.adminChoiceServices = [];
           this.domainServices = [];
@@ -119,8 +196,6 @@ export default {
       
 
           this.createdAdminAccount = false;
-          this.domainName = '';
-          this.domainComment = '';
         
           this.titlePage = 'Rejestracja nowej domeny:';
           this.showContent = false;
@@ -129,7 +204,7 @@ export default {
     },
 	
     showAdminAccountPanel(){
-          if (this.domainName.length < 5) this.createdAdminAccount = false; 
+          if (this.domainObj.domain.length < 5) this.createdAdminAccount = false; 
         
           if (this.createdAdminAccount) {
               this.createdAdminAccount = false;  
@@ -139,62 +214,216 @@ export default {
     },
     
     ShowDomains() {
+          console.log('showDomains');
+          this.showSpinLoading = false;
           this.showButtonPrev = false;
           this.showDomainContent = false;
           this.showContent = true;
+          this.showDeleteDomainContent = false;
           this.titlePage = 'Domeny zarejestrowane:';
     },	
 
     
-    GetDomains() {
-                      fetch(this.serverurl+'domains.php?token='+this.token)
-              .then(res=>res.json()).then((response) => {
-                            console.log(response.result);
-                this.Domains = response.result;
 
-                          }).catch( (error) => {
-                              console.log(error);
-                              this.ErrorMessage = error;
-                          });		  
-      },
+    GetDomains() {
+          fetch( this.serverurl +'domains.php?token=' + this.token)
+                .then((res) => {
+                  console.log('StatusCode: ' + res.status);
+                  return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+                })
+                .then((json) => {
+                  console.log(json);
+                  if (json.error) {
+                    console.log(json.error);
+                    this.ErrorMessage = json.error.message;
+                  } else {
+                    this.Domains = json.result;
+                  }
+                })
+                .catch((error) => {
+                  console.log(error);
+                  if (error == "TypeError: Failed to fetch")
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                  else
+                    if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                        this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                    else
+                      this.ErrorMessage = 'Wyjątek: ' + error;
+                });
+
+    },
       
     GetServices() {
-                      fetch(this.serverurl+'services.php?token='+this.token)
-              .then(res=>res.json()).then((response) => {
-                            console.log(response.result);
-                this.Services = response.result;
-
-                          }).catch( (error) => {
-                              console.log(error);
-                              this.ErrorMessage = error;
-                          });		  
+          fetch( this.serverurl+'services.php?token='+this.token)
+                  .then((res) => {
+                        console.log('StatusCode: ' + res.status);
+                        return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+                  })
+                  .then((json) => {
+                        console.log(json);
+                        if (json.error) {
+                          console.log(json.error);
+                          this.ErrorMessage = json.error.message;
+                        } else {
+                          this.Services = json.result;
+                        }
+                  })
+                  .catch((error) => {
+                        console.log(error);
+                        if (error == "TypeError: Failed to fetch")
+                          this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                        else
+                          if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                              this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                          else
+                            this.ErrorMessage = 'Wyjątek: ' + error;
+                  });	  
     },
 
-    SaveData() {
-        var data = {  token  : this.token, 
-                      data   : this.domainObj,
-                      services : this.domainChoiceServices};
-          
-          
-        this.showSpinLoading = true;
-        console.log('Save domain');
-        console.log(JSON.stringify(data));
 
-        fetch(this.serverurl+'domains.php', {
-                  mode: 'no-cors',
+    GetServicesDomain(domain) {
+              console.log('GetServicesDomain: '+domain);
+              fetch( this.serverurl+'services.php?token='+this.token+'&domain='+domain)
+              .then((res) => {
+                    console.log('StatusCode: ' + res.status);
+                    return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+              })
+              .then((json) => {
+                    console.log(json);
+                    if (json.error) {
+                      console.log(json.error);
+                      this.ErrorMessage = json.error.message;
+                    } else {
+                      for (const element of json.result ) {
+                        this.currentServices.push(element.service_id);
+                        this.domainChoiceServices.push(element.service_id);
+                      }
+                      this.ChangeServicesDomain();
+                    }
+              })
+              .catch((error) => {
+                    console.log(error);
+                    if (error == "TypeError: Failed to fetch")
+                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                    else
+                      if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                          this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                      else
+                        this.ErrorMessage = 'Wyjątek: ' + error;
+              });	  
+    },    
+
+    UpdateDomain(){
+        if (!this.IsUpdateDomain()) {
+            this.SuccessMessage = "Dane domeny nie uległy zmienie.";
+        }
+          else
+            this.SuccessMessage = "Aktualizowano.";
+    },
+
+    SaveNewDomain() {
+            var data = {  token  : this.token, 
+                          data   : this.domainObj,
+                          services : this.domainChoiceServices};
+
+
+            this.showSpinLoading = true;
+            console.log('Save domain');
+            console.log(JSON.stringify(data));
+
+            fetch(  this.serverurl+'domains.php', {
                   headers: { 'Content-type': 'application/json' },
                   method: "POST",
-                  body: JSON.stringify(data)
-              }).then(res=>res.json()).then((response) => {
-                  console.log('Responde OK');
-                  console.log(response.result);
-                  this.SuccessMessage = 'Nowa domena '+response.result.domain+' została zarejestrowana.';
-                  this.Domains.push(response.result);
-              }).catch( (error) => {
-                  console.log(error);
-                  this.ErrorMessage = error;
-        });
-        this.ShowDomains();
+                  body: JSON.stringify(data)})
+            .then((res) => {
+                  console.log('StatusCode: ' + res.status);
+                  return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+            })
+            .then((json) => {
+                  console.log(json);
+                  console.log('JSONM saveDomain');
+                  if (json.error) {
+                    console.log(json.error);
+                    this.ErrorMessage = json.error.message;
+                  } else {
+                    this.Domains.push(json.result);
+                    this.SuccessMessage = "Domena "+json.result.domain+" została wprowadzona.";
+
+                    if (this.createdAdminAccount)
+                        this.CreateNewAdmin();
+                  }
+
+                  this.ShowDomains();
+            })
+            .catch((error) => {
+                  console.log('Error saveDomain');
+                  if (error == "TypeError: Failed to fetch")
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                  else
+                    if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                        this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                    else
+                      this.ErrorMessage = 'Wyjątek: ' + error;
+                  this.ShowDomains();
+            });
+    },
+
+
+    CreateNewAdmin() {
+      this.adminObj.username = this.mailUser+'@'+this.mailDomain;
+
+      var data = {  token   : this.token, 
+                    domain  : this.domainObj.domain,
+                    admin   :  this.adminObj,
+                    services: this.domainChoiceServices};
+
+
+      this.showSpinLoading = true;
+
+      this.ShowDomains();
+
+      console.log('Create admin dedicate');
+      console.log(JSON.stringify(data));
+
+      fetch(  this.serverurl+'admins.php', {
+            headers: { 'Content-type': 'application/json' },
+            method: "POST",
+            body: JSON.stringify(data)})
+      .then((res) => {
+            console.log('StatusCode: ' + res.status);
+            return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+      })
+      .then((json) => {
+            console.log(json);
+            if (json.error) {
+              console.log(json.error);
+              this.ErrorMessage = json.error.message;
+            } else {
+              this.SuccessMessageSlave = "Administrator został utworzony "+json.result.username;
+        }
+        this.ShowDomains = true;
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error == "TypeError: Failed to fetch")
+          this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+        else
+          if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+              this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+          else
+            this.ErrorMessage = 'Wyjątek: ' + error;
+          
+      });
+  },    
+
+    SaveData() {
+
+        if (this.AdminPanel) {
+            this.SaveNewDomain();
+        }
+            else {
+                this.UpdateDomain();
+            }
     }
 
 	  
@@ -233,17 +462,41 @@ export default {
           {{ SuccessMessage }}
         </div> 
         <div class="alert alert-success" v-if="SuccessMessageSlave" style="margin-bottom: 20px;">
-          {{ SuccessMessage }}
+          {{ SuccessMessageSlave }}
         </div>     
   </div>
 
-    <div v-if="showDomainContent">
+  <div v-if="showDeleteDomainContent">
+      <h5 class="text-warning" style="margin-bottom:10px;"><b>OSTRZEŻENIE</b></h5>
+      <div class="text-danger" style="margin-bottom:20px;">
+      Usunięcie domeny spodouje automatyczne usunięcie kont pocztowych, kont administratorów dedykowanych przypisanych do domeny.<br>
+      Jeśli administrator dedykowany jest przypisany do kilku domen (w tym do domeny usuwanej) - również zostanie usunięty!
+      </diV>
+      <h5 class="text-danger" style="margin-bottom:10px;"><b>CZY NAPEWNO USUNĄĆ DOMENĘ ?</b></h5>
+
+      <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
+          <div class="col-auto">
+              <button type="button" class="btn btn-outline-danger" style="width: 100px;"  v-if="isglobal">
+                TAK
+              </button>      
+          </div>
+          <div class="col-auto">
+              <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="ShowDomains" v-if="isglobal">
+                NIE
+              </button>      
+          </div>
+
+      </div>
+
+  </div>
+
+  <div v-if="showDomainContent">
           <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
             <div class="col-2">
               <label class="col-form-label"><b>Nazwa domeny:</b>  </label>
             </div>
             <div class="col-4">
-              <input type="text" class="form-control" v-model="domainObj.domain" @input="CheckText" :disabled="isDisableInputs">
+              <input type="text" class="form-control" v-model="domainObj.domain" @input="CheckText" :disabled="isDisableInputs || !AdminPanel">
             </div>
           </div>
           
@@ -262,7 +515,7 @@ export default {
                 <div class="col-auto">
                     <div class="list-group" v-for="service in Services" >
                           <label class="list-group-item d-flex gap-2">
-                            <input class="form-check-input flex-shrink-0" type="checkbox" :value="service.id" v-model="domainChoiceServices"  :checked="service.com_checked" :disabled="service.com_disabled || isDisableInputs" @change="ChangeServicesDomain">
+                            <input class="form-check-input flex-shrink-0" type="checkbox" :value="service.id" v-model="domainChoiceServices"  :disabled="service.com_disabled || isDisableInputs" @change="ChangeServicesDomain">
                             <span>
 							{{ service.name }}
                               <small class="d-block text-body-secondary">{{ service.description }}</small>
@@ -291,7 +544,7 @@ export default {
               <input type="number" class="form-control" :value="domainObj.limit_admins" :v-model="domainObj.limit_admins" :disabled="isDisableInputs">
             </div>
           </div>			  
-          <div class="list-group" style="margin-bottom: 20px;">
+          <div class="list-group" style="margin-bottom: 20px;" v-if="AdminPanel">
                 <label class="list-group-item d-flex gap-2">
                   <input class="form-check-input flex-shrink-0" type="checkbox" v-model="createdAdminAccount" :disabled="domainObj.domain.length < 5 || isDisableInputs">
                   <span>
@@ -375,7 +628,7 @@ export default {
 				<button class="btn btn-outline-danger" v-on:click="ShowDomains" :disabled="isDisableInputs">Zamknij</button>
 			</div>			
 		</div>
-    </div>
+  </div>
     
     
 	<div v-if="showContent">
@@ -409,12 +662,12 @@ export default {
                                     <td>{{ domain.created }}</td>
                                     <td>{{ domain.comment }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-primary" style="width: 100px;" v-on:click="EditDomain(domain.domain)" v-if="isglobal">
+                                        <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="EditDomain(domain)" v-if="isglobal">
                                           <i class="fas fa-pen"></i>
                                           Edycja
                                         </button>
                                         <div style="margin-top: 10px;" v-if="isglobal">
-                                          <button type="button" class="btn btn-outline-danger" style="width: 100px;" v-on:click="DeleteDomain(domain.domain)">
+                                          <button type="button" class="btn btn-outline-danger" style="width: 100px;" v-on:click="SelectDomain(domain)"  v-if="isglobal">
                                             <i class="fas fa-trash"></i>
                                             Usuń
                                           </button>

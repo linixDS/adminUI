@@ -61,8 +61,8 @@ class SessionController
 	
 	public function GetAdminUID()
 	{
-		if (isset($_SESSION['LoginSession']['uid']))
-			return $_SESSION['LoginSession']['uid'];
+		if (isset($_SESSION['LoginSession']['id_admin']))
+			return $_SESSION['LoginSession']['id_admin'];
 		else
 			return -1;
 	}
@@ -102,6 +102,8 @@ class SessionController
 	
 	public function isAuthClient($token)
 	{
+		if(!defined('AUTHCLIENT_LOADED')) {
+			define('AUTHCLIENT_LOADED', true);
 			session_id($token);
 			session_start();
 			
@@ -112,6 +114,9 @@ class SessionController
 				return true;
 			else
 				return false;
+		}
+			else
+			return true;
 	}
 
 	

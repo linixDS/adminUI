@@ -15,6 +15,7 @@
 
 
     <style>
+   
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -151,27 +152,27 @@
 		<hr>
 		<ul class="nav nav-pills flex-column mb-auto">
 			<li class="nav-item">
-				<a href="#" class="nav-link active" aria-current="page">
+				<a href="#" v-bind:class="[showHomePage ? 'nav-link active' : 'nav-link text-white']" aria-current="page">
 					<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"/></svg>
 					Home
 				</a>
 			</li>
 			<li>
-				<a href="#" class="nav-link text-white" v-on:click="ShowDomainsPage">
+				<a href="#" v-bind:class="[showDomainsPage ? 'nav-link active' : 'nav-link text-white']" v-on:click="ShowDomainsPage">
 					<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#speedometer2"/></svg>
 					Domeny
 				</a>
 			</li>
 			<li>
-				<a href="#" class="nav-link text-white">
+				<a href="#" v-bind:class="[showAdminsPage ? 'nav-link active' : 'nav-link text-white']">
 					<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#table"/></svg>
 					Administratorzy
 				</a>
 			</li>
 			<li>
-				<a href="#" class="nav-link text-white">
+				<a href="#" v-bind:class="[showMailsPage ? 'nav-link active' : 'nav-link text-white']">
 					<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>
-					Konta
+					Konta Pocztowe
 				</a>
 			</li>
 		</ul>
@@ -232,7 +233,10 @@
                             IsAdminGlobal: false,
                             showPage: false,
                             showProfile: false,
-                            showDomainsPage: false
+                            showDomainsPage: false,
+                            showHomePage: true,
+                            showAdminsPage: false,
+                            showMailsPage: false
                         }
             },
                     
@@ -286,8 +290,13 @@
                             
                 ShowDomainsPage() {
                     this.showDomainsPage = true;
+                    this.showAdminsPage = false;
+                    this.showMailsPage = false;
+                    this.showHomePage = false;
                 },
-                            
+
+             
+                                     
      
                             
             },
