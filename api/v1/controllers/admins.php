@@ -38,7 +38,7 @@ class Controller extends BaseController
         if ($registerAdmins == -1)
                 return $this->SendError(501, "Błąd w odczycie liczby administratorów przypisanych do domeny"); 
         if ($registerAdmins >= $ret['limit_admins'])
-                return $this->SendError(501, "Przekroczono dopuszczalną liczbę administratorów przypisanych do domeny."); 
+                return $this->SendError(401, "Przekroczono dopuszczalną liczbę administratorów przypisanych do domeny."); 
 
         $classAdm = new AdminsClass(null);
         $classAdm->addAdminDedicated($args['token'], $ret, $args['admin'], $args['services']) ;

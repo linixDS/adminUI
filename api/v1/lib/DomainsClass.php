@@ -237,11 +237,64 @@ class DomainsClass extends BaseClass
         return $this->sendError(401, 'Access denied');
     }
 
-    public function deleteDomain($token)
+    public function deleteDomain($token, $domain)
     {
-        if (!isset($token))
-            return $this->sendError(400, 'Bad request - token is empty');
-    }
+        if ( (!isset($token)) || (!isset($domain)) )
+        {
+            return $this->getError(400, 'Access denied -token');
+        }
+
+
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false) 
+        {
+            return $this->getError(401, 'Access denied -wrong token');
+        }
+
+        if (!$sess->IsGlobalAdmin())
+            return $this->sendError(401, 'Access denied - global');        
+
+  
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null) 
+            return $this->getError(501, 'Baza');
+
+        try
+        {
+            $query = "SELECT id,domain,comment,created,limit_admins,limit_mails FROM domains WHERE domain=:name LIMIT 1;";
+            $sth = $db->prepare($conn, $query);
+            $sth->execute([':name' => $domain]);
+
+            $count = $sth->rowCount();
+            
+            if ($count > 0)
+            {
+                $data = $sth->fetch();
+                if ($sendResponde)
+                    return $this->sendResult(200, $data);                
+                else
+                    return $data;
+            }
+                else 
+                {
+                    if ($sendResponde)
+                        $this->sendError(501, "Nie znaleziono domeny.");
+                    else
+                        return  $this->getError(501, 'Nie znaleziono domeny.');
+                }
+
+        } 
+        catch (Exception $e) 
+        {
+            if ($sendResponde)
+                return $this->sendError(501, 'SQL: '.$e);
+            else
+                return $this->getError(501, 'SQL: '.$e);
+        }
+    }    
 
 
 }
