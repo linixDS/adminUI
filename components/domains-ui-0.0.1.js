@@ -24,6 +24,7 @@ export default {
               showDomainContent: false,
               showButtonPrev: false,
 		          showSpinLoading: false,
+              showPassword: false,
               createdAdminAccount: false,
               
               titlePage: 'Domeny zarejestrowane:',
@@ -82,6 +83,13 @@ export default {
   },  
   
   methods: {
+    ToggleViewPassword(){
+        if (this.showPassword)
+            this.showPassword=false;
+        else
+            this.showPassword=true;
+    },
+
     CheckText(){
             if (this.domainObj.domain.length < 5)
             {
@@ -414,7 +422,51 @@ export default {
             this.ErrorMessage = 'Wyjątek: ' + error;
           
       });
-  },    
+    }, 
+    
+    DeleteDomain() {
+       var data = {  token   : this.token, 
+                     domain  : this.currentDomainObj.domain,
+                  };
+
+
+      this.showSpinLoading = true;
+
+
+      console.log('Delete domain');
+      console.log(JSON.stringify(data));
+
+      fetch(  this.serverurl+'domains.php', {
+            headers: { 'Content-type': 'application/json' },
+            method: "DELETE",
+            body: JSON.stringify(data)})
+      .then((res) => {
+            console.log('StatusCode: ' + res.status);
+            return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+      })
+      .then((json) => {
+            console.log(json);
+            if (json.error) {
+              console.log(json.error);
+              this.ErrorMessage = json.error.message;
+            } else {
+              this.SuccessMessage = "Administrator został utworzony "+json.result.username;
+        }
+        this.ShowDomains = true;
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error == "TypeError: Failed to fetch")
+          this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+        else
+          if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+              this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+          else
+            this.ErrorMessage = 'Wyjątek: ' + error;
+          
+      });
+    },     
+
 
     SaveData() {
 
@@ -469,7 +521,7 @@ export default {
   <div v-if="showDeleteDomainContent">
       <h5 class="text-warning" style="margin-bottom:10px;"><b>OSTRZEŻENIE</b></h5>
       <div class="text-danger" style="margin-bottom:20px;">
-      Usunięcie domeny spodouje automatyczne usunięcie kont pocztowych, kont administratorów dedykowanych przypisanych do domeny.<br>
+      Usunięcie domeny spowoduje automatyczne usunięcie kont pocztowych, kont administratorów dedykowanych przypisanych do domeny.<br>
       Jeśli administrator dedykowany jest przypisany do kilku domen (w tym do domeny usuwanej) - również zostanie usunięty!
       </diV>
       <h5 class="text-danger" style="margin-bottom:10px;"><b>CZY NAPEWNO USUNĄĆ DOMENĘ ?</b></h5>
@@ -581,25 +633,27 @@ export default {
                   <label class="col-form-label">Hasło:</label>
                 </div>
                 <div class="col-4">
-                  <input type="password" class="form-control" v-model="adminObj.password" :disabled="isDisableInputs">
+                  <input :type="showPassword ? 'text' : 'password'" class="form-control" v-model="adminObj.password" :disabled="isDisableInputs">
                 </div>
             </div>
-             <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
+            <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
                 <div class="col-2">
                   <label class="col-form-label">Powtórz:</label>
                 </div>
                 <div class="col-4">
-					<div class="input-group-mb-3">
-						<input type="password" class="form-control" v-model="password2" :disabled="isDisableInputs">
-					</div>
-				</div>
+					        <div class="input-group-mb-3">
+						          <input :type="showPassword ? 'text' : 'password'" class="form-control" v-model="password2" :disabled="isDisableInputs">
+				        </div>
+            </div>
+
 				
-				<div class="col-auto">
-	           <button class="btn btn-outline-secondary" v-on:click="">
-                    <i class="fa fa-eye"></i>
+            <div class="col-auto">
+                <button class="btn btn-outline-secondary" v-on:click="ToggleViewPassword">
+                        <i class="fa fa-eye"></i>
                   </button>
-				</div>
-            </div>               
+            </div>
+
+        </div>               
             
             <div class="list-group" style="margin-bottom: 20px;">
 				    <h6 class="text-primary">Uprawnienia administratora dedykowanego:</h6>

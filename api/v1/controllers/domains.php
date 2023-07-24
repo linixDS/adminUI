@@ -44,9 +44,12 @@ class Controller extends BaseController
 
  	public function DELETE($args){
         if (!isset($args['token']))
-			return $this->SendError(400, 'Bad request - token is empty'); 
-        
+			return $this->SendError(400, 'Access denied - token'); 
+		if (!isset($args['domain']))
+			return $this->SendError(400, 'Access denied - domain');		
 
+		$class = new DomainsClass($args);
+		$class->deleteDomains($args['token'], $args['domain']);
 	}       
 }
 
