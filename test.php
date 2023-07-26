@@ -1,26 +1,50 @@
 <?php
-    $json = "{\"token\":\"tkn7im3d7312kc95h5ls9th4gv\",\"data\":{\"domain\":\"asdasd\",\"comment\":\"\",\"limit_mails\":100,\"limit_admins\":100},\"services\":[1,2,3,4]}";
-    $args = json_decode($json, true);
 
+     function isService($id, $table){
+          for ($x=0; $x < count($table); $x++){
+              if ($table[$x] == $id) return true;
+          }
 
-    $domain_id = 10;
-    try{
+          return false;
+     }
 
-        $query = "INSERT INTO domains_services (domain_id,service_id) VALUES ";
-        for ($idx=0; $idx < count($args['services']); $idx++) {
-            $service_id = $args['services'][$idx];
-            $query .= '('.$domain_id. ','.$service_id.')';
-            if ($idx < count($args['services'])-1 ){
-                $query .= ',';
-            }
-                else
-                $query .= ';';
-        }
+     function getChangedServicesResultData($current, $new){
+              $serviceNew = array();
+              $serviceDelete = array();
 
-        echo $query;
-    }catch ( Exception $e) {
+              /* Sprawdzamy bieżące usługi
+                 jeśli w nowych usługach czegoś nie znajdziemy to należy usunąć usuługę
+              */
+              for ($x=0; $x < count($current); $x++){
+                  if (!isService($current[$x], $new)) {
+                     array_push($serviceDelete, $current[$x]);
+                  }
+              }
 
-    }
+               /* Sprawdzamy nowe usługi
+                 jeśli w bieżacych usługach czegoś nie znajdziemy to należy dodać usuługę
+              */
+              for ($y=0; $y < count($new); $y++){
+                  if (!isService($new[$y], $current)) {
+                     array_push($serviceNew, $new[$y]);
+                  }
+              }
 
+              $result = array();
+              $result['add'] =  $serviceNew;
+              $result['delete'] = $serviceDelete;
+
+              return $result;
+     }
+
+     $current = array(1,2,3);
+     $new = array(2,4);
+
+     print_r($current);
+     echo "<br/>";
+     print_r($new);
+     echo "<br/>";
+
+     print_r(getChangedServicesResultData($current, $new));
 
 ?>

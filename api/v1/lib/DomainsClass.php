@@ -40,7 +40,7 @@ class DomainsClass extends BaseClass
                 $sth = $db->prepare($conn, $query);
                 $sth->execute();
             } else {
-                $query = "SELECT domain,comment,created,limit_admins,limit_mails FROM domains WHERE id IN (SELECT domain_id FROM domain_admin WHERE admin_id=:uid) ORDER BY domain;";
+                $query = "SELECT domain,comment,created,limit_admins,limit_mails FROM domains WHERE id_domain IN (SELECT domain_id FROM domain_accounts WHERE account_id=:uid) ORDER BY domain;";
                 $sth = $db->prepare($conn, $query);
                 $sth->execute([':uid' => $uid]);
             }
@@ -75,7 +75,7 @@ class DomainsClass extends BaseClass
 
         try
         {
-            $query = "SELECT COUNT(*) FROM domain_admins WHERE domain_id=:domainId LIMIT 1;";
+            $query = "SELECT COUNT(*) FROM domain_accounts WHERE (domain_id=:domainId and is_admin=1) LIMIT 1;";
             $sth = $db->prepare($conn, $query);
             $sth->bindValue(':domainId', $domainId, PDO::PARAM_INT);
             $sth->execute();
@@ -117,6 +117,7 @@ class DomainsClass extends BaseClass
                 return $this->getError(401, 'Access denied -wrong token');
         }
 
+
   
         $db = new DB();
         $conn = $db->getConnection();
@@ -130,7 +131,7 @@ class DomainsClass extends BaseClass
 
         try
         {
-            $query = "SELECT id,domain,comment,created,limit_admins,limit_mails FROM domains WHERE domain=:name LIMIT 1;";
+            $query = "SELECT id_domain,domain,comment,created,limit_admins,limit_mails FROM domains WHERE domain=:name LIMIT 1;";
             $sth = $db->prepare($conn, $query);
             $sth->execute([':name' => $domain]);
 
@@ -199,9 +200,16 @@ class DomainsClass extends BaseClass
 
         try {
             $db->BeginTransaction($conn);
-            $query = "INSERT INTO domains (domain,comment,limit_admins,limit_mails) VALUES (:domain,:comment,:limit_admins,:limit_mails);";
+
+            $query = "INSERT INTO domains (domain,comment,limit_admins,limit_mails) VALUES (:NAMEDOMAIN,:COMMENT,:LIMIT1,:LIMIT2);";
             $sth = $db->prepare($conn, $query);
-            $sth->execute([':domain' => $name, ':comment' => $comment, ':limit_admins' => $limit_admins, ':limit_mails' => $limit_mails]);
+
+            $sth->bindValue(':NAMEDOMAIN', $name, PDO::PARAM_STR);
+            $sth->bindValue(':COMMENT', $comment, PDO::PARAM_STR);
+            $sth->bindValue(':LIMIT1', $limit_admins, PDO::PARAM_INT);
+            $sth->bindValue(':LIMIT2', $limit_mails, PDO::PARAM_INT);
+
+            $sth->execute();
 
             $domain_id = $db->GetLastInsertId($conn);
 
@@ -264,7 +272,7 @@ class DomainsClass extends BaseClass
 
         try
         {
-            $query = "SELECT id,domain,comment,created,limit_admins,limit_mails FROM domains WHERE domain=:name LIMIT 1;";
+            $query = "SELECT id_domain,domain,comment,created,limit_admins,limit_mails FROM domains WHERE domain=:name LIMIT 1;";
             $sth = $db->prepare($conn, $query);
             $sth->execute([':name' => $domain]);
 

@@ -222,7 +222,7 @@ export default {
     },
     
     ShowDomains() {
-          console.log('showDomains');
+          console.log('PAGE DOMAINS');
           this.showSpinLoading = false;
           this.showButtonPrev = false;
           this.showDomainContent = false;
@@ -359,9 +359,11 @@ export default {
 
                     if (this.createdAdminAccount)
                         this.CreateNewAdmin();
+                    else
+                      this.ShowDomains();
                   }
 
-                  this.ShowDomains();
+                  
             })
             .catch((error) => {
                   console.log('Error saveDomain');
@@ -378,20 +380,22 @@ export default {
 
 
     CreateNewAdmin() {
-      this.adminObj.username = this.mailUser+'@'+this.mailDomain;
-
+      console.log('Create admin dedicate');
+      this.adminObj.username = this.mailUser+this.mailDomain;
+      
+      
       var data = {  token   : this.token, 
                     domain  : this.domainObj.domain,
                     admin   :  this.adminObj,
                     services: this.domainChoiceServices};
-
+      
+      
+      console.log(JSON.stringify(data));
 
       this.showSpinLoading = true;
 
       this.ShowDomains();
 
-      console.log('Create admin dedicate');
-      console.log(JSON.stringify(data));
 
       fetch(  this.serverurl+'admins.php', {
             headers: { 'Content-type': 'application/json' },
@@ -409,7 +413,6 @@ export default {
             } else {
               this.SuccessMessageSlave = "Administrator został utworzony "+json.result.username;
         }
-        this.ShowDomains = true;
       })
       .catch((error) => {
         console.log(error);
@@ -452,7 +455,7 @@ export default {
             } else {
               this.SuccessMessage = "Administrator został utworzony "+json.result.username;
         }
-        this.ShowDomains = true;
+        this.ShowDomains();
       })
       .catch((error) => {
         console.log(error);

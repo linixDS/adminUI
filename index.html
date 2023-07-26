@@ -158,6 +158,12 @@
 				</a>
 			</li>
 			<li>
+				<a href="#" v-bind:class="[showCompanyPage ? 'nav-link active' : 'nav-link text-white']" v-on:click="ShowCompanyPage">
+					<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#table"/></svg>
+					Kontrahenci
+				</a>
+			</li>    
+			<li>
 				<a href="#" v-bind:class="[showDomainsPage ? 'nav-link active' : 'nav-link text-white']" v-on:click="ShowDomainsPage">
 					<svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#speedometer2"/></svg>
 					Domeny
@@ -203,11 +209,19 @@
 			</div>
 
 
+			<company-ui v-if="showCompanyPage"
+						:token="SessToken"
+						:isglobal="IsAdminGlobal"
+						:serverurl="ServerUrl">
+			</company-ui>
+
 			<domains-ui v-if="showDomainsPage"
 						:token="SessToken"
 						:isglobal="IsAdminGlobal"
 						:serverurl="ServerUrl">
 			</domains-ui>
+
+
 		</div>
     
 	</main>
@@ -218,6 +232,7 @@
 <script src="./js/sidebars.js"></script>
 <script type="module">
 	import DomainsUi from './components/domains-ui-0.0.1.js';
+  import CompanyUi from './components/company-ui-0.0.1.js';
 	
 	const serverApi = "http://127.0.0.1";
   console.log(document.URL);
@@ -234,6 +249,7 @@
                             showPage: false,
                             showProfile: false,
                             showDomainsPage: false,
+                            showCompanyPage: false,
                             showHomePage: true,
                             showAdminsPage: false,
                             showMailsPage: false
@@ -241,7 +257,8 @@
             },
                     
             components: {
-				        DomainsUi
+				        DomainsUi,
+                CompanyUi
             },
                   
             methods: {
@@ -289,11 +306,20 @@
                 },                            
                             
                 ShowDomainsPage() {
-                    this.showDomainsPage = true;
+                   this.showDomainsPage = true;
+                   this.showAdminsPage = false;
+                   this.showMailsPage = false;
+                   this.showHomePage = false;
+                   this.showCompanyPage = false;
+                },
+
+                ShowCompanyPage() {
+                    this.showDomainsPage = false;
                     this.showAdminsPage = false;
                     this.showMailsPage = false;
                     this.showHomePage = false;
-                },
+                    this.showCompanyPage = true;
+                },                
 
              
                                      

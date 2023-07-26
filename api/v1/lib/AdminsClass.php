@@ -55,7 +55,7 @@ class AdminsClass extends BaseClass
             return $this->sendError(401, 'Access denied - admin');
 
 
-        if ((!isset($domain['id'])) || (!isset($domain['limit_admins'])) )
+        if ((!isset($domain['id_domain'])) || (!isset($domain['limit_admins'])) )
             return $this->sendError(401, 'Access denied - domain2');            
 
         $sess = new SessionController();
@@ -72,13 +72,13 @@ class AdminsClass extends BaseClass
         $name = $adminData['name'];
         $username = $adminData['username'];
         $password = $adminData['password'];
-        $domain_id = $domain['id'];
+        $domain_id = $domain['id_domain'];
         
         $query = '';
 
         try {
             $db->BeginTransaction($conn);
-            $query = "INSERT INTO admins (username,password,name,type) VALUES (:username, :password, :name, 'dedicated');";
+            $query = "INSERT INTO accounts (username,password,name,type) VALUES (:username, :password, :name, 'dedicated');";
  
             $sth = $db->prepare($conn, $query);
             $sth->bindValue(':username', $username, PDO::PARAM_STR);
@@ -87,30 +87,32 @@ class AdminsClass extends BaseClass
 
             $sth->execute();
 
-            $admin_id = $db->GetLastInsertId($conn);
+            $account_id = $db->GetLastInsertId($conn);
 
-            $query = "INSERT INTO domain_admins (domain_id, admin_id) VALUES (:domain_id,:admin_id);";
+            $query = "INSERT INTO domain_accounts (domain_id, account_id, is_admin) VALUES (:domain_id,:account_id, 1);";
             $sth = $db->prepare($conn, $query);
             $sth->bindValue(':domain_id', $domain_id, PDO::PARAM_INT);
-            $sth->bindValue(':admin_id', $admin_id, PDO::PARAM_INT);
+            $sth->bindValue(':account_id', $account_id, PDO::PARAM_INT);
             $sth->execute();
 
-           
 
-            $query = "INSERT INTO admins_services (admin_id, service_id) VALUES ";
+            $query_services = "INSERT INTO account_services (account_id, service_id) VALUES ";
             for ($i = 0; $i < count($services); $i++) {
                 $service_id = $services[$i];
-                $query .= '(' . $admin_id . ',' . $service_id . ')';
+                $query_services .= '(' . $account_id . ',' . $service_id . ')';
                 if ($i < count($services) - 1) {
-                    $query .= ',';
+                    $query_services .= ',';
                 } else
-                    $query .= ';';
-            }
-
-            $sth2 = $db->prepare($conn, $query);
+                    $query_services .= ';';
+            }            
+           
+            $sth2 = $db->prepare($conn, $query_services);
             $sth2->execute();
 
             $db->Commit($conn);
+
+            $service = new ServicesClass(null);
+            $service->runTriggerService('onRegisterUser', $account_id, $username);
         } catch (Exception $e) {
             $db->Rollback($conn);
 
@@ -120,6 +122,9 @@ class AdminsClass extends BaseClass
                 $this->sendError(501, "Error SQL:" . $e);
             return;
         }
+
+
+        
 
         return $this->sendResult(201, $adminData);
     }

@@ -61,8 +61,8 @@ class SessionController
 	
 	public function GetAdminUID()
 	{
-		if (isset($_SESSION['LoginSession']['id_admin']))
-			return $_SESSION['LoginSession']['id_admin'];
+		if (isset($_SESSION['LoginSession']['id_account']))
+			return $_SESSION['LoginSession']['id_account'];
 		else
 			return -1;
 	}
