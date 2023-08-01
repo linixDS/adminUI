@@ -1,0 +1,84 @@
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[23000]: Integrity constraint violation: 1451 Cannot delete or update a parent row: a foreign key constraint fails (`admin_panel`.`clients_services`, CONSTRAINT `clients_services_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON UPDATE NO ACTION) in /srv/www/adminUI/api/v1/lib/ClientsClass.php:254
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/ClientsClass.php(254): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/clients.php(59): ClientsClass->deleteClient()
+#2 /srv/www/adminUI/api/v1/core/Route.php(73): Controller->DELETE()
+#3 /srv/www/adminUI/api/v1/clients.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Nie można usunąc kontrahenta. Kontrahent powiązany jest z usługami,kontami itp.'
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column \'limit_admins\' in \'field list\' in /srv/www/adminUI/api/v1/lib/ClientsClass.php:35
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/ClientsClass.php(35): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/clients.php(23): ClientsClass->getClients()
+#2 /srv/www/adminUI/api/v1/core/Route.php(64): Controller->GET()
+#3 /srv/www/adminUI/api/v1/clients.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Access denied -Admin'
+EXCEPTION => 	'Access denied -Admin'
+EXCEPTION => 	'Access denied -Admin'
+EXCEPTION => 	'Access denied -Admin'
+EXCEPTION => 	'Access denied -Admin'
+EXCEPTION => 	'Access denied -Admin'
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column \'created\' in \'field list\' in /srv/www/adminUI/api/v1/lib/DomainsClass.php:39
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/DomainsClass.php(39): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/domains.php(22): DomainsClass->getDomains()
+#2 /srv/www/adminUI/api/v1/core/Route.php(64): Controller->GET()
+#3 /srv/www/adminUI/api/v1/domains.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column \'domain\' in \'order clause\' in /srv/www/adminUI/api/v1/lib/DomainsClass.php:39
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/DomainsClass.php(39): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/domains.php(22): DomainsClass->getDomains()
+#2 /srv/www/adminUI/api/v1/core/Route.php(64): Controller->GET()
+#3 /srv/www/adminUI/api/v1/domains.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Duplikacja nazwy domeny: Podana nazwa domeny została wcześniej wprowadzona.'
+EXCEPTION => 	'Access denied - token'
+EXCEPTION => 	'Access denied - token 2a'
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[HY093]: Invalid parameter number: parameter was not defined in /srv/www/adminUI/api/v1/lib/DomainsClass.php:173
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/DomainsClass.php(173): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/domains.php(44): DomainsClass->updateDomain()
+#2 /srv/www/adminUI/api/v1/core/Route.php(70): Controller->PUT()
+#3 /srv/www/adminUI/api/v1/domains.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[HY093]: Invalid parameter number: parameter was not defined in /srv/www/adminUI/api/v1/lib/DomainsClass.php:173
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/DomainsClass.php(173): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/domains.php(44): DomainsClass->updateDomain()
+#2 /srv/www/adminUI/api/v1/core/Route.php(70): Controller->PUT()
+#3 /srv/www/adminUI/api/v1/domains.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[HY093]: Invalid parameter number: parameter was not defined in /srv/www/adminUI/api/v1/lib/DomainsClass.php:173
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/DomainsClass.php(173): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/domains.php(44): DomainsClass->updateDomain()
+#2 /srv/www/adminUI/api/v1/core/Route.php(70): Controller->PUT()
+#3 /srv/www/adminUI/api/v1/domains.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Access denied - data'
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table \'admin_panel.admin\' doesn\'t exist in /srv/www/adminUI/api/v1/lib/AdminsClass.php:96
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/AdminsClass.php(96): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/admins.php(32): AdminsClass->addAdmin()
+#2 /srv/www/adminUI/api/v1/core/Route.php(67): Controller->POST()
+#3 /srv/www/adminUI/api/v1/admins.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Error SQL:PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column \'client\' in \'field list\' in /srv/www/adminUI/api/v1/lib/AdminsClass.php:96
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/AdminsClass.php(96): PDOStatement->execute()
+#1 /srv/www/adminUI/api/v1/controllers/admins.php(32): AdminsClass->addAdmin()
+#2 /srv/www/adminUI/api/v1/core/Route.php(67): Controller->POST()
+#3 /srv/www/adminUI/api/v1/admins.php(5): Route->run()
+#4 {main}'
+EXCEPTION => 	'Access denied - admin'
+EXCEPTION => 	'Nieprawidłowe zapytanie - data admin'
+EXCEPTION => 	'Nieprawidłowe zapytanie - data admin client'
+EXCEPTION => 	'Error SQL:ErrorException: Undefined variable $mail in /srv/www/adminUI/api/v1/lib/AdminsClass.php:164
+Stack trace:
+#0 /srv/www/adminUI/api/v1/lib/AdminsClass.php(164): error_handler()
+#1 /srv/www/adminUI/api/v1/controllers/admins.php(43): AdminsClass->editAdmin()
+#2 /srv/www/adminUI/api/v1/core/Route.php(70): Controller->PUT()
+#3 /srv/www/adminUI/api/v1/admins.php(5): Route->run()
+#4 {main}'

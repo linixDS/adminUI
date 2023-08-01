@@ -3,8 +3,6 @@
 include("./core/BaseController.php");
 include("./core/DB.php");
 include("./core/Session.php");
-include("./lib/ServicesClass.php");
-include("./lib/DomainsClass.php");
 include("./lib/AdminsClass.php");
 
 class Controller extends BaseController
@@ -16,40 +14,44 @@ class Controller extends BaseController
 	
 	
 	public function GET($args) {
-
+                if (!isset($args['token']))
+                        return $this->SendError(401, 'Access denied - token'); 
+                     
+                $class = new AdminsClass(null);
+                $class->getAllAdmins($args['token']) ;
 	}	
 	
  	public function POST($args){
                 if (!isset($args['token']))
-                                return $this->SendError(401, 'Access denied - token'); 
-                if (!isset($args['services']))
-                                return $this->SendError(401, 'Access denied - services'); 
+                        return $this->SendError(400, 'Nieprawidłowe zapytanie - token'); 
                 if (!isset($args['admin']))
-                                return $this->SendError(401, 'Access denied - admin');
-                if (!isset($args['domain']))
-                                return $this->SendError(401, 'Access denied - domain empty');                       
+                        return $this->SendError(400, 'Nieprawidłowe zapytanie - admin');
+                    
 
-                $class = new DomainsClass(null);
-                $ret = $class->getDomain($args['token'], $args['domain'], false);
-                if (isset($ret['error']))
-                        return $this->SendError(501, $ret); 
-
-                $registerAdmins = $class->getAdminInDomain($args['token'], $ret['id_domain']);
-                if ($registerAdmins == -1)
-                        return $this->SendError(501, "Błąd w odczycie liczby administratorów przypisanych do domeny"); 
-                if ($registerAdmins >= $ret['limit_admins'])
-                        return $this->SendError(401, "Przekroczono dopuszczalną liczbę administratorów przypisanych do domeny."); 
-
-                $classAdm = new AdminsClass(null);
-                $classAdm->addAdminDedicated($args['token'], $ret, $args['admin'], $args['services']) ;
+                $class = new AdminsClass(null);
+                $class->addAdmin($args['token'], $args['admin']) ;
 	}
 
  	public function PUT($args){
-                return $this->SendError(401, 'Access denied'); 
+                if (!isset($args['token']))
+                        return $this->SendError(400, 'Nieprawidłowe zapytanie - token'); 
+                if (!isset($args['admin']))
+                        return $this->SendError(400, 'Nieprawidłowe zapytanie - admin');
+                    
+
+                $class = new AdminsClass(null);
+                $class->updateAdmin($args['token'], $args['admin']) ;
 	}
 
  	public function DELETE($args){
+                if (!isset($args['token']))
+                        return $this->SendError(400, 'Nieprawidłowe zapytanie - token'); 
+                if (!isset($args['admin']))
+                        return $this->SendError(400, 'Nieprawidłowe zapytanie - admin');
+                    
 
+                $class = new AdminsClass(null);
+                $class->deleteAdmin($args['token'], $args['admin']) ;
 	}       
 }
 

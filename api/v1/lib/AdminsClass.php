@@ -30,39 +30,40 @@ class AdminsClass extends BaseClass
             return $this->sendError(501, $db->getLastError());
 
         try {
-            $query = "SELECT username,type,name,comment FROM admins ORDER BY username;";
+            $query = "SELECT username,client_id as client,type,name,created,mail FROM admins ORDER BY username;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute();
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+            $result['admins'] = $data;
+            return $this->sendResult(200, $result);
         } catch (Exception $e) {
             $this->sendError(500, "Error SQL:" . $e);
             return;
         }
     }
 
-    public function addAdminDedicated($token, $domain, $adminData, $services) {
+    public function addAdmin($token, $adminData) {
         if (!isset($token))
             return $this->sendError(401, 'Access denied - token');
-        if (!isset($domain))
-            return $this->sendError(401, 'Access denied - domain');            
         if (!isset($adminData))
             return $this->sendError(401, 'Access denied - adminData');
-        if (!isset($services))
-            return $this->sendError(401, 'Access denied - access');
 
+        if ((!isset($adminData['name'])) || (!isset($adminData['username'])) || (!isset($adminData['type'])) ||
+            (!isset($adminData['password'])) || (!isset($adminData['mail']))  )
+            return $this->sendError(401, 'Nieprawidłowe zapytanie - data admin');
 
-        if ((!isset($adminData['name'])) || (!isset($adminData['username'])) || (!isset($adminData['password'])) )
-            return $this->sendError(401, 'Access denied - admin');
-
-
-        if ((!isset($domain['id_domain'])) || (!isset($domain['limit_admins'])) )
-            return $this->sendError(401, 'Access denied - domain2');            
+        if ( ($adminData['type'] != 'global') && (!isset($adminData['client'])) )
+            return $this->sendError(401, 'Nieprawidłowe zapytanie - data admin client');
 
         $sess = new SessionController();
         $res = $sess->isAuthClient($token);
         if ($res == false)
             return $this->sendError(401, 'Access denied - wrong token');
 
+        
+        if ( (!$sess->IsGlobalAdmin()) && ($adminData['type'] == 'global') )
+            return $this->sendError(401, 'Access denied - global');
 
         $db = new DB();
         $conn = $db->getConnection();
@@ -72,47 +73,30 @@ class AdminsClass extends BaseClass
         $name = $adminData['name'];
         $username = $adminData['username'];
         $password = $adminData['password'];
-        $domain_id = $domain['id_domain'];
+        $client_id = $adminData['client'];
+        $type = $adminData['type'];
+        $mail = $adminData['mail'];
         
         $query = '';
 
         try {
             $db->BeginTransaction($conn);
-            $query = "INSERT INTO accounts (username,password,name,type) VALUES (:username, :password, :name, 'dedicated');";
+            $query  = "INSERT INTO admins (username,password,name,type,mail,client_id) VALUES ";
+            $query .= "(:USERNAME, :PASSWORD, :NAME, :ADMINTYPE, :MAIL, :CLIENTID);";
  
             $sth = $db->prepare($conn, $query);
-            $sth->bindValue(':username', $username, PDO::PARAM_STR);
-            $sth->bindValue(':password', $password, PDO::PARAM_STR);
-            $sth->bindValue(':name', $name, PDO::PARAM_STR);
+            $sth->bindValue(':USERNAME', $username, PDO::PARAM_STR);
+            $sth->bindValue(':PASSWORD', $password, PDO::PARAM_STR);
+            $sth->bindValue(':NAME', $name, PDO::PARAM_STR);
+            $sth->bindValue(':ADMINTYPE', $type, PDO::PARAM_STR);
+            $sth->bindValue(':MAIL', $mail, PDO::PARAM_STR);
+            $sth->bindValue(':CLIENTID', $client_id, PDO::PARAM_INT);
 
             $sth->execute();
-
-            $account_id = $db->GetLastInsertId($conn);
-
-            $query = "INSERT INTO domain_accounts (domain_id, account_id, is_admin) VALUES (:domain_id,:account_id, 1);";
-            $sth = $db->prepare($conn, $query);
-            $sth->bindValue(':domain_id', $domain_id, PDO::PARAM_INT);
-            $sth->bindValue(':account_id', $account_id, PDO::PARAM_INT);
-            $sth->execute();
-
-
-            $query_services = "INSERT INTO account_services (account_id, service_id) VALUES ";
-            for ($i = 0; $i < count($services); $i++) {
-                $service_id = $services[$i];
-                $query_services .= '(' . $account_id . ',' . $service_id . ')';
-                if ($i < count($services) - 1) {
-                    $query_services .= ',';
-                } else
-                    $query_services .= ';';
-            }            
-           
-            $sth2 = $db->prepare($conn, $query_services);
-            $sth2->execute();
 
             $db->Commit($conn);
 
-            $service = new ServicesClass(null);
-            $service->runTriggerService('onRegisterUser', $account_id, $username);
+            return $this->sendResult(201, $adminData);
         } catch (Exception $e) {
             $db->Rollback($conn);
 
@@ -122,12 +106,138 @@ class AdminsClass extends BaseClass
                 $this->sendError(501, "Error SQL:" . $e);
             return;
         }
+    }
 
+    public function updateAdmin($token, $adminData) {
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied - token');
+        if (!isset($adminData))
+            return $this->sendError(401, 'Access denied - adminData');
+
+        if ((!isset($adminData['name'])) || (!isset($adminData['username'])) || (!isset($adminData['type'])) ||
+            (!isset($adminData['mail']))  )
+            return $this->sendError(401, 'Nieprawidłowe zapytanie - data admin');
+
+        if ( ($adminData['type'] != 'global') && (!isset($adminData['client'])) )
+            return $this->sendError(401, 'Nieprawidłowe zapytanie - data admin client');
+
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');
 
         
+        if ( (!$sess->IsGlobalAdmin()) && ($adminData['type'] == 'global') )
+            return $this->sendError(401, 'Access denied - global');
 
-        return $this->sendResult(201, $adminData);
-    }
+        if (isset($adminData['passowrd'])){
+            $password = $adminData['password'];
+            if (strlen($password) < 12)
+                return $this->sendError(401, 'Access denied - incorrect value');
+        }
+
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(501, $db->getLastError());
+
+        $name = $adminData['name'];
+        $username = $adminData['username'];
+        $mail = $adminData['mail'];
+       
+        $query = '';
+
+        try {
+            $db->BeginTransaction($conn);
+            
+            if (isset($adminData['passowrd'])) {
+                $query  = "UPDATE admins SET name=:NAME,mail=:MAIL,password=:PASSWORD WHERE username=:USERNAME LIMIT 1;";
+            }
+                else {
+                    $query  = "UPDATE admins SET name=:NAME,mail=:MAIL WHERE username=:USERNAME LIMIT 1;";
+                }
+
+ 
+            $sth = $db->prepare($conn, $query);
+            $sth->bindValue(':USERNAME', $username, PDO::PARAM_STR);
+            $sth->bindValue(':NAME', $name, PDO::PARAM_STR);
+            $sth->bindValue(':MAIL', $mail, PDO::PARAM_STR);
+            if (isset($adminData['passowrd'])) 
+                $sth->bindValue(':PASSWORD', $password, PDO::PARAM_STR);
+
+
+            $sth->execute();
+
+
+            $db->Commit($conn);
+
+            return $this->sendResult(200, $adminData);
+        } catch (Exception $e) {
+            $db->Rollback($conn);
+
+            if (str_contains($e,'Duplicate entry'))
+                $this->sendError(409, "Podana nazwa administratora jest już używana.");    
+            else                
+                $this->sendError(501, "Error SQL:" . $e);
+            return;
+        }
+    }    
+
+    public function deleteAdmin($token, $adminData) {
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied - token');
+        if (!isset($adminData))
+            return $this->sendError(401, 'Access denied - adminData');
+
+        if ((!isset($adminData['name'])) || (!isset($adminData['username'])) || (!isset($adminData['type'])) ||
+            (!isset($adminData['mail']))  )
+            return $this->sendError(401, 'Nieprawidłowe zapytanie - data admin');
+
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');
+
+        
+        if ( (!$sess->IsGlobalAdmin()) && ($adminData['type'] == 'global') )
+            return $this->sendError(401, 'Access denied - global');
+
+
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(501, $db->getLastError());
+
+        $username = $adminData['username'];
+      
+        $query = '';
+
+        try {
+            $db->BeginTransaction($conn);
+            
+            $query  = "DELETE FROM admins WHERE username=:USERNAME LIMIT 1;";
+ 
+            $sth = $db->prepare($conn, $query);
+            $sth->bindValue(':USERNAME', $username, PDO::PARAM_STR);
+
+            $sth->execute();
+
+            $db->Commit($conn);
+
+            return $this->sendResult(200, $adminData);
+        } catch (Exception $e) {
+            $db->Rollback($conn);
+
+            if (str_contains($e,'Duplicate entry'))
+                $this->sendError(409, "Podana nazwa administratora jest już używana.");    
+            else                
+                $this->sendError(501, "Error SQL:" . $e);
+            return;
+        }
+    }        
+
 }
 
 ?>

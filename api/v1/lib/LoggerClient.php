@@ -4,11 +4,6 @@
 
 	class LoggerClient
 	{
-		const EXT_ERROR 	= ".ERR";
-		const EXT_LOG		= ".LOG";
-		const EXT_REQUEST	= ".REQ";
-		
-		
 		private $request_time;
 		private $request_from;
 		private $request_uri = null;
@@ -74,8 +69,25 @@
 				
 			return false;
 		}
-		
-		private function writeDebugLog($filename, $message){
+
+		private function writeLog2($filename, $message){
+			if (file_exists($filename)){
+				$handle = fopen($filename,"a+");
+			}
+				else
+					$handle = fopen($filename, "w");
+			
+			if ($handle){
+				$txt = "---[".date("Y-m-d H:i:s", $time)."]-----|  (".$this->request_from.")\r\n".$message."\r\n";  
+				fwrite($handle, $txt);
+				fclose($handle);
+				return true;
+			}
+				
+			return false;
+		}		
+
+		private function writeLogDebug($filename, $message){
 			if (file_exists($filename)){
 				$handle = fopen($filename,"a+");
 			}
@@ -90,109 +102,47 @@
 			}
 				
 			return false;
-		}
+		}				
+		
 
 		
-		public function saveHttpRequestToFile($user)
+		public function saveRequest()
 		{
-			$filename = CONFIG_CLIENT_LOG.$user.self::EXT_REQUEST;
+			$filename = getcwd().CONFIG_LOG_PATH."access.log";
+
 			$header = "---[ BEGIN TRANSMISSION ]-----------\r\n";
-			$msg = "  URI=".$this->request_uri."\r\n";
-			$msg .= "  HEAD=".$this->request_data."\r\n\r\n";
-			$msg .= $this->responde_code." --[".date("Y-m-d H:i:s", time())."]-----\r\n";
-			$msg .= "  HEAD=".$this->responde_data."\r\n---[ END TRANSMISSION ]-----------\r\n\r\n";
+			$msg  = "  URI=".$this->request_uri."\r\n";
+			$msg .= "  HEAD=".$this->request_data."\r\n";
+			$msg .= " ---[ END TRANSMISSION ]-----------\r\n\r\n";
 						
 			return $this->writeLog($filename,"REQ","", $this->request_time, $msg, $header);
 		}
+
+		public function saveQuery($pdo_sth)
+		{
+			$filename = getcwd().CONFIG_LOG_PATH."query_db.log";
+			$query =  $pdo_sth->debugDumpParams();
+			return $this->writeLog2($filename, $query);
+		}
+
+		public function saveException($error)
+		{
+			$filename = getcwd().CONFIG_LOG_PATH."exceptions.log";
+			$message = "EXCEPTION => \t";
+			$message .= var_export($error, true);
+			return $this->writeLogDebug($filename, $message);
+		}	
 		
-		public function writeError($user, $write_to_log = false, $write_request = false){
-			$filename = CONFIG_CLIENT_LOG.$user;
-			if ($this->responde_data == null && ) return false;
-
-			$post = (array)json_decode($this->responde_data);
-	
-	
-			if (!isset($post['message'])) return false;
-	
-			if ($write_to_log){
-				$msg = "Message: ".$post['message']." (Code=".$post['errorCode'].")\r\n";
-				$this->writeLog($filename.self::EXT_LOG,$this->responde_code,"ERROR", $this->request_time, $msg);
-				$msg .= "  URI=".$this->request_uri."\r\n  HEAD=".$this->request_data."\r\n";
-			}
-				else
-			$msg = "Message: ".$post['message']." (Code=".$post['errorCode'].")\r\n  URI=".$this->request_uri."\r\n  HEAD=".$this->request_data."\r\n";
-			
-			if ($write_request)
-				$this->saveHttpRequestToFile($user);
-			
-			return $this->writeLog($filename.self::EXT_ERROR,$this->responde_code,"ERROR", $this->request_time, $msg);
-		}
 		
-		public function writeExceptionAPI($){
-			$filename = CONFIG_LOG_PATH.$user;
-			$filename2= CONFIG_LOG_PATH."EXCEPTION.ERR";
-			
-			if ($this->responde_data == null) return false;
-
-			$post = (array)json_decode($this->responde_data);
-	
-	
-			if (!isset($post['message'])) return false;
-	
-			$msg = "Message: ".$post['message']." (Code=".$post['errorCode'].")\r\n";
-			$this->writeLog($filename.self::EXT_LOG,$this->responde_code,"ERROR", $this->request_time, $msg);
-			$msg .= "  URI=".$this->request_uri."\r\n  HEAD=".$this->request_data."\r\n";
-			
-			$this->saveHttpRequestToFile($user);
-			$this->writeLog($filename2.self::EXT_ERROR,$this->responde_code,"ERROR", $this->request_time, $msg);
-			
-			return $this->writeLog($filename.self::EXT_ERROR,$this->responde_code,"ERROR", $this->request_time, $msg);
-		}
 		
-		public function writeLogin($user, $write_request = false){
-			$filename = CONFIG_CLIENT_LOG.$user.self::EXT_LOG;
-			if ($this->responde_data == null) return false;
+		public function saveDebug($class, $func, $value)
+		{
+			$filename = getcwd().CONFIG_LOG_PATH."debug.log";
+			$message = strtoupper($class)."::".$func." => \t";
+			$message .= var_export($value, true);
+			return $this->writeLogDebug($filename, $message);
+		}			
 
-			$post_res = (array)json_decode($this->responde_data);
-			$post_req = (array)json_decode($this->request_data);
-			$sess = (array)$post_res['session'];
-	
-	
-			$msg = " GET ".$this->request_uri."\r\n";		
-			$msg .= " _LOGIN=".$user."\r\n _APZ=".$sess['apz_name']."\r\n _SessionID=".$post_res['token']."\r\n _VersionAPI=".$post_req['version']."\r\n";
-
-			if ($write_request)
-				$this->saveHttpRequestToFile($user);
-			
-			return $this->writeLog($filename,$this->responde_code,"INFO", $this->request_time, $msg);			
-		}
-
-		public function writeInfo($user, $msg, $write_request = false){
-			$filename = CONFIG_CLIENT_LOG.$user.self::EXT_LOG;
-			if ($this->responde_data == null) return false;
-
-			$msg = " Message: ".$msg."\r\n GET ".$this->request_uri."\r\n";
-			if ($write_request && )
-				$this->saveHttpRequestToFile($user);
-			
-			return $this->writeLog($filename,$this->responde_code,"INFO", $this->request_time, $msg);			
-		}
-		
-
-		public function writeDebug($user, $msg){
-			$filename = CONFIG_CLIENT_LOG.$user.self::EXT_LOG;
-
-						
-			return $this->writeDebugLog($filename,$msg);			
-		}
-		
-		public function masterLog($filename, $msg, $write_request = false){
-			$filename = CONFIG_CLIENT_LOG.$filename.self::EXT_LOG;
-
-			$msg = " Message: ".$msg."\r\n GET ".$this->request_uri."\r\n";
-			
-			return $this->writeLog($filename, 201,"INFO", $this->request_time, $msg);			
-		}
 		
 	}
 

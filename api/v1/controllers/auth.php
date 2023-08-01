@@ -36,7 +36,7 @@ class Controller extends BaseController
         if ($conn == null)
             return $this->SendError(500, $db->getLastError()); 
         
-        $query = "SELECT id_account,name,username,type FROM accounts WHERE username=:username AND password=md5(:password);";
+        $query = "SELECT admin_id as id,name,username,type,client_id FROM admins WHERE username=:username AND password=md5(:password);";
         $sth = $db->prepare($conn, $query);
         $sth->execute([':username' => $args['username'], 'password' => $args['password']]);
         $data = $sth->fetch(PDO::FETCH_ASSOC);

@@ -1,6 +1,7 @@
 <?php
 
 
+include("./lib/LoggerClient.php");
 
 class Route{
 
@@ -28,6 +29,8 @@ class Route{
 
 		public function __construct()
 		{
+			$logger = new LoggerClient();
+			$logger->saveRequest();
 		}
 		
 		public function run($action, $accessMethod = 'ALL')

@@ -15,41 +15,121 @@ class ServicesClass extends BaseClass
 
 
     private function isService($id, $table){
-        for ($x=0; $x < count($table); $x++){
-            if ($table[$x] == $id) return true;
-        }
+        foreach ($table as $value)
+             if ($value['id'] == $id) return true;
 
         return false;
     }
 
+    private function getCurrentService($id, $table){
+        foreach ($table as $value){
+              if ($value['id'] == $id) return $value;
+        }
+ 
+        return null;      
+    }
+
     public function getChangedServicesResultData($current, $new){
-        $serviceNew = array();
-        $serviceDelete = array();
+            $serviceNew = array();
+            $serviceDelete = array();
+            $serviceUpdate = array();
 
-            /* Sprawdzamy bieżące usługi
-               jeśli w nowych usługach czegoś nie znajdziemy to należy usunąć usuługę
-            */
-        for ($x=0; $x < count($current); $x++){
-            if (!isService($current[$x], $new)) {
-                   array_push($serviceDelete, $current[$x]);
+
+            if (count($new) == 0){
+                foreach ($current as $value) {
+                    array_push($serviceDelete, $value);
+                }                
             }
+                else {
+             /* Sprawdzamy bieżące usługi
+                 jeśli w nowych usługach czegoś nie znajdziemy to należy usunąć usuługę
+              */
+
+                        foreach ($current as $value) {
+                            if (!$this->isService($value['id'], $new)) 
+                            array_push($serviceDelete, $value);
+                        }
+            
+
+                        /* Sprawdzamy nowe usługi
+                        jeśli w bieżacych usługach czegoś nie znajdziemy to należy dodać usuługę
+                        */
+                        foreach ($new as $value) {
+                            if (!$this->isService($value['id'], $current)) 
+                            array_push($serviceNew, $value);
+                        }
+            
+
+
+                        foreach ($new as $value) {
+                            $curr = $this->getCurrentService($value['id'], $current);
+                            if ($curr != null){
+                            if ($curr['limit_accounts'] != $value['limit_accounts'])
+                            array_push($serviceUpdate, $value);
+                            }
+                        }
+                }
+
+             $result = array();
+             $result['add'] =  $serviceNew;
+             $result['delete'] = $serviceDelete;
+             $result['update'] = $serviceUpdate;
+
+             return $result;
+    }
+
+
+    public function insertClientServiceFromData($conn, $db, $clientId, $service) {
+        $service_id = $service['id'];
+        $limit = $service['limit_accounts'];
+        try {
+            $query = "INSERT INTO clients_services(client_id, service_id, limit_accounts) VALUES (?,?,?);";
+            $sth = $db->prepare($conn, $query);
+
+            $sth->execute([$clientId, $service_id, $limit]);
+            return true;
+        } catch (Exception $e) {
+            $this->exceptionWrite($e);
+            
+
+            return false;
         }
+    }
 
-             /* Sprawdzamy nowe usługi
-               jeśli w bieżacych usługach czegoś nie znajdziemy to należy dodać usuługę
-            */
-        for ($y=0; $y < count($new); $y++){
-            if (!isService($new[$y], $current)) {
-                   array_push($serviceNew, $new[$y]);
-            }
+    public function updateClientServiceFromData($conn, $db, $clientId, $service) {
+        $service_id = $service['id'];
+        $limit = $service['limit_accounts'];
+        try {
+            $query = "UPDATE clients_services SET limit_accounts=? WHERE client_id=? AND service_id=? LIMIT 1;";
+            $sth = $db->prepare($conn, $query);
+
+            $sth->execute([$limit, $clientId, $service_id]);
+            return true;
+        } catch (Exception $e) {
+            $this->exceptionWrite($e);
+            
+
+            return false;
         }
+    }
+    
+    public function removeClientServiceFromData($conn, $db, $clientId, $service) {
+        $service_id = $service['id'];
+        try {
+            $query = "DELETE FROM clients_services WHERE client_id=? AND service_id=? LIMIT 1;";
+            $sth = $db->prepare($conn, $query);
 
-        $result = array();
-        $result['add'] =  $serviceNew;
-        $result['delete'] = $serviceDelete;
+            $sth->execute([$clientId, $service_id]);
+            return true;
+        } catch (Exception $e) {
+            $this->exceptionWrite($e);
+            
 
-        return $result;
-   }   
+            return false;
+        }
+    }     
+
+ 
 
 
     public function getAdminServicesResultData($account) {
@@ -59,7 +139,7 @@ class ServicesClass extends BaseClass
             return null;
 
         try {
-            $query = "SELECT id,onRegisterUser,onDeleteUser FROM services ";
+            $query = "SELECT service_id as id,onRegisterUser,onDeleteUser FROM services ";
             $query.= "WHERE id IN (SELECT service_id FROM account_services WHERE active=1 AND account_id=:ADMIN_ID);";
 
             $sth = $db->prepare($conn, $query);
@@ -130,7 +210,7 @@ class ServicesClass extends BaseClass
 
 
         try {
-            $query = "SELECT id,name,description,com_checked,com_disabled FROM services WHERE ACTIVE=1 ORDER BY name;";
+            $query = "SELECT service_id as id,name,description,limit_accounts FROM services ORDER BY name;";
             $sth = $db->prepare($conn, $query);
             $sth->execute();
     
@@ -140,8 +220,69 @@ class ServicesClass extends BaseClass
             return;
         }
 
-        return $this->sendResult(200, $data);
+        $result['services']= $data;
+        return $this->sendResult(200, $result);
     }
+
+
+    public function getClientServicesResultData($clientId)
+    {
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(500, $db->getLastError());
+
+
+        try {
+            $query = "SELECT service_id as id,limit_accounts FROM clients_services WHERE active=1 AND client_id=:CLIENTID ORDER BY service_id";
+            $sth = $db->prepare($conn, $query);
+            $sth->bindValue(':CLIENTID', $clientId, PDO::PARAM_INT);
+            $sth->execute();            
+    
+            $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $this->sendError(500, "Error SQL:" . $e);
+            return;
+        }
+
+        return $data;
+    }  
+
+
+    public function getClientServices($token,$clientId)
+    {
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied - token');
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');           
+
+        if (!$sess->IsGlobalAdmin())
+            return $this->sendError(401, 'Access denied - global');
+
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(500, $db->getLastError());
+
+
+        try {
+            $query = "SELECT service_id as id,limit_accounts FROM clients_services WHERE active=1 AND client_id=:CLIENTID ORDER BY service_id";
+            $sth = $db->prepare($conn, $query);
+            $sth->bindValue(':CLIENTID', $clientId, PDO::PARAM_INT);
+            $sth->execute();            
+    
+            $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $this->sendError(500, "Error SQL:" . $e);
+            return;
+        }
+
+        $result['services']= $data;
+        return $this->sendResult(200, $result);
+    }    
 
     public function getDomainServices($token, $domain)
     {

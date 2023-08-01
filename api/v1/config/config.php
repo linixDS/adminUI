@@ -8,5 +8,5 @@
          error_reporting(E_ALL);
      }
 
-     define("CONFIG_LOG_PATH", "./logs/");
+     define("CONFIG_LOG_PATH", "/logs/");
 ?>

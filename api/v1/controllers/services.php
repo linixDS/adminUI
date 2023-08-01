@@ -19,10 +19,10 @@ class Controller extends BaseController
 			return $this->SendError(401, 'Access denied'); 
         
 		$class = new ServicesClass($args);
-		if (!isset($args['domain']))
-			$class->getAllServices($args['token']);
+		if (isset($args['client']))
+			$class->getClientServices($args['token'], $args['client']);
 		else
-			$class->getDomainServices($args['token'], $args['domain']);
+			$class->getAllServices($args['token']);
 	}	
 	
  	public function POST($args){

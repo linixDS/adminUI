@@ -6,6 +6,18 @@ define('BASE_CLASS_LOADED', true);
 
 class BaseClass {
 
+    public function debugWrite($class, $func, $value){
+        $logger = new LoggerClient();
+        $logger->saveDebug($class, $func, $value);
+    }
+
+    
+    public function exceptionWrite($value){
+        $logger = new LoggerClient();
+        $logger->saveException($value);
+    }      
+
+
     public function sendError($statusCode, $message)
     {
 		header("Access-Control-Allow-Origin: *");
@@ -20,6 +32,9 @@ class BaseClass {
 		$result['error'] = $error;
 		
         echo json_encode($result);
+
+        $this->exceptionWrite($message);
+
         exit();
     }
 

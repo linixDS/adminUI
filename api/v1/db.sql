@@ -1,8 +1,10 @@
--- MariaDB dump 10.19  Distrib 10.4.28-MariaDB, for Win64 (AMD64)
+use admin_panel;
+
+-- MariaDB dump 10.19-11.0.2-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: admin_panel
 -- ------------------------------------------------------
--- Server version	10.4.28-MariaDB
+-- Server version	11.0.2-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,139 +18,110 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `account_services`
+-- Table structure for table `admins`
 --
 
-USE admin_panel;
-
-DROP TABLE IF EXISTS `account_services`;
+DROP TABLE IF EXISTS `admins`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_services` (
-  `active` int(1) NOT NULL DEFAULT 1,
-  `account_id` int(11) NOT NULL,
-  `service_id` varchar(45) NOT NULL,
-  KEY `ACTIVE_IDX` (`active`),
-  KEY `ADMIN_IDX` (`account_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `account_services`
---
-
-LOCK TABLES `account_services` WRITE;
-/*!40000 ALTER TABLE `account_services` DISABLE KEYS */;
-INSERT INTO `account_services` VALUES (1,2,'1'),(1,2,'2'),(1,3,'1'),(1,4,'1'),(1,4,'2'),(1,5,'1'),(1,6,'1'),(1,7,'1');
-/*!40000 ALTER TABLE `account_services` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `accounts`
---
-
-DROP TABLE IF EXISTS `accounts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `accounts` (
-  `id_account` int(11) NOT NULL AUTO_INCREMENT,
-  `active` int(1) NOT NULL DEFAULT 1,
+CREATE TABLE `admins` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(10) unsigned DEFAULT NULL,
   `username` varchar(45) NOT NULL,
   `password` varchar(120) NOT NULL,
   `type` enum('global','dedicated') NOT NULL DEFAULT 'dedicated',
   `name` varchar(65) NOT NULL,
-  `created` datetime DEFAULT current_timestamp(),
-  `changed` datetime DEFAULT NULL,
-  PRIMARY KEY (`id_account`),
-  UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `created` datetime NOT NULL DEFAULT current_timestamp(),
+  `changed` varchar(45) DEFAULT NULL,
+  `mail` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`admin_id`),
+  UNIQUE KEY `username_UNIQUE` (`username`),
+  KEY `fk_admins_1_idx` (`client_id`),
+  CONSTRAINT `fk_admins_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `accounts`
+-- Dumping data for table `admins`
 --
 
-LOCK TABLES `accounts` WRITE;
-/*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
-INSERT INTO `accounts` VALUES (1,1,'GlobalAdmin','0ec02c60874b9c472bf80a568fba27d3','global','Administrator globalny','2023-07-25 15:09:57',NULL),(2,1,'admin@@heban.net','test1234','dedicated','admin','2023-07-25 15:10:46',NULL),(3,1,'admin2@@admin.com','123456789','dedicated','admin2','2023-07-25 15:16:28',NULL),(4,1,'admin@@coms.pl','123456789','dedicated','admin','2023-07-25 15:20:00',NULL),(5,1,'fghfghf@fghfghfg','11111111','dedicated','fghfgh','2023-07-25 15:21:52',NULL),(6,1,'admin@test.com','11111111111','dedicated','admin','2023-07-25 15:22:53',NULL),(7,1,'kot@alamakota','111111111111','dedicated','kot','2023-07-25 15:43:55',NULL);
-/*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
+LOCK TABLES `admins` WRITE;
+/*!40000 ALTER TABLE `admins` DISABLE KEYS */;
+INSERT INTO `admins` VALUES
+(1,NULL,'GlobalAdmin','0ec02c60874b9c472bf80a568fba27d3','global','Administrator','2023-01-01 12:00:00',NULL,NULL);
+/*!40000 ALTER TABLE `admins` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `company`
+-- Table structure for table `clients`
 --
 
-DROP TABLE IF EXISTS `company`;
+DROP TABLE IF EXISTS `clients`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `company` (
-  `id_company` int(10) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `clients` (
+  `client_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `nip` varchar(10) NOT NULL,
   `name` varchar(200) NOT NULL,
   `city` varchar(120) NOT NULL,
-  PRIMARY KEY (`id_company`),
+  `mail` varchar(85) NOT NULL,
+  `limit_admins` int(10) unsigned NOT NULL DEFAULT 5,
+  PRIMARY KEY (`client_id`),
   UNIQUE KEY `NIP_IDX` (`nip`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `company`
+-- Dumping data for table `clients`
 --
 
-LOCK TABLES `company` WRITE;
-/*!40000 ALTER TABLE `company` DISABLE KEYS */;
-/*!40000 ALTER TABLE `company` ENABLE KEYS */;
+LOCK TABLES `clients` WRITE;
+/*!40000 ALTER TABLE `clients` DISABLE KEYS */;
+INSERT INTO `clients` VALUES
+(2,'2222222222','asdastest233aaa','test222fggsss','test2@com.pl',2),
+(3,'3333333333','test3','','test2@com.pl',2),
+(4,'4444444444','test4','','test@sss.pl',2),
+(5,'5555555555','test5','','555@sss.pl',2),
+(6,'9999999999','test10','','test10@test.pl',3);
+/*!40000 ALTER TABLE `clients` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `domain_accounts`
+-- Table structure for table `clients_services`
 --
 
-DROP TABLE IF EXISTS `domain_accounts`;
+DROP TABLE IF EXISTS `clients_services`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `domain_accounts` (
-  `domain_id` int(11) NOT NULL,
-  `account_id` int(11) NOT NULL,
-  `is_admin` int(1) NOT NULL DEFAULT 0,
-  KEY `DOMAINS_IDX` (`domain_id`,`account_id`,`is_admin`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+CREATE TABLE `clients_services` (
+  `active` varchar(45) DEFAULT '1',
+  `client_id` int(10) unsigned NOT NULL,
+  `service_id` int(10) unsigned NOT NULL,
+  `limit_accounts` int(11) NOT NULL,
+  KEY `ACTIVE_IDX` (`active`),
+  KEY `fk_clients_services_2_idx` (`service_id`),
+  KEY `clients_services_ibfk_1` (`client_id`),
+  CONSTRAINT `clients_services_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON UPDATE NO ACTION,
+  CONSTRAINT `clients_services_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`service_id`) ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `domain_accounts`
+-- Dumping data for table `clients_services`
 --
 
-LOCK TABLES `domain_accounts` WRITE;
-/*!40000 ALTER TABLE `domain_accounts` DISABLE KEYS */;
-INSERT INTO `domain_accounts` VALUES (1,2,1),(3,3,1),(4,4,1),(5,5,1),(6,6,1),(7,7,1);
-/*!40000 ALTER TABLE `domain_accounts` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `domain_services`
---
-
-DROP TABLE IF EXISTS `domain_services`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `domain_services` (
-  `active` int(1) unsigned NOT NULL DEFAULT 1,
-  `domain_id` int(10) unsigned NOT NULL,
-  `service_id` int(11) unsigned NOT NULL,
-  KEY `DOMAIN_IDX` (`domain_id`),
-  KEY `ACTIVE_IDX` (`active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `domain_services`
---
-
-LOCK TABLES `domain_services` WRITE;
-/*!40000 ALTER TABLE `domain_services` DISABLE KEYS */;
-INSERT INTO `domain_services` VALUES (1,1,1),(1,1,2),(1,2,1),(1,3,1),(1,4,1),(1,4,2),(1,5,1),(1,6,1),(1,7,1);
-/*!40000 ALTER TABLE `domain_services` ENABLE KEYS */;
+LOCK TABLES `clients_services` WRITE;
+/*!40000 ALTER TABLE `clients_services` DISABLE KEYS */;
+INSERT INTO `clients_services` VALUES
+('1',2,1,8),
+('1',2,2,2),
+('1',3,3,2),
+('1',3,2,4),
+('1',4,3,2),
+('1',5,3,1),
+('1',5,2,1),
+('1',6,1,2);
+/*!40000 ALTER TABLE `clients_services` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -159,16 +132,16 @@ DROP TABLE IF EXISTS `domains`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `domains` (
-  `id_domain` int(11) NOT NULL AUTO_INCREMENT,
-  `active` tinyint(1) NOT NULL DEFAULT 1,
-  `domain` varchar(255) NOT NULL,
+  `domain_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `client_id` int(10) unsigned NOT NULL,
+  `name` varchar(85) NOT NULL,
+  `limit_mails` int(11) NOT NULL DEFAULT 100,
   `created` datetime NOT NULL DEFAULT current_timestamp(),
-  `comment` varchar(255) DEFAULT NULL,
-  `limit_admins` int(11) NOT NULL DEFAULT -1,
-  `limit_mails` int(11) NOT NULL DEFAULT -1,
-  PRIMARY KEY (`id_domain`,`domain`),
-  UNIQUE KEY `DOMAIN_IDX` (`domain`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  PRIMARY KEY (`domain_id`),
+  UNIQUE KEY `name_UNIQUE` (`name`),
+  KEY `fk_domains_1_idx` (`client_id`),
+  CONSTRAINT `fk_domains_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -177,8 +150,46 @@ CREATE TABLE `domains` (
 
 LOCK TABLES `domains` WRITE;
 /*!40000 ALTER TABLE `domains` DISABLE KEYS */;
-INSERT INTO `domains` VALUES (1,1,'heban.net','2023-07-25 15:10:46','',5,100),(2,1,'heban.pl','2023-07-25 15:13:58','',5,100),(3,1,'admin.com','2023-07-25 15:16:28','',5,100),(4,1,'coms.pl','2023-07-25 15:20:00','',5,100),(5,1,'fghfghfg','2023-07-25 15:21:52','',5,100),(6,1,'test.com','2023-07-25 15:22:53','',5,100),(7,1,'alamakota','2023-07-25 15:43:54','',5,100);
+INSERT INTO `domains` VALUES
+(1,6,'test10.com',5,'2023-07-31 13:44:46');
 /*!40000 ALTER TABLE `domains` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `mails`
+--
+
+DROP TABLE IF EXISTS `mails`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `mails` (
+  `id` int(11) NOT NULL,
+  `active` varchar(45) NOT NULL DEFAULT '0',
+  `domain_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(85) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `created` datetime NOT NULL DEFAULT current_timestamp(),
+  `modify` varchar(45) DEFAULT 'NOW()',
+  `created__admin` int(11) NOT NULL,
+  `modify_admin` int(11) DEFAULT NULL,
+  `token` varchar(85) NOT NULL,
+  `accountGlpi` tinyint(1) DEFAULT 0,
+  `accountChat` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `MAIL_IDX` (`email`),
+  KEY `DOMAIN_IDX` (`active`,`domain_id`),
+  KEY `TOKEN_IDX` (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `mails`
+--
+
+LOCK TABLES `mails` WRITE;
+/*!40000 ALTER TABLE `mails` DISABLE KEYS */;
+/*!40000 ALTER TABLE `mails` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -189,21 +200,19 @@ DROP TABLE IF EXISTS `services`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `services` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `service_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(35) NOT NULL,
   `url` varchar(255) NOT NULL,
   `description` varchar(120) DEFAULT NULL,
-  `com_checked` tinyint(1) NOT NULL DEFAULT 0,
-  `com_disabled` tinyint(1) NOT NULL DEFAULT 0,
+  `limit_accounts` int(11) DEFAULT 100,
   `onInstall` text DEFAULT NULL,
   `onUninstall` text DEFAULT NULL,
   `onRegisterUser` text DEFAULT NULL,
   `onDeleteUser` text DEFAULT NULL,
   `onExec` text DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `SERVICE_IDX` (`name`,`active`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
+  PRIMARY KEY (`service_id`),
+  UNIQUE KEY `SERVICE_IDX` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_polish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -212,81 +221,12 @@ CREATE TABLE `services` (
 
 LOCK TABLES `services` WRITE;
 /*!40000 ALTER TABLE `services` DISABLE KEYS */;
-INSERT INTO `services` VALUES (1,1,'SOGo','http://192.168.0.3/SOGo','Dostęp do poczty internetowej',1,1,NULL,NULL,NULL,NULL,NULL),(2,1,'WorkFlow','http://workflow/','ądzanie zasobami,projektami,zadaniami',0,0,NULL,NULL,NULL,NULL,NULL),(3,1,'Chat','http://111','Chat',0,0,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `services` VALUES
+(1,'SOGo','http://192.168.0.3/SOGo','Dostęp do poczty internetowej',1,NULL,NULL,NULL,NULL,NULL),
+(2,'WorkFlow','http://workflow/','ądzanie zasobami,projektami,zadaniami',1,NULL,NULL,NULL,NULL,NULL),
+(3,'Chat','http://111','Chat',1,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `services` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping routines for database 'admin_panel'
---
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `DeleteAdmin` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteAdmin`(Id int)
-BEGIN
-	DELETE FROM `admin_panel`.`admins_services` WHERE admin_id=Id;
-    DELETE FROM `admin_panel`.`domain_admins` WHERE admin_id=Id;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION' */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `DeleteDomain` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteDomain`(IN DomainID int)
-BEGIN
-	DECLARE finished INTEGER DEFAULT 0;
-	DECLARE AdministratorID INT;
-
-	
-	DECLARE curAdmins
-		CURSOR FOR 
-			SELECT id_admin FROM admins WHERE id_admin IN (SELECT admin_id FROM domain_admins WHERE domain_id=DomainID);
-
-	
-	DECLARE CONTINUE HANDLER 
-        FOR NOT FOUND SET finished = 1;
-
-	START TRANSACTION;
-    
-    DELETE FROM domain_services WHERE domain_id=DomainID;
-    DELETE FROM domains WHERE id=DomainID LIMIT 1;
-    
-	OPEN curAdmins;
-
-	getAdmins: LOOP
-		FETCH curAdmins INTO AdministratorID;
-		IF finished = 1 THEN 
-			LEAVE getAdmins;
-		END IF;
-		
-		CALL DeleteAdmin(AdministratorID);
-	END LOOP getAdmins;
-	CLOSE curAdmins;
-    
-    COMMIT;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -297,4 +237,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-07-26 13:45:40
+-- Dump completed on 2023-08-01 21:39:05

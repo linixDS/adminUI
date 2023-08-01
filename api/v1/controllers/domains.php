@@ -16,30 +16,32 @@ class Controller extends BaseController
 	public function GET($args)
     {
 		if (!isset($args['token']))
-		return $this->SendError(401, 'Access denied'); 
+			return $this->SendError(401, 'Access denied'); 
 
 		$class = new DomainsClass($args);
-
-		if (!isset($args['domain']))
-			$class->getDomains($args['token']);
-		else
-			$class->getDomain($args['token'], $args['domain'], true);
+		$class->getDomains($args['token']);
 	}	
 	
  	public function POST($args){
         if (!isset($args['token']))
 			return $this->SendError(401, 'Access denied - token'); 
-        if (!isset($args['data']))
+        if (!isset($args['domain']))
 			return $this->SendError(401, 'Access denied - data');
-        if (!isset($args['services']))
-			return $this->SendError(401, 'Access denied - access'); 		
+		
 
 		$class = new DomainsClass($args);
-		$class->addDomain( $args['token'], $args['data'], $args['services'] );
+		$class->addDomain( $args['token'], $args['domain']);
 	}
 
  	public function PUT($args){
-        return $this->SendError(401, 'Access denied'); 
+        if (!isset($args['token']))
+			return $this->SendError(401, 'Access denied - token 2'); 
+        if (!isset($args['domain']))
+			return $this->SendError(401, 'Access denied - data 2');
+		
+
+		$class = new DomainsClass($args);
+		$class->updateDomain( $args['token'], $args['domain']); 
 	}
 
  	public function DELETE($args){
@@ -49,7 +51,7 @@ class Controller extends BaseController
 			return $this->SendError(400, 'Access denied - domain');		
 
 		$class = new DomainsClass($args);
-		$class->deleteDomains($args['token'], $args['domain']);
+		$class->deleteDomain($args['token'], $args['domain']);
 	}       
 }
 
