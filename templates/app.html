@@ -246,7 +246,7 @@
 	const serverApi = "http://127.0.0.1";
   console.log(document.URL);
 			  
-    var vueApp = Vue.createApp({
+  var vueApp = Vue.createApp({
             data() {
                 return {
                             ServerUrl: '',
@@ -348,7 +348,11 @@
             },
             
 			mounted () {
-				  this.ServerUrl = document.URL+'api/v1/';
+          const url = new URL(document.URL);
+          const protocol = url.protocol;
+          const host = url.host;
+
+				  this.ServerUrl = protocol+'//'+host+'/api/v1/';
           console.log('mounted: '+this.ServerUrl);
           this.Authorize();
 			}
