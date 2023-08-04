@@ -2,13 +2,12 @@ export default {
   
   props: 
   {
-        isglobal: '',
-        token: '',
-        serverurl: ''
+      auth: {}
   },
   
   data() {
 	  return {
+              Serverurl: '',
               isEditable: false,
               isValidName: false,
               isValidNIP: false,
@@ -230,7 +229,7 @@ export default {
       }
 
 
-      var data = {  token  : this.token, 
+      var data = {  token  : this.auth.SessToken, 
                     client : this.clientData,
                     services: servicesList};
 
@@ -239,7 +238,7 @@ export default {
       console.log('----[ ADD NEW CLIEN ]-----');
       console.log(JSON.stringify(data));
 
-      fetch(  this.serverurl+'clients.php', {
+      fetch(  this.ServerUrl+'clients.php', {
             headers: { 'Content-type': 'application/json' },
             method: "POST",
             body: JSON.stringify(data)})
@@ -327,7 +326,7 @@ export default {
         }
   
   
-        var data = {  token  : this.token, 
+        var data = {  token  : this.auth.SessToken, 
                       client : this.clientData,
                       services: servicesList};
   
@@ -336,7 +335,7 @@ export default {
         console.log('----[ UPDATE CLIENT ]-----');
         console.log(JSON.stringify(data));
   
-        fetch(  this.serverurl+'clients.php', {
+        fetch(  this.ServerUrl+'clients.php', {
               headers: { 'Content-type': 'application/json' },
               method: "PUT",
               body: JSON.stringify(data)})
@@ -376,7 +375,7 @@ export default {
 
     DeleteData(){
 
-      var data = {  token  : this.token, 
+      var data = {  token  : this.auth.SessToken, 
                     client : this.clientData};
 
 
@@ -384,7 +383,7 @@ export default {
       console.log('----[ DELETE CLIENT ]-----');
       console.log(JSON.stringify(data));
 
-      fetch(  this.serverurl+'clients.php', {
+      fetch(  this.ServerUrl+'clients.php', {
             headers: { 'Content-type': 'application/json' },
             method: "DELETE",
             body: JSON.stringify(data)})
@@ -417,7 +416,7 @@ export default {
             .catch((error) => {
                   console.log('Error saveClient');
                   if (error == "TypeError: Failed to fetch")
-                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                   else
                     if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                         this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -441,7 +440,7 @@ export default {
     
 
     GetClients() {
-          fetch( this.serverurl +'clients.php?token=' + this.token)
+          fetch( this.ServerUrl +'clients.php?token=' + this.auth.SessToken)
                 .then((res) => {
                   console.log('StatusCode: ' + res.status);
                   return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
@@ -458,7 +457,7 @@ export default {
                 .catch((error) => {
                   console.log(error);
                   if (error == "TypeError: Failed to fetch")
-                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                   else
                     if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                         this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -469,7 +468,7 @@ export default {
     },
       
     GetServices() {
-          fetch( this.serverurl+'services.php?token='+this.token)
+          fetch( this.ServerUrl+'services.php?token='+this.auth.SessToken)
                   .then((res) => {
                         console.log('StatusCode: ' + res.status);
                         return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
@@ -496,8 +495,8 @@ export default {
     },
 
     GetServicesClient(clientId) {
-      console.log('GetServicesClient: '+this.serverurl+'services.php?token='+this.token+'&client='+clientId);
-      fetch( this.serverurl+'services.php?token='+this.token+'&client='+clientId)
+      console.log('GetServicesClient: '+this.ServerUrl+'services.php?token='+this.auth.SessToken+'&client='+clientId);
+      fetch( this.ServerUrl+'services.php?token='+this.auth.SessToken+'&client='+clientId)
       .then((res) => {
             console.log('StatusCode: ' + res.status);
             return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
@@ -535,7 +534,7 @@ export default {
       .catch((error) => {
             console.log(error);
             if (error == "TypeError: Failed to fetch")
-              this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+              this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
             else
               if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                   this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -549,6 +548,12 @@ export default {
   },
   
   mounted() {
+    const url = new URL(document.URL);
+    const protocol = url.protocol;
+    const host = url.host;
+
+    this.ServerUrl = protocol+'//'+host+'/api/v1/';
+
 		this.GetClients();
 		this.GetServices();
   },
@@ -598,12 +603,12 @@ export default {
 
       <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
           <div class="col-auto">
-              <button type="button" class="btn btn-outline-danger" style="width: 100px;"  v-if="isglobal" v-on:click="DeleteData">
+              <button type="button" class="btn btn-outline-danger" style="width: 100px;"  v-if="auth.isGlobalAdmin" v-on:click="DeleteData">
                 TAK
               </button>      
           </div>
           <div class="col-auto">
-              <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="BackPage" v-if="isglobal">
+              <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="BackPage" v-if="auth.isGlobalAdmin">
                 NIE
               </button>      
           </div>
@@ -703,7 +708,7 @@ export default {
                 <button class="btn btn-outline-primary" v-on:click="BackPage" :disabled="isDisableInputs">Zamknij</button>
               </div>	
               <div class="col" style="margin-left: 40px;">
-                <button type="button" class="btn btn-outline-danger" style="width: 100px;" v-on:click="ShowDeletePage"  v-if="isglobal">
+                <button type="button" class="btn btn-outline-danger" style="width: 100px;" v-on:click="ShowDeletePage"  v-if="auth.isGlobalAdmin">
                   <i class="fas fa-trash"></i>
                   Usuń
                 </button>
@@ -743,7 +748,7 @@ export default {
                                     <td>{{ client.name }}</td>
                                     <td>{{ client.city }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="EditClient(client)" v-if="isglobal">
+                                        <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="EditClient(client)" v-if="auth.isGlobalAdmin">
                                           <i class="fas fa-pen"></i>
                                           Edycja
                                         </button>

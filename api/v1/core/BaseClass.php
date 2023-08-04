@@ -6,6 +6,11 @@ define('BASE_CLASS_LOADED', true);
 
 class BaseClass {
 
+    public function SaveResponde($value){
+        $logger = new LoggerClient();
+        $logger->saveResponde($value);
+    } 
+
     public function debugWrite($class, $func, $value){
         $logger = new LoggerClient();
         $logger->saveDebug($class, $func, $value);
@@ -49,7 +54,10 @@ class BaseClass {
 		$result['result'] = $data;
 
 		
-        echo json_encode($result);
+        $json = json_encode($result);
+        $this->SaveResponde($json);
+
+        echo $json;
         exit();
     }
 

@@ -13,11 +13,13 @@ class Controller extends BaseController
 	
 	public function GET($args)
     {
+
         if (!isset($args['token']))
 			return $this->SendError(401, 'Access denied 2'); 
         
         $sess = new SessionController();
         $res = $sess->isAuthClient($args['token']);
+
         if ($res == false)
             return $this->SendError(401, 'Access denied - wrong token'); 
         

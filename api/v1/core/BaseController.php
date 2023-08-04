@@ -4,6 +4,11 @@ class BaseController
 {
 	protected $data = null;	
 	
+    public function SaveResponde($value){
+        $logger = new LoggerClient();
+        $logger->saveResponde($value);
+    } 
+
     public function SendResult($code, $result)
     {
 		header("Access-Control-Allow-Origin: *");
@@ -12,7 +17,10 @@ class BaseController
         http_response_code($code);
 		
 		$responde['result'] = $result;
-        echo json_encode($responde);
+        $json = json_encode($responde);
+		$this->SaveResponde($json);
+
+		echo $json;
         exit();
 	}
 	
@@ -30,7 +38,10 @@ class BaseController
 		$result['error'] = $error;
 
 		
-        echo json_encode($result);
+        $json = json_encode($result);
+		$this->SaveResponde($json);
+
+		echo $json;
         exit();
 	}	
 	

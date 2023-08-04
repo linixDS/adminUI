@@ -2,5 +2,5 @@
 	include ("init.php");
 	
     $route = new Route();
-    $route->run('auth',"POST");
+    $route->run('auth',"ALL");
 ?>

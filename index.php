@@ -31,8 +31,6 @@ function goLoginPage($error){
         goLoginPage(null);
     }
 
-
-
     $username = $_POST['username'];
     $password = $_POST['password'];
 
@@ -60,9 +58,14 @@ function goLoginPage($error){
         if ($status == 200){
             $result = json_decode($result_json, true);
             $token = $result['result']['token'];  
-            $name = $result['result']['user']['name'];    
             
-            echo file_get_contents("./templates/app.html");
+            $buffer = file_get_contents("./templates/app.html");
+            $text = "const key='".base64_encode($token)."';";
+
+          //  $text = "const key='".$token."';";
+            $buffer = str_replace("<TOKEN>", $text, $buffer);
+
+            echo $buffer;
         }
             else {
                 $result = json_decode($result_json, true);

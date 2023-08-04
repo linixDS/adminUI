@@ -44,7 +44,11 @@ class SessionController
 			else
 				$ipaddress = 'UNKNOWN';
 			
-			return $ipaddress;
+
+			if ($ipaddress == "::1")
+				return "127.0.0.1";
+			else
+				return $ipaddress;
 	}   
 
 
@@ -96,10 +100,14 @@ class SessionController
 	public function GetUserInfo()
 	{
 		$result = array();
-		$result['Username'] = $_SESSION['LoginSession']['username'];
-		$result['AccountType'] = $_SESSION['LoginSession']['type'];
+		$result['UserName'] = $_SESSION['LoginSession']['username'];
+		if ($_SESSION['LoginSession']['type'] == 'global')
+			$result['isGlobalAdmin'] = true;
+		else
+			$result['isGlobalAdmin'] = false;
 		$result['DisplayName'] = $_SESSION['LoginSession']['name'];
-		$result['ClientIP'] = $_SESSION['ConnectionSession'];
+		$result['Connection'] = $_SESSION['ConnectionSession'];
+		$result['SessToken'] = session_id();
 		
 		return $result;
 	}
@@ -109,6 +117,7 @@ class SessionController
 	{
 		if(!defined('AUTHCLIENT_LOADED')) {
 			define('AUTHCLIENT_LOADED', true);
+
 			session_id($token);
 			session_start();
 			
@@ -117,7 +126,7 @@ class SessionController
 		
 			if ($_SESSION['ConnectionSession'] ==  $this->getUserIP())
 				return true;
-			else
+			else 
 				return false;
 		}
 			else

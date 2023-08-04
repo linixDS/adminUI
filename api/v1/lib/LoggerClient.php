@@ -78,7 +78,7 @@
 					$handle = fopen($filename, "w");
 			
 			if ($handle){
-				$txt = "---[".date("Y-m-d H:i:s", $time)."]-----|  (".$this->request_from.")\r\n".$message."\r\n";  
+				$txt = "---[".date("Y-m-d H:i:s", $time)."]-----|  (".$this->request_from.")\r\n".$message."\r\n\r\n";  
 				fwrite($handle, $txt);
 				fclose($handle);
 				return true;
@@ -113,10 +113,17 @@
 			$header = "---[ BEGIN TRANSMISSION ]-----------\r\n";
 			$msg  = "  URI=".$this->request_uri."\r\n";
 			$msg .= "  HEAD=".$this->request_data."\r\n";
-			$msg .= " ---[ END TRANSMISSION ]-----------\r\n\r\n";
+			$msg .= " ---[ END TRANSMISSION ]-----------\r\n";
 						
 			return $this->writeLog($filename,"REQ","", $this->request_time, $msg, $header);
 		}
+
+		public function saveResponde($json)
+		{
+			$filename = getcwd().CONFIG_LOG_PATH."access.log";
+					
+			return $this->writeLog($filename,"RES","", $this->request_time, $json, '');
+		}		
 
 		public function saveQuery($pdo_sth)
 		{

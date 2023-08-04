@@ -2,13 +2,12 @@ export default {
   
   props: 
   {
-        isglobal: '',
-        token: '',
-        serverurl: ''
+      auth: {}
   },
   
   data() {
 	  return {
+              ServerUrl: '',
               isEditable: false,
               isValidMails: false,
               isValidName: false,
@@ -178,14 +177,14 @@ export default {
     },
     
     SaveNewDomain() {
-      var data = {  token  : this.token, 
+      var data = {  token  : this.auth.SessToken, 
                     domain : this.domainData};
 
 
       this.showSpinLoading = true;
       console.log(JSON.stringify(data));
 
-      fetch(  this.serverurl+'domains.php', {
+      fetch(  this.ServerUrl+'domains.php', {
             headers: { 'Content-type': 'application/json' },
             method: "POST",
             body: JSON.stringify(data)})
@@ -237,7 +236,7 @@ export default {
         }
 
   
-        var data = {  token  : this.token, 
+        var data = {  token  : this.auth.SessToken, 
                       domain : this.domainData};
   
   
@@ -245,7 +244,7 @@ export default {
         console.log('----[ UPDATE DOMAIN ]-----');
         console.log(JSON.stringify(data));
   
-        fetch(  this.serverurl+'domains.php', {
+        fetch(  this.ServerUrl+'domains.php', {
               headers: { 'Content-type': 'application/json' },
               method: "PUT",
               body: JSON.stringify(data)})
@@ -285,7 +284,7 @@ export default {
 
     DeleteData(){
 
-      var data = {  token  : this.token, 
+      var data = {  token  : this.auth.SessToken, 
                     domain : this.domainData};
 
 
@@ -293,7 +292,7 @@ export default {
       console.log('----[ DELETE DOMAIN ]-----');
       console.log(JSON.stringify(data));
 
-      fetch(  this.serverurl+'domains.php', {
+      fetch(  this.ServerUrl+'domains.php', {
             headers: { 'Content-type': 'application/json' },
             method: "DELETE",
             body: JSON.stringify(data)})
@@ -326,7 +325,7 @@ export default {
             .catch((error) => {
                   console.log('Error saveClient');
                   if (error == "TypeError: Failed to fetch")
-                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                   else
                     if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                         this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -350,7 +349,8 @@ export default {
     
 
     GetDomains() {
-          fetch( this.serverurl +'domains.php?token=' + this.token)
+          console.log('GET DOMAINS');
+          fetch( this.ServerUrl+'domains.php?token='+this.auth.SessToken)
                 .then((res) => {
                   console.log('StatusCode: ' + res.status);
                   return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
@@ -367,7 +367,7 @@ export default {
                 .catch((error) => {
                   console.log(error);
                   if (error == "TypeError: Failed to fetch")
-                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                   else
                     if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                         this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -378,7 +378,8 @@ export default {
 
 
     GetClients() {
-      fetch( this.serverurl +'clients.php?token=' + this.token)
+      console.log('GET clients');
+      fetch( this.ServerUrl +'clients.php?token=' + this.auth.SessToken)
             .then((res) => {
               console.log('StatusCode: ' + res.status);
               return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
@@ -395,7 +396,7 @@ export default {
             .catch((error) => {
               console.log(error);
               if (error == "TypeError: Failed to fetch")
-                this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
               else
                 if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                     this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -403,13 +404,21 @@ export default {
                   this.ErrorMessage = 'Wyjątek: ' + error;
             });
 
-},    
+      },    
       
  
 	  
   },
   
   mounted() {
+    const url = new URL(document.URL);
+    const protocol = url.protocol;
+    const host = url.host;
+
+    this.ServerUrl = protocol+'//'+host+'/api/v1/';
+
+    console.log('AUTH= '+this.auth.SessToken);
+
 		this.GetDomains();
     this.GetClients();
   },
@@ -454,12 +463,12 @@ export default {
 
       <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
           <div class="col-auto">
-              <button type="button" class="btn btn-outline-danger" style="width: 100px;"  v-if="isglobal" v-on:click="DeleteData">
+              <button type="button" class="btn btn-outline-danger" style="width: 100px;"  v-if="auth.isGlobalAdmin" v-on:click="DeleteData">
                 TAK
               </button>      
           </div>
           <div class="col-auto">
-              <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="BackPage" v-if="isglobal">
+              <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="BackPage" v-if="auth.isGlobalAdmin">
                 NIE
               </button>      
           </div>
@@ -530,7 +539,7 @@ export default {
 	<div v-if="showContent">
             <div class="row" style="margin-bottom: 10px;">
                 <div  class="col-auto">
-                    <button class="btn btn-outline-primary"  v-on:click="AddNewDomain"  v-if="isglobal">
+                    <button class="btn btn-outline-primary"  v-on:click="AddNewDomain"  v-if="auth.isGlobalAdmin">
                     <i class="fa fa-plus"></i>    Dodaj domenę</button>
                 </div>
 				        <div  class="col-auto">
@@ -556,7 +565,7 @@ export default {
                                     <td>{{ domain.name }}</td>
                                     <td>{{ domain.created }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="EditDomain(domain)" v-if="isglobal">
+                                        <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="EditDomain(domain)" v-if="auth.isGlobalAdmin">
                                           <i class="fas fa-pen"></i>
                                           Edycja
                                         </button>

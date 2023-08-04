@@ -3,13 +3,12 @@ export default {
   
     props: 
     {
-          isglobal: '',
-          token: '',
-          serverurl: ''
+          auth: {}
     },
     
     data() {
         return {
+                ServerUrl: '',
                 isEditable: false,
                 
                 isValidUser: false,
@@ -244,7 +243,7 @@ export default {
         this.adminData.password = passwordHashString;
         this.adminData.username = this.adminData.username+this.localName;
 
-        var data = {  token  : this.token, 
+        var data = {  token  : this.auth.SessToken, 
                       admin : this.adminData};
   
 
@@ -254,7 +253,7 @@ export default {
         this.showSpinLoading = true;
 
   
-        fetch(  this.serverurl+'admins.php', {
+        fetch(  this.ServerUrl+'admins.php', {
               headers: { 'Content-type': 'application/json' },
               method: "POST",
               body: JSON.stringify(data)})
@@ -281,7 +280,7 @@ export default {
               .catch((error) => {
                     console.log('Error saveClient');
                     if (error == "TypeError: Failed to fetch")
-                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                     else
                       if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                           this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -314,7 +313,7 @@ export default {
               this.adminData.password = passwordHashString;
           }
 
-          var data = {  token  : this.token, 
+          var data = {  token  : this.auth.SessToken, 
                         admin : this.adminData};
     
     
@@ -322,7 +321,7 @@ export default {
           console.log('----[ UPDATE DOMAIN ]-----');
           console.log(JSON.stringify(data));
 
-          fetch(  this.serverurl+'admins.php', {
+          fetch(  this.ServerUrl+'admins.php', {
                 headers: { 'Content-type': 'application/json' },
                 method: "PUT",
                 body: JSON.stringify(data)})
@@ -348,7 +347,7 @@ export default {
                 .catch((error) => {
                       console.log('Error saveClient');
                       if (error == "TypeError: Failed to fetch")
-                        this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                        this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                       else
                         if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                             this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -362,7 +361,7 @@ export default {
   
       DeleteData(){
   
-        var data = {  token  : this.token, 
+        var data = {  token  : this.auth.SessToken, 
                       admin : this.adminData};
   
   
@@ -370,7 +369,7 @@ export default {
         console.log('----[ DELETE ADMINS ]-----');
         console.log(JSON.stringify(data));
   
-        fetch(  this.serverurl+'admins.php', {
+        fetch(  this.ServerUrl+'admins.php', {
               headers: { 'Content-type': 'application/json' },
               method: "DELETE",
               body: JSON.stringify(data)})
@@ -403,7 +402,7 @@ export default {
               .catch((error) => {
                     console.log('Error saveClient');
                     if (error == "TypeError: Failed to fetch")
-                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                     else
                       if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                           this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -427,7 +426,7 @@ export default {
       
   
       GetAdmins() {
-            fetch( this.serverurl +'admins.php?token=' + this.token)
+            fetch( this.ServerUrl +'admins.php?token=' + this.auth.SessToken)
                   .then((res) => {
                     console.log('StatusCode: ' + res.status);
                     return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
@@ -444,7 +443,7 @@ export default {
                   .catch((error) => {
                     console.log(error);
                     if (error == "TypeError: Failed to fetch")
-                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                     else
                       if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                           this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -455,7 +454,7 @@ export default {
   
   
       GetClients() {
-        fetch( this.serverurl +'clients.php?token=' + this.token)
+        fetch( this.ServerUrl +'clients.php?token=' + this.auth.SessToken)
               .then((res) => {
                 console.log('StatusCode: ' + res.status);
                 return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
@@ -472,7 +471,7 @@ export default {
               .catch((error) => {
                 console.log(error);
                 if (error == "TypeError: Failed to fetch")
-                  this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
+                  this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
                 else
                   if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
                       this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
@@ -487,6 +486,12 @@ export default {
     },
     
     mounted() {
+        const url = new URL(document.URL);
+        const protocol = url.protocol;
+        const host = url.host;
+
+        this.ServerUrl = protocol+'//'+host+'/api/v1/';
+
         this.GetAdmins();
         this.GetClients();
 
@@ -532,12 +537,12 @@ export default {
   
         <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
             <div class="col-auto">
-                <button type="button" class="btn btn-outline-danger" style="width: 100px;"  v-if="isglobal" v-on:click="DeleteData">
+                <button type="button" class="btn btn-outline-danger" style="width: 100px;"  v-if="auth.isGlobalAdmin" v-on:click="DeleteData">
                   TAK
                 </button>      
             </div>
             <div class="col-auto">
-                <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="BackPage" v-if="isglobal">
+                <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="BackPage" v-if="auth.isGlobalAdmin">
                   NIE
                 </button>      
             </div>
@@ -548,7 +553,7 @@ export default {
   
   
     <div v-if="showAdminContent">
-            <div v-if="adminData.type === 'dedicated'">
+            <div v-if="auth.isGlobalAdmin">
                 <h5 class="text-primary">Kontrahent:</h5>
       
                 <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
@@ -616,7 +621,7 @@ export default {
                   <label class="col-form-label">Hasło:  </label>
                 </div>
                 <div class="col-4">
-                  <input type="password" maxlength="25" :class="isValidPass1 ? 'form-control' : 'form-control is-invalid'" v-model="password1"  :disabled="isDisableInputs || !isChangePassword">
+                  <input type="current-password" maxlength="25" :class="isValidPass1 ? 'form-control' : 'form-control is-invalid'" v-model="password1"  :disabled="isDisableInputs || !isChangePassword">
                 </div>
                 <div class="col-4">
                   <div v-if="!isChangePassword">
@@ -631,7 +636,7 @@ export default {
                   <label class="col-form-label">Powtórz:  </label>
                 </div>
                 <div class="col-4">
-                  <input type="password" maxlength="25" :class="isValidPass2 ? 'form-control is-valid' : 'form-control is-invalid'" v-model="password2"  :disabled="isDisableInputs">
+                  <input type="current-password" maxlength="25" :class="isValidPass2 ? 'form-control is-valid' : 'form-control is-invalid'" v-model="password2"  :disabled="isDisableInputs">
                 </div>
             </div>              
             
@@ -660,7 +665,7 @@ export default {
       <div v-if="showContent">
               <div class="row" style="margin-bottom: 10px;">
                   <div  class="col-auto">
-                      <button class="btn btn-outline-primary"  v-on:click="AddNewAdmin"  v-if="isglobal">
+                      <button class="btn btn-outline-primary"  v-on:click="AddNewAdmin" v-if="auth.isGlobalAdmin">
                       <i class="fa fa-plus"></i>    Dodaj administatora</button>
                   </div>
                           <div  class="col-auto">
