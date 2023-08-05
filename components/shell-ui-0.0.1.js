@@ -1,6 +1,7 @@
 import DomainsUi from './domains-ui-0.0.1.js';
 import ClientsUi from './clients-ui-0.0.1.js';
 import AdminsUi from './admins-ui-0.0.1.js';
+import ProfileUi from './profile-ui-0.0.1.js';
 import ProfilemenuUi from './profilemenu-ui-0.0.1.js';
 
 export default {
@@ -21,7 +22,8 @@ export default {
                             {name: 'DOMAINS', show: false,  needAdmin: false},
                             {name: 'ADMINS', show: false,  needAdmin: false},
                             {name: 'USERS', show: false,  needAdmin: false},
-                            {name: 'MAILS', show: false,  needAdmin: false}
+                            {name: 'MAILS', show: false,  needAdmin: false},
+                            {name: 'PROFILE', show: false,  needAdmin: false}
                         ]
             }
         },
@@ -30,6 +32,7 @@ export default {
             DomainsUi,
             ClientsUi,
             AdminsUi,
+            ProfileUi,
             ProfilemenuUi,
         },        
 
@@ -40,6 +43,7 @@ export default {
         methods: {
             ShowProfileEvent(payload) {
               console.log('Received event data:', payload.eventData);
+              this.LoadPage('PROFILE');
             },
 
             LoadPage(name){
@@ -85,6 +89,8 @@ export default {
                     this.ErrorMessage = json.error.message;
                   } else {
                     this.AuthData = json.result;
+                    console.log('Authorize');
+                    console.log(this.AuthData);
                   }
                 })
                 .catch((error) => {
@@ -189,6 +195,10 @@ export default {
           <admins-ui v-if="IsViewPage('ADMINS')"
                 :auth="AuthData">
           </admins-ui>
+
+          <profile-ui v-if="IsViewPage('PROFILE')"
+                :auth="AuthData">
+          </profile-ui>          
 		</div>
     
 	</main>

@@ -564,7 +564,11 @@ export default {
                     else
                       this.ErrorMessage = 'Wyjątek: ' + error;
                 });
-        },   
+        },
+        
+        ShowProfileEvent(payload) {
+          console.log('Received event data admin module:', payload.eventData);
+        },
         
     },
     

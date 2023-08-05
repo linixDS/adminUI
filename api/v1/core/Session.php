@@ -114,6 +114,7 @@ class SessionController
 		else
 			$result['isGlobalAdmin'] = false;
 		$result['DisplayName'] = $_SESSION['LoginSession']['name'];
+		$result['Email'] = $_SESSION['LoginSession']['mail'];
 		$result['Connection'] = $_SESSION['ConnectionSession'];
 		$result['SessToken'] = session_id();
 		

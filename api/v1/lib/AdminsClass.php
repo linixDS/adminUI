@@ -211,7 +211,7 @@ class AdminsClass extends BaseClass
 
         if ((!isset($adminData['name'])) || (!isset($adminData['username'])) || (!isset($adminData['type'])) ||
             (!isset($adminData['mail']))  )
-            return $this->sendError(401, 'Nieprawidłowe zapytanie - data admin');
+            return $this->sendError(401, 'Nieprawidłowe zapytanie - data admin 2');
 
         if ( ($adminData['type'] != 'global') && (!isset($adminData['client'])) )
             return $this->sendError(401, 'Nieprawidłowe zapytanie - data admin client');
@@ -247,10 +247,10 @@ class AdminsClass extends BaseClass
             $db->BeginTransaction($conn);
             
             if (isset($adminData['passowrd'])) {
-                $query  = "UPDATE admins SET name=:NAME,mail=:MAIL,password=:PASSWORD WHERE username=:USERNAME LIMIT 1;";
+                $query  = "UPDATE admins SET name=:NAME,mail=:MAIL,password=:PASSWORD,changed=NOW() WHERE username=:USERNAME LIMIT 1;";
             }
                 else {
-                    $query  = "UPDATE admins SET name=:NAME,mail=:MAIL WHERE username=:USERNAME LIMIT 1;";
+                    $query  = "UPDATE admins SET name=:NAME,mail=:MAIL,changed=NOW() WHERE username=:USERNAME LIMIT 1;";
                 }
 
  
