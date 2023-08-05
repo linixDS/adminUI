@@ -2296,3 +2296,443 @@ REQ --[2023-08-05 06:40:24]-----|  (::1)
 
 RES --[2023-08-05 06:40:24]-----|  (::1)
 {"result":{"services":[{"id":1,"limit_accounts":5},{"id":2,"limit_accounts":2}]}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 06:41:40]-----|  (::1)
+  URI=//localhost/api/v1/clients.php?token=qfple2h4ue5gcd4otus27rij7b
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 06:41:40]-----|  (::1)
+  URI=//localhost/api/v1/admins.php?token=qfple2h4ue5gcd4otus27rij7b
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 06:41:40]-----|  (::1)
+{"result":{"clients":[{"id":2,"name":"asdastest233aaa","nip":"2222222222","city":"test222fggsss","mail":"test2@com.pl","admins":2},{"id":7,"name":"heban","nip":"3331111111","city":"Krak\u00f3w","mail":"heban@net.pl","admins":2},{"id":6,"name":"test10","nip":"9999999999","city":"","mail":"test10@test.pl","admins":3},{"id":3,"name":"test3","nip":"3333333333","city":"","mail":"test2@com.pl","admins":2},{"id":4,"name":"test4","nip":"4444444444","city":"","mail":"test@sss.pl","admins":2},{"id":5,"name":"test5","nip":"5555555555","city":"","mail":"555@sss.pl","admins":2}]}}
+RES --[2023-08-05 06:41:40]-----|  (::1)
+{"result":{"admins":[{"username":"GlobalAdmin","client":null,"type":"global","name":"Administrator","created":"2023-01-01 12:00:00","mail":null},{"username":"admin2@3331111111","client":7,"type":"dedicated","name":"Heban 2","created":"2023-08-05 07:46:03","mail":""},{"username":"admin@3331111111","client":7,"type":"dedicated","name":"Heban","created":"2023-08-05 05:59:49","mail":""},{"username":"pkul","client":null,"type":"global","name":"Pawe\u0142","created":"2023-08-05 08:22:43","mail":""},{"username":"test@3333333333","client":3,"type":"dedicated","name":"Testow","created":"2023-08-05 08:26:00","mail":""}]}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 06:50:56]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 06:50:56]-----|  (::1)
+{"result":{"token":"2ced76uqa59mnp5d23bl89fjeo","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 06:57:42]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 06:57:42]-----|  (::1)
+{"result":{"token":"o3ej5q3q7gmeemcc50guqtsaaq","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 06:58:25]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 06:58:25]-----|  (::1)
+{"result":{"token":"e664ckk8fjdbo4j0srk7p804os","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:02:56]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:02:56]-----|  (::1)
+{"result":{"token":"trj5abrd3cel6vdoqi4nlshfiu","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:03:34]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:03:34]-----|  (::1)
+{"result":{"token":"kg42k89sts7ro9u51ndrcsf5u2","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:03:35]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=kg42k89sts7ro9u51ndrcsf5u2
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:03:35]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"kg42k89sts7ro9u51ndrcsf5u2"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:04:10]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:04:10]-----|  (::1)
+{"result":{"token":"fflk2pddjtlc7g4q5k2cljo3pf","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:04:10]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=fflk2pddjtlc7g4q5k2cljo3pf
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:04:10]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"fflk2pddjtlc7g4q5k2cljo3pf"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:06:26]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:06:26]-----|  (::1)
+{"result":{"token":"266dhrhn5036ho4gt42hvg7bqd","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:06:26]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=266dhrhn5036ho4gt42hvg7bqd
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:06:26]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"266dhrhn5036ho4gt42hvg7bqd"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:10:53]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:10:53]-----|  (::1)
+{"result":{"token":"q0fi48mnibdnvu59mh0618v2b2","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:10:53]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=q0fi48mnibdnvu59mh0618v2b2
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:10:53]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"q0fi48mnibdnvu59mh0618v2b2"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:13:46]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:13:46]-----|  (::1)
+{"result":{"token":"0ebltm20sg8vps5te4cr847fq8","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:13:46]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=0ebltm20sg8vps5te4cr847fq8
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:13:46]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"0ebltm20sg8vps5te4cr847fq8"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:14:38]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:14:38]-----|  (::1)
+{"result":{"token":"kb02p5e81i4e8nvidg067r4rcc","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:15:52]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:15:52]-----|  (::1)
+{"result":{"token":"i2na6049gel9i4kn4i25apvbpd","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:19:55]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:19:55]-----|  (::1)
+{"result":{"token":"2jejjs09ae4gdhfcsjgoooiggk","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 07:19:56]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=2jejjs09ae4gdhfcsjgoooiggk
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 07:19:56]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"2jejjs09ae4gdhfcsjgoooiggk"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 10:50:37]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 10:50:37]-----|  (::1)
+{"result":{"token":"ahuscajq5r8djace8hli15aog3","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 10:51:48]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 10:51:48]-----|  (::1)
+{"result":{"token":"qaistnrl6debm85rv7rp05rpgu","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 10:51:48]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=qaistnrl6debm85rv7rp05rpgu
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 10:51:48]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"qaistnrl6debm85rv7rp05rpgu"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:00:39]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:00:39]-----|  (::1)
+{"result":{"token":"bksujdiedv8g7h0ucfq9lipqth","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:00:40]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=bksujdiedv8g7h0ucfq9lipqth
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:00:40]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"bksujdiedv8g7h0ucfq9lipqth"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:03:10]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:03:10]-----|  (::1)
+{"result":{"token":"sihorromk4h8miehbvhrf1efhm","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:03:11]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=sihorromk4h8miehbvhrf1efhm
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:03:11]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"sihorromk4h8miehbvhrf1efhm"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:04:44]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:04:44]-----|  (::1)
+{"result":{"token":"e0a0mob2u7qk3auj7ag5ro60tr","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:04:45]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=e0a0mob2u7qk3auj7ag5ro60tr
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:04:45]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"e0a0mob2u7qk3auj7ag5ro60tr"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:08:12]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:08:12]-----|  (::1)
+{"result":{"token":"ciceroui2u6iv5uhrqv51ltmg3","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:08:12]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=ciceroui2u6iv5uhrqv51ltmg3
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:08:12]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"ciceroui2u6iv5uhrqv51ltmg3"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:09:01]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:09:01]-----|  (::1)
+{"result":{"token":"1egvifh34mvmjr1npncqa466dg","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:09:15]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:09:15]-----|  (::1)
+{"result":{"token":"m6u11h91dep47adi2huulqlf95","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:09:15]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=m6u11h91dep47adi2huulqlf95
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:09:15]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"m6u11h91dep47adi2huulqlf95"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:11:15]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:11:15]-----|  (::1)
+{"result":{"token":"37a1duubtevk1qph012ud9c2kf","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:11:56]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:11:56]-----|  (::1)
+{"result":{"token":"7d6so66ret97ea19se8js9erfm","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:13:26]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:13:26]-----|  (::1)
+{"result":{"token":"juknu9485ngufoto72fhkmfff0","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:14:19]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:14:19]-----|  (::1)
+{"result":{"token":"u2rank393avet4dq2id8n0qesl","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:15:10]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:15:10]-----|  (::1)
+{"result":{"token":"2ub3rfugm84a4j8ob4q6ioin3f","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:15:10]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=2ub3rfugm84a4j8ob4q6ioin3f
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:15:10]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"2ub3rfugm84a4j8ob4q6ioin3f"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:18:42]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:18:42]-----|  (::1)
+{"result":{"token":"3vf62f3r7olgec8r22nrd51mik","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:18:42]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=3vf62f3r7olgec8r22nrd51mik
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:18:42]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"3vf62f3r7olgec8r22nrd51mik"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:19:35]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:19:35]-----|  (::1)
+{"result":{"token":"oqgb0a72inbo2voot3ql7hvj6o","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:19:35]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=oqgb0a72inbo2voot3ql7hvj6o
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:19:35]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"oqgb0a72inbo2voot3ql7hvj6o"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:20:20]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:20:20]-----|  (::1)
+{"result":{"token":"11bp0jhh7i9ekue6eqn8nlmttf","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:20:20]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=11bp0jhh7i9ekue6eqn8nlmttf
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:20:20]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"11bp0jhh7i9ekue6eqn8nlmttf"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:22:08]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:22:08]-----|  (::1)
+{"result":{"token":"u5fd8gi490879am8h9hq3hhfe1","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:22:09]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=u5fd8gi490879am8h9hq3hhfe1
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:22:09]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"u5fd8gi490879am8h9hq3hhfe1"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:22:28]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:22:28]-----|  (::1)
+{"result":{"token":"6sfbbam6hulb1155lsp3p9cphi","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:22:28]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=6sfbbam6hulb1155lsp3p9cphi
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:22:28]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"6sfbbam6hulb1155lsp3p9cphi"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:23:49]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:23:49]-----|  (::1)
+{"result":{"token":"tt2ksb8h69puug6ivoh5nvd2bu","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:23:49]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=tt2ksb8h69puug6ivoh5nvd2bu
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:23:49]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"tt2ksb8h69puug6ivoh5nvd2bu"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:25:39]-----|  (::1)
+  URI=//localhost/api/v1/login.php
+  HEAD={"username":"GlobalAdmin","password":"Kamasutra"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:25:39]-----|  (::1)
+{"result":{"token":"o4b1fdgjf8g52h3a79q34af341","user":{"id":1,"name":"Administrator","username":"GlobalAdmin","type":"global","client_id":null}}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:25:40]-----|  (::1)
+  URI=//localhost/api/v1/login.php?token=o4b1fdgjf8g52h3a79q34af341
+  HEAD=
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:25:40]-----|  (::1)
+{"result":{"UserName":"GlobalAdmin","isGlobalAdmin":true,"DisplayName":"Administrator","Connection":"127.0.0.1","SessToken":"o4b1fdgjf8g52h3a79q34af341"}}
+---[ BEGIN TRANSMISSION ]-----------
+REQ --[2023-08-05 11:25:43]-----|  (::1)
+  URI=//localhost/api/v1/logout.php
+  HEAD={"token":"o4b1fdgjf8g52h3a79q34af341"}
+ ---[ END TRANSMISSION ]-----------
+
+RES --[2023-08-05 11:25:43]-----|  (::1)
+{"result":{"message":"End session","time":1691234743}}

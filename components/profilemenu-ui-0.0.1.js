@@ -20,6 +20,10 @@ export default {
   
     
     methods: {
+        showProfileEvent() {
+            this.$emit('showprofile-event', { eventData: 'Hello from the child component!' });
+        },
+
         LogOut() {
             var data = {token: this.auth.SessToken};
             fetch(this.ServerUrl+'logout.php', {
@@ -67,7 +71,7 @@ export default {
       {{ auth.DisplayName }}
     </a>
     <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-      <li><a class="dropdown-item" href="#">Profil</a></li>
+      <li><a class="dropdown-item" href="#" v-on:click="showProfileEvent">Profil</a></li>
       <li><hr class="dropdown-divider"></li>
       <li><a class="dropdown-item" href="#" v-on:click="LogOut">Wyloguj</a></li>
     </ul>

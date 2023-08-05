@@ -1,7 +1,7 @@
 import DomainsUi from './domains-ui-0.0.1.js';
 import ClientsUi from './clients-ui-0.0.1.js';
 import AdminsUi from './admins-ui-0.0.1.js';
-import ProfileUi from './profile-ui-0.0.1.js';
+import ProfilemenuUi from './profilemenu-ui-0.0.1.js';
 
 export default {
 
@@ -30,7 +30,7 @@ export default {
             DomainsUi,
             ClientsUi,
             AdminsUi,
-            ProfileUi,
+            ProfilemenuUi,
         },        
 
         computed: {
@@ -38,6 +38,10 @@ export default {
         },
 
         methods: {
+            ShowProfileEvent(payload) {
+              console.log('Received event data:', payload.eventData);
+            },
+
             LoadPage(name){
                 let showPages = this.Pages.filter( page => page.show == true );
                 for (const item of showPages){
@@ -164,8 +168,8 @@ export default {
             </ul>
 		
 		    <hr>
-            <profile-ui  :auth="AuthData">
-            </profile-ui>
+            <Profilemenu-ui  :auth="AuthData" @showprofile-event="ShowProfileEvent">
+            </Profilemenu-ui>
     </div>
 
   
@@ -173,7 +177,6 @@ export default {
   
 		<!--- Display content main --->
 		<div style="margin: 30px 30px 30px 30px; width: 100%; overflow-x: hidden; overflow-y: auto;">
-  
           <clients-ui v-if="IsViewPage('CLIENTS')"
                 :auth="AuthData">
           </clients-ui>
