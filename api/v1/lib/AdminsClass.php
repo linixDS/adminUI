@@ -12,6 +12,76 @@ class AdminsClass extends BaseClass
         $this->args = $args;
     }
 
+
+    private function getCountAdminsResultData($db, $conn, $client){
+        if (!isset($client))
+            return false;        
+
+        $sess = new SessionController();
+
+
+        try {
+            if ($sess->IsGlobalAdmin()){
+                $query = "SELECT COUNT(*) as active_admins FROM admins WHERE client_id=?;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$client]);
+            }
+            else {
+                $cid = $sess->GetClientID();
+                $query = "SELECT COUNT(*) as active_admins FROM admins WHERE client_id=?;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$cid]);
+            }
+
+            $data = $sth->fetch(PDO::FETCH_ASSOC);
+
+            return $data;
+        } catch (Exception $e) {
+            return false;
+        }
+    } 
+
+    public function getCountAdmins($token, $client){
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied');
+
+        if (!isset($client))
+            return $this->sendError(401, 'Access denied');            
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');
+        
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(501, $db->getLastError());
+
+        try {
+            if ($sess->IsGlobalAdmin()){
+                $query = "SELECT COUNT(*) as active_admins FROM admins WHERE client_id=?;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$client]);
+            }
+            else {
+                $cid = $sess->GetClientID();
+                $query = "SELECT COUNT(*) as active_admins FROM admins WHERE client_id=?;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$cid]);
+            }
+
+            $data = $sth->fetch(PDO::FETCH_ASSOC);
+
+            return $this->sendResult(200, $data);
+        } catch (Exception $e) {
+            $this->sendError(500, "Error SQL:" . $e);
+            return;
+        }
+    }
+
+    
+
     public function getAllAdmins($token){
         if (!isset($token))
             return $this->sendError(401, 'Access denied');
@@ -21,18 +91,24 @@ class AdminsClass extends BaseClass
         if ($res == false)
             return $this->sendError(401, 'Access denied - wrong token');
         
-        if (!$sess->IsGlobalAdmin())
-            return $this->sendError(401, 'Access denied'); 
-
         $db = new DB();
         $conn = $db->getConnection();
         if ($conn == null)
             return $this->sendError(501, $db->getLastError());
 
         try {
-            $query = "SELECT username,client_id as client,type,name,created,mail FROM admins ORDER BY username;";
-			$sth = $db->prepare($conn, $query);
-			$sth->execute();
+            if ($sess->IsGlobalAdmin()){
+                $query = "SELECT username,client_id as client,type,name,created,mail FROM admins ORDER BY username;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute();
+            }
+            else {
+                $cid = $sess->GetClientID();
+                $query = "SELECT username,client_id as client,type,name,created,mail FROM admins WHERE client_id=? ORDER BY username;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$cid]);
+            }
+
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
 
             $result['admins'] = $data;
@@ -70,6 +146,7 @@ class AdminsClass extends BaseClass
         if ($conn == null)
             return $this->sendError(501, $db->getLastError());
 
+
         $name = $adminData['name'];
         $username = $adminData['username'];
         $password = $adminData['password'];
@@ -77,6 +154,24 @@ class AdminsClass extends BaseClass
         $type = $adminData['type'];
         $mail = $adminData['mail'];
         
+        if ($type != 'global'){
+            $clientClass = new ClientsClass(null);
+            $result = $clientClass->getLimitAdminsResultData($db, $conn, $client_id);
+            if ($result == false)
+                return $this->sendError(501, 'Błąd systemowy SQL - limit 1');
+            
+            $maxAdmins = $result['admins'];
+    
+            $result = $this->getCountAdminsResultData($db, $conn, $client_id);
+            if ($result == false)
+                return $this->sendError(501, 'Błąd systemowy SQL - limit 2');
+    
+            $currAdmins = $result['active_admins'];
+    
+            if ($currAdmins >= $maxAdmins)
+                return $this->sendError(400, 'Limit kont dla administratorów został wykorzystany.');
+        }
+
         $query = '';
 
         try {

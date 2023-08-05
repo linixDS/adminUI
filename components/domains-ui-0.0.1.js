@@ -411,6 +411,7 @@ export default {
   },
   
   mounted() {
+    console.log("LOAD MODULE: domains");
     const url = new URL(document.URL);
     const protocol = url.protocol;
     const host = url.host;
@@ -420,7 +421,8 @@ export default {
     console.log('AUTH= '+this.auth.SessToken);
 
 		this.GetDomains();
-    this.GetClients();
+    if (this.auth.isGlobalAdmin)
+      this.GetClients();
   },
   
   components: {

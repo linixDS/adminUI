@@ -4,6 +4,7 @@ include("./core/BaseController.php");
 include("./core/DB.php");
 include("./core/Session.php");
 include("./lib/AdminsClass.php");
+include("./lib/ClientsClass.php");
 
 class Controller extends BaseController
 {
@@ -18,7 +19,10 @@ class Controller extends BaseController
                         return $this->SendError(401, 'Access denied - token'); 
                      
                 $class = new AdminsClass(null);
-                $class->getAllAdmins($args['token']) ;
+                if (!isset($args['client']))
+                        $class->getAllAdmins($args['token']) ;
+                else
+                        $class->getCountAdmins($args['token'], $args['client']) ;
 	}	
 	
  	public function POST($args){

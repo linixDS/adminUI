@@ -43,6 +43,49 @@ class ClientsClass extends BaseClass
         return $this->sendResult(201, $result);
     }
 
+
+    public function getLimitAdminsResultData($db,$conn,$client){
+        try {
+            $query = "SELECT limit_admins as admins FROM clients WHERE client_id=? LIMIT 1;";
+			$sth = $db->prepare($conn, $query);
+			$sth->execute([$client]);
+            $data = $sth->fetch(PDO::FETCH_ASSOC);
+            return $data;
+        } catch (Exception $e) {
+            return false;
+        }
+    }    
+
+    public function getCurrentClient($token){
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied');
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');
+        
+        $cid = $sess->GetClientID();
+
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(501, $db->getLastError());
+
+        try {
+            $query = "SELECT client_id as id,name,nip,city,mail,limit_admins as admins FROM clients WHERE client_id=? LIMIT 1;";
+			$sth = $db->prepare($conn, $query);
+			$sth->execute([$cid]);
+            $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $this->sendError(500, "Error SQL:" . $e);
+            return;
+        }
+
+        $result['clients'] = $data;
+        return $this->sendResult(201, $result);
+    }    
+
     public function addClient($token, $clientData, $serviceData){
         if (!isset($token))
             return $this->sendError(401, 'Access denied - token');

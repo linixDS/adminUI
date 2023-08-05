@@ -70,6 +70,14 @@ class SessionController
 		else
 			return -1;
 	}
+
+	public function GetClientID()
+	{
+		if (isset($_SESSION['LoginSession']['client_id']))
+			return $_SESSION['LoginSession']['client_id'];
+		else
+			return -1;
+	}	
 	
 	public function GetLoginUID()
 	{

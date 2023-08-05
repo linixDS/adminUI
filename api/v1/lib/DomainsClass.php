@@ -25,7 +25,7 @@ class DomainsClass extends BaseClass
         if ($res == false)
             return $this->sendError(401, 'Access denied - wrong token');
 
-        $uid = $sess->GetLoginUID();
+        $cid = $sess->GetClientID();
 
         $db = new DB();
         $conn = $db->getConnection();
@@ -40,7 +40,7 @@ class DomainsClass extends BaseClass
             } else {
                 $query = "SELECT name,client_id as client,created,limit_mails as mails FROM domains WHERE client_id=? ORDER BY name;";
                 $sth = $db->prepare($conn, $query);
-                $sth->execute([$uid]);
+                $sth->execute([$cid]);
             }
     
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);

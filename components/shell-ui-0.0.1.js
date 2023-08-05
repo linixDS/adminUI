@@ -129,12 +129,14 @@ export default {
                   Home
                 </a>
               </li>
+              <div v-if="AuthData.isGlobalAdmin">
               <li>
                 <a href="#" v-bind:class="[IsViewPage('CLIENTS')  ? 'nav-link active' : 'nav-link text-white']" v-on:click="LoadPage('CLIENTS')">
                   <i class="fas fa-list" style="color: white;"></i>
                   Kontrahenci
                 </a>
-              </li>    
+              </li>
+              </div>    
               <li>
                 <a href="#" v-bind:class="[IsViewPage('DOMAINS') ? 'nav-link active' : 'nav-link text-white']" v-on:click="LoadPage('DOMAINS')">
                   <i class="fas fa-sitemap" style="color: white;"></i>

@@ -38,6 +38,8 @@ export default {
                 password1: '',
                 password2: '',    
                 updateAdminData: {},
+                currentAdmins: 0,
+                maxAdmins: 0,
   
                 adminData: {}
               }
@@ -97,6 +99,12 @@ export default {
                 this.isValidPass1 = true;
 
 
+              if (this.adminData.type != 'global'){
+                  if (this.currentAdmins >= this.maxAdmins){
+                    return false;
+                  }
+              }
+
               return true;
       },    
   
@@ -125,6 +133,10 @@ export default {
           if (temp){
               console.log('NIP: '+temp.nip);
               this.localName = '@'+temp.nip;
+              this.currentAdmins = temp.admins;
+              this.maxAdmins = temp.admins;
+
+              this.GetCountAdmins();
           }
       },
 
@@ -162,6 +174,8 @@ export default {
   
   
       AddNewAdmin() {
+            this.isEditable =false;
+            this.isDisableInputs = false;
             this.isValidUser = false;
             this.isValidName = false;
             this.isValidPass1 = false;
@@ -173,12 +187,25 @@ export default {
             this.ErrorMessage = '';
             this.SuccessMessage = '';
 
+            this.currentAdmins = 0;
+            this.maxAdmins = 0;
+
             this.password1 = '';
             this.password2 = '';
             this.localName = '';
   
             this.adminData=  {'username':'','name':'', 'type': 'dedicated','password': '', client: -1, 'mail': ''};
   
+            if (!this.auth.isGlobalAdmin){
+              const temp = this.Clients[0];
+              if (temp){
+                this.adminData.client = temp.id;
+                console.log("CHANGE CLIENT "+this.adminData.client );
+                this.changeClientData();
+              }
+            }
+
+
             this.titlePage = 'Nowy administrator:';
             this.showContent = false;
             this.showButtonPrev = true;
@@ -188,6 +215,10 @@ export default {
       EditAdmin(client) {
             console.log("---[ SHOW PAGE EDIT ADMIN ]-----");
             this.isEditable = true;
+
+            this.currentAdmins = 0;
+            this.maxAdmins = 0;
+
             this.CopyData(client);
             this.adminData = client;
 
@@ -478,10 +509,62 @@ export default {
                   else
                     this.ErrorMessage = 'Wyjątek: ' + error;
               });
-  
-  },    
+        },
         
-   
+        GetCurrentClient() {
+          fetch( this.ServerUrl +'clients.php?token=' + this.auth.SessToken+'&client=current')
+                .then((res) => {
+                  console.log('StatusCode: ' + res.status);
+                  return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+                })
+                .then((json) => {
+                  console.log(json);
+                  if (json.error) {
+                    console.log(json.error);
+                    this.ErrorMessage = json.error.message;
+                  } else {
+                    this.Clients = json.result.clients;
+                  }
+                })
+                .catch((error) => {
+                  console.log(error);
+                  if (error == "TypeError: Failed to fetch")
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
+                  else
+                    if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                        this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                    else
+                      this.ErrorMessage = 'Wyjątek: ' + error;
+                });
+        },    
+
+        GetCountAdmins() {
+          fetch( this.ServerUrl +'admins.php?token=' + this.auth.SessToken+'&client='+this.adminData.client)
+                .then((res) => {
+                  console.log('StatusCode: ' + res.status);
+                  return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+                })
+                .then((json) => {
+                  console.log(json);
+                  if (json.error) {
+                    console.log(json.error);
+                    this.ErrorMessage = json.error.message;
+                  } else {
+                    this.currentAdmins = json.result.active_admins;
+                    console.log('Current admins: '+this.currentAdmins);
+                  }
+                })
+                .catch((error) => {
+                  console.log(error);
+                  if (error == "TypeError: Failed to fetch")
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
+                  else
+                    if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                        this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                    else
+                      this.ErrorMessage = 'Wyjątek: ' + error;
+                });
+        },   
         
     },
     
@@ -493,8 +576,10 @@ export default {
         this.ServerUrl = protocol+'//'+host+'/api/v1/';
 
         this.GetAdmins();
-        this.GetClients();
-
+        if (this.auth.isGlobalAdmin)
+          this.GetClients();
+        else
+          this.GetCurrentClient();
     },
     
     components: {
@@ -553,17 +638,21 @@ export default {
   
   
     <div v-if="showAdminContent">
-            <div v-if="auth.isGlobalAdmin">
+            <div v-if="adminData.type == 'dedicated'">
                 <h5 class="text-primary">Kontrahent:</h5>
       
                 <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
                   <div class="col-8">
-                      <select :class="isValidClient ? 'form-select' : 'form-select is-invalid'"  aria-label="wybierz z listy" v-model="adminData.client" :disabled="isDisableInputs || isEditable" @change="changeClientData">
+                      <select :class="isValidClient ? 'form-select' : 'form-select is-invalid'"  aria-label="wybierz z listy" v-model="adminData.client" :disabled="isDisableInputs || isEditable || !auth.isGlobalAdmin" @change="changeClientData">
                         <option v-for="client in Clients" :key="client.id" :value="client.id">
                         {{ client.name }}
                         </option>
                       </select>
                   </div>
+                </div>
+
+                <div  style="margin-bottom: 20px;" :class="currentAdmins < maxAdmins ? 'text-success' : 'text-danger'" v-if="!isEditable">
+                  Ilość wykorzystanych kont {{ currentAdmins }} z {{ maxAdmins }}
                 </div>
             </div>
 
@@ -576,7 +665,7 @@ export default {
                 <label class="col-form-label">Typ konta:</label>
               </div>
               <div class="col-4">
-                  <select class="form-select"  aria-label="wybierz z listy" v-model="adminData.type" @change="changeAdminType" :disabled="isDisableInputs || isEditable">
+                  <select class="form-select"  aria-label="wybierz z listy" v-model="adminData.type" @change="changeAdminType" :disabled="isDisableInputs || isEditable || !auth.isGlobalAdmin">
                     <option value="dedicated">DEDYKOWANY</option>
                     <option value="global">GLOBALNY</option>
                   </select>
@@ -621,7 +710,7 @@ export default {
                   <label class="col-form-label">Hasło:  </label>
                 </div>
                 <div class="col-4">
-                  <input type="current-password" maxlength="25" :class="isValidPass1 ? 'form-control' : 'form-control is-invalid'" v-model="password1"  :disabled="isDisableInputs || !isChangePassword">
+                  <input type="password" maxlength="25" :class="isValidPass1 ? 'form-control' : 'form-control is-invalid'" v-model="password1"  :disabled="isDisableInputs || !isChangePassword">
                 </div>
                 <div class="col-4">
                   <div v-if="!isChangePassword">
@@ -636,7 +725,7 @@ export default {
                   <label class="col-form-label">Powtórz:  </label>
                 </div>
                 <div class="col-4">
-                  <input type="current-password" maxlength="25" :class="isValidPass2 ? 'form-control is-valid' : 'form-control is-invalid'" v-model="password2"  :disabled="isDisableInputs">
+                  <input type="password" maxlength="25" :class="isValidPass2 ? 'form-control is-valid' : 'form-control is-invalid'" v-model="password2"  :disabled="isDisableInputs">
                 </div>
             </div>              
             
@@ -665,7 +754,7 @@ export default {
       <div v-if="showContent">
               <div class="row" style="margin-bottom: 10px;">
                   <div  class="col-auto">
-                      <button class="btn btn-outline-primary"  v-on:click="AddNewAdmin" v-if="auth.isGlobalAdmin">
+                      <button class="btn btn-outline-primary"  v-on:click="AddNewAdmin">
                       <i class="fa fa-plus"></i>    Dodaj administatora</button>
                   </div>
                           <div  class="col-auto">

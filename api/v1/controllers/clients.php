@@ -20,7 +20,10 @@ class Controller extends BaseController
 		    return $this->SendError(401, 'Access denied'); 
 
 		$class = new ClientsClass($args);
-    	$class->getClients($args['token']);
+		if (!isset($args['client']))
+    		$class->getClients($args['token']);
+		else
+			$class->getCurrentClient($args['token']);
 	}	
 	
  	public function POST($args){
