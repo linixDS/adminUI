@@ -147,7 +147,7 @@ export default {
         this.isValidUser = false;
     },      
 
-      BackPage(){
+    BackPage(){
           console.log("BACK !!!");
           if (this.isEditable){
               var temp = this.Admins.find(admin => admin.username == this.updateAdminData.username);
@@ -637,7 +637,6 @@ export default {
             </div>
   
         </div>
-  
     </div>
   
   

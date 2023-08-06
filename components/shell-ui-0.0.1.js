@@ -2,7 +2,9 @@ import DomainsUi from './domains-ui-0.0.1.js';
 import ClientsUi from './clients-ui-0.0.1.js';
 import AdminsUi from './admins-ui-0.0.1.js';
 import ProfileUi from './profile-ui-0.0.1.js';
+import AccountsUi from './accounts-ui-0.0.1.js';
 import ProfilemenuUi from './profilemenu-ui-0.0.1.js';
+import MailsUi from './mails-ui-0.0.1.js';
 
 export default {
 
@@ -21,9 +23,9 @@ export default {
                             {name: 'CLIENTS', show: false, needAdmin: true},
                             {name: 'DOMAINS', show: false,  needAdmin: false},
                             {name: 'ADMINS', show: false,  needAdmin: false},
-                            {name: 'USERS', show: false,  needAdmin: false},
                             {name: 'MAILS', show: false,  needAdmin: false},
-                            {name: 'PROFILE', show: false,  needAdmin: false}
+                            {name: 'PROFILE', show: false,  needAdmin: false},
+                            {name: 'ACCOUNTS', show: false,  needAdmin: false}
                         ]
             }
         },
@@ -34,6 +36,8 @@ export default {
             AdminsUi,
             ProfileUi,
             ProfilemenuUi,
+            AccountsUi,
+            MailsUi
         },        
 
         computed: {
@@ -160,13 +164,13 @@ export default {
                 </a>
               </li>
               <li>
-                <a href="#" v-bind:class="[IsViewPage('USERS') ? 'nav-link active' : 'nav-link text-white']">
+                <a href="#" v-bind:class="[IsViewPage('ACCOUNTS') ? 'nav-link active' : 'nav-link text-white']" v-on:click="LoadPage('ACCOUNTS')">
                   <i class="fas fa-user-friends" style="color: white;"></i>
                   Konta użytkowników
                 </a>
               </li>
               <li>
-                <a href="#" v-bind:class="[IsViewPage('MAILS') ? 'nav-link active' : 'nav-link text-white']">
+                <a href="#" v-bind:class="[IsViewPage('MAILS') ? 'nav-link active' : 'nav-link text-white']" v-on:click="LoadPage('MAILS')">
                   <i class="fas fa-address-book" style="color: white;"></i>
                   Konta pocztowe
                 </a>
@@ -198,7 +202,15 @@ export default {
 
           <profile-ui v-if="IsViewPage('PROFILE')"
                 :auth="AuthData">
-          </profile-ui>          
+          </profile-ui> 
+          
+          <accounts-ui v-if="IsViewPage('ACCOUNTS')"
+                :auth="AuthData">
+          </accounts-ui> 
+          
+          <mails-ui v-if="IsViewPage('MAILS')"
+                :auth="AuthData">
+          </mails-ui>              
 		</div>
     
 	</main>

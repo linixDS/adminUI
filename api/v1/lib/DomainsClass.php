@@ -34,11 +34,11 @@ class DomainsClass extends BaseClass
 
         try{
             if ($sess->IsGlobalAdmin()) {
-                $query = "SELECT name,client_id as client, created,limit_mails as mails FROM domains ORDER BY name;";
+                $query = "SELECT domain_id as id,name,client_id as client, created,limit_mails as mails FROM domains ORDER BY name;";
                 $sth = $db->prepare($conn, $query);
                 $sth->execute();
             } else {
-                $query = "SELECT name,client_id as client,created,limit_mails as mails FROM domains WHERE client_id=? ORDER BY name;";
+                $query = "SELECT domain_id as id,name,client_id as client,created,limit_mails as mails FROM domains WHERE client_id=? ORDER BY name;";
                 $sth = $db->prepare($conn, $query);
                 $sth->execute([$cid]);
             }
@@ -52,6 +52,43 @@ class DomainsClass extends BaseClass
             return;
         }
     }
+
+    public function getClientDomains($token, $client_id)
+    {
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied token');
+        if (!isset($client_id))
+            return $this->sendError(401, 'Access denied token');       
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');
+        
+        if (!$sess->IsGlobalAdmin())
+            return $this->sendError(401, 'Access denied'); 
+
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(501, $db->getLastError());
+
+        try{
+            $query = "SELECT domain_id as id,name,client_id as client, created,limit_mails as mails FROM domains WHERE client_id=? ORDER BY name;";
+            $sth = $db->prepare($conn, $query);
+            $sth->execute([$client_id]);
+
+    
+            $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+            $result['domains'] = $data;
+            return $this->sendResult(200, $result);
+
+        } catch (Exception $e) {
+            $this->sendError(501, "Error SQL:" . $e);
+            return;
+        }
+    }
+
 
     private function getError($code, $msg)
     {

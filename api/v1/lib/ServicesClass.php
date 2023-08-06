@@ -284,12 +284,77 @@ class ServicesClass extends BaseClass
         return $this->sendResult(200, $result);
     }    
 
-    public function getDomainServices($token, $domain)
+
+    private function getCountClientServiceResultData($db, $conn, $client_id, $service_id){
+        if (!isset($client_id))  return false;        
+        if (!isset($service_id))  return false;  
+
+        $sess = new SessionController();
+
+
+        try {
+            $query = "SELECT COUNT(*) as active_accounts FROM accounts WHERE client_id IN (SELECT client_id FROM accounts_services WHERE service_id=? AND client_id=?);";
+            $sth = $db->prepare($conn, $query);            
+            $sth->execute([$service_id,$client_id]);
+ 
+            $data = $sth->fetch(PDO::FETCH_ASSOC);
+            return $data;
+        } catch (Exception $e) {
+            $this->exceptionWrite($e);
+            return false;
+        }
+    }     
+
+    public function getAccessAccountServices($token,$clientId)
     {
         if (!isset($token))
             return $this->sendError(401, 'Access denied - token');
 
-        if (!isset($domain))
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');           
+
+
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(500, $db->getLastError());
+
+
+        try {
+            $query  = "SELECT services.service_id as id,name,description, clients_services.limit_accounts FROM clients_services ";
+            $query .= "LEFT JOIN services ON clients_services.service_id = services.service_id ";
+            $query .= "WHERE clients_services.active=1 AND clients_services.client_id=? ORDER BY name";
+            $sth = $db->prepare($conn, $query);
+            $sth->execute([$clientId]);            
+    
+            $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+            for ($i=0; $i < count($data); $i++){
+                $service_id = $data[$i]['id'];
+                $count = $this->getCountClientServiceResultData($db, $conn, $clientId, $service_id);
+                if ($count != false)
+                    $data[$i]['active_accounts'] = $count['active_accounts'];
+                else    
+                    $data[$i]['active_accounts'] = -1;
+            }
+        } catch (Exception $e) {
+            $this->sendError(500, "Error SQL:" . $e);
+            return;
+        }
+
+        $result['services']= $data;
+        return $this->sendResult(200, $result);
+    }    
+
+
+    public function getAccountServices($token, $account)
+    {
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied - token');
+
+        if (!isset($account))
             return $this->sendError(401, 'Access denied - token');
 
         $sess = new SessionController();
@@ -304,18 +369,19 @@ class ServicesClass extends BaseClass
 
 
         try {
-            $query = "SELECT service_id FROM domain_services WHERE active=1 AND domain_id=(SELECT id_domain FROM domains WHERE domain=:domainName LIMIT 1);";
+            $query = "SELECT service_id as id FROM accounts_services WHERE account_id=?;";
             $sth = $db->prepare($conn, $query);
-            $sth->bindValue(':domainName', $domain, PDO::PARAM_STR);
-            $sth->execute();
+            $sth->execute([$account]);
     
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+            $result['services'] = $data;
+            return $this->sendResult(200, $result);
         } catch (Exception $e) {
             $this->sendError(500, "Error SQL:" . $e);
             return;
         }
 
-        return $this->sendResult(200, $data);
+        
     }    
 }
 

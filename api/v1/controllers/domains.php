@@ -19,7 +19,10 @@ class Controller extends BaseController
 			return $this->SendError(401, 'Access denied'); 
 
 		$class = new DomainsClass($args);
-		$class->getDomains($args['token']);
+		if (!isset($args['client']))
+			$class->getDomains($args['token']);
+		else
+			$class->getClientDomains($args['token'],$args['client']);
 	}	
 	
  	public function POST($args){

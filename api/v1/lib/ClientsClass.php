@@ -40,7 +40,7 @@ class ClientsClass extends BaseClass
         }
 
         $result['clients'] = $data;
-        return $this->sendResult(201, $result);
+        return $this->sendResult(200, $result);
     }
 
 
