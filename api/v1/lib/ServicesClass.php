@@ -293,7 +293,8 @@ class ServicesClass extends BaseClass
 
 
         try {
-            $query = "SELECT COUNT(*) as active_accounts FROM accounts WHERE client_id IN (SELECT client_id FROM accounts_services WHERE service_id=? AND client_id=?);";
+            $query = "SELECT COUNT(*) as active_accounts FROM accounts_services WHERE service_id=? AND account_id IN ";
+            $query.= "(SELECT account_id FROM accounts WHERE client_id=?);";
             $sth = $db->prepare($conn, $query);            
             $sth->execute([$service_id,$client_id]);
  

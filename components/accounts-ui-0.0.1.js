@@ -11,6 +11,7 @@ export default {
                 Domains : [],
                 Accounts : [],
                 Services : [],
+                currentSessServiceLimit: [],
                 ChoiceServices: [],
                 
                 SearchAccountText: '',
@@ -114,7 +115,69 @@ export default {
           console.log("BACK !!!");
           this.ShowAccounts();
       },
- 
+
+      ReloadServices(){
+          for (const item of this.currentSessServiceLimit){
+              const found = this.Services.find(service => service.id == item.id);
+              if (found){
+                  found.active_accounts = item.active_accounts;
+              }
+          }
+      },
+
+      CheckLimit(service){
+          if (!this.isEditable){
+              if (service.active_accounts >= service.limit_accounts)
+                  return true;
+                else
+                  return false;
+          }
+            else{
+
+                    const found = this.currentSessServiceLimit.find(item => item.id == service.id);
+                    if (found){
+                        if (found.active_accounts > found.limit_accounts)
+                            return true;
+                          else
+                            return false;
+                  }
+                    else
+                    return true;
+            }
+      },
+
+      UncheckChoiceService(id){
+        console.log('Uncheck '+id);
+          const indexToRemove = this.ChoiceServices.indexOf(id);
+          if (indexToRemove !== -1) {
+            console.log('remove '+id);
+              this.ChoiceServices.splice(indexToRemove, 1);
+          }
+      },
+
+      handleCheckboxChange(event) {
+        const id = event.target.value;
+        const state = event.target.value;
+
+        const found = this.currentSessServiceLimit.find(service => service.id == id);
+        if (found){
+           if (state){
+                const newval = found.active_accounts;
+                if (newval > found.limit_accounts)
+                    this.UncheckChoiceService(id);
+                  else
+                    found.active_accounts++;
+           }
+            else{
+              if (found.active_accounts > 0)
+                found.active_accounts--;
+            }
+
+            console.log('Limit1 '+found.active_accounts+' z '+found.limit_accounts);
+        }
+
+      },
+
       ChangePassword() {
         this.password1 = '';
         this.password2 = '';
@@ -153,16 +216,32 @@ export default {
       },
 
       CopyData(account){
-          this.updateAdminData = {username: '', name: ''};
-          this.updateAccountData.name = account.name;
-          this.updateAccountData.id = account.id;
-          this.updateAccountData.username = account.username;
-          this.updateAccountData.created = account.created;
-          this.updateAccountData.client = this.ClientId;
-          this.updateAccountData.domain = this.DomainId;
-    },      
+          if (account){
+              this.updateAccountData = {username: '', name: ''};
+              this.updateAccountData.name = account.name;
+              this.updateAccountData.id = account.id;
+              this.updateAccountData.username = account.username;
+              this.updateAccountData.created = account.created;
+              this.updateAccountData.client = this.ClientId;
+              this.updateAccountData.domain = this.DomainId;
+          }
+
+          this.currentSessServiceLimit = [];
+          for (const item of this.Services){
+              const obj = {id: item.id, active_accounts: item.active_accounts, limit_accounts: item.limit_accounts};
+              this.currentSessServiceLimit.push(obj);
+          }
+
+      },
+      
+  
+      
+      
 
       AddNewAccount() {
+        console.log('---[ Services ]-----' );
+        console.log(this.Services);
+        this.CopyData(null);
         this.ErrorMessage = '';
         this.SuccessMessage ='';
         this.ChoiceServices = [];
@@ -283,6 +362,7 @@ export default {
                     } else {
                       this.Accounts.push(json.result);
                       this.SuccessMessage = "Konto "+json.result.name+" zostało utworzone.";
+                      this.ReloadServices();
                       this.ShowAccounts();
                     }
 
@@ -607,14 +687,16 @@ export default {
                             <div class="row" style="margin-bottom: 20px;">
                                 <div class="col-8">
                                     <label class="list-group-item d-flex gap-2">
-                                            <input class="form-check-input flex-shrink-0" type="checkbox" :value="service.id" v-model="ChoiceServices">
+                                            <input class="form-check-input flex-shrink-0" type="checkbox" 
+                                                        :value="service.id" @change="handleCheckboxChange"  v-model="ChoiceServices" 
+                                                        :disabled="CheckLimit(service) && !isEditable">
                                             <span>{{ service.name }}
                                             <small class="d-block text-body-secondary">{{ service.description }}</small>
                                             </span>
                                     </label>
                                 </div>
-                                <div class="col">
-                                    Limit kont:
+                                <div class="col text-danger" v-if="CheckLimit(service)">
+                                    Limit kont wykorzystany
                                 </div>
 
                             </div>
@@ -645,16 +727,17 @@ export default {
       
       <div v-if="showContent">
 
+            <div v-if="auth.isGlobalAdmin">
+                <h6 class="text-primary">Kontrahent:</h6>
 
-            <h6 class="text-primary">Kontrahent:</h6>
-
-            <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
-                <div class="col-8">
-                        <select class="form-select" aria-label="wybierz z listy" v-model="ClientId"  :disabled="isDisableInputs || !auth.isGlobalAdmin" @change="ChangeClient">
-                        <option v-for="client in Clients" :key="client.id" :value="client.id">
-                        {{ client.name }}
-                        </option>
-                        </select>
+                <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
+                    <div class="col-8">
+                            <select class="form-select" aria-label="wybierz z listy" v-model="ClientId"  :disabled="isDisableInputs || !auth.isGlobalAdmin" @change="ChangeClient">
+                            <option v-for="client in Clients" :key="client.id" :value="client.id">
+                            {{ client.name }}
+                            </option>
+                            </select>
+                    </div>
                 </div>
             </div>
 

@@ -116,7 +116,8 @@ class AccountsClass extends BaseClass
             $sth2->execute();
              
 
-            $accountData['id'] = $account_id;            
+            $accountData['id'] = $account_id;
+            $accountData['active'] = 1;            
 
             $db->Commit($conn);
 

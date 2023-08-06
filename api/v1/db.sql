@@ -1,5 +1,3 @@
-use admin_panel;
-
 -- MariaDB dump 10.19-11.0.2-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: admin_panel
@@ -16,6 +14,77 @@ use admin_panel;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `accounts`
+--
+
+DROP TABLE IF EXISTS `accounts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `accounts` (
+  `account_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active` int(1) NOT NULL DEFAULT 1,
+  `username` varchar(45) NOT NULL,
+  `password` varchar(65) NOT NULL,
+  `domain_id` int(10) unsigned NOT NULL,
+  `client_id` int(10) unsigned NOT NULL,
+  `name` varchar(45) NOT NULL,
+  `created` datetime NOT NULL DEFAULT current_timestamp(),
+  `changed` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`account_id`),
+  UNIQUE KEY `name_UNIQUE` (`username`),
+  KEY `fk_accounts_1_idx` (`domain_id`),
+  KEY `fk_accounts_2_idx` (`client_id`),
+  CONSTRAINT `fk_accounts_1` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`domain_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_accounts_2` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `accounts`
+--
+
+LOCK TABLES `accounts` WRITE;
+/*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
+INSERT INTO `accounts` VALUES
+(1,1,'d.marcisz@salonyhoff.pl','test',5,7,'test1','2023-08-05 22:56:15',NULL),
+(2,0,'pkul@salonyhoff.pl','test',5,7,'test2','2023-08-05 22:56:41',NULL),
+(3,1,'test@salonyhoff.pl','16d7a4fca7442dda3ad93c9a726597e4',5,7,'test','2023-08-06 10:26:41',NULL),
+(4,1,'test@heban.net','16d7a4fca7442dda3ad93c9a726597e4',4,7,'Test','2023-08-06 10:28:24',NULL),
+(5,1,'workflow@salonyhoff.pl','16d7a4fca7442dda3ad93c9a726597e4',5,7,'Workflow','2023-08-06 21:12:33',NULL);
+/*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `accounts_services`
+--
+
+DROP TABLE IF EXISTS `accounts_services`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `accounts_services` (
+  `account_id` int(10) unsigned DEFAULT NULL,
+  `service_id` int(10) unsigned DEFAULT NULL,
+  KEY `index1` (`account_id`,`service_id`),
+  KEY `fk_accounts_services_2_idx` (`service_id`),
+  CONSTRAINT `fk_accounts_services_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`) ON UPDATE NO ACTION,
+  CONSTRAINT `fk_accounts_services_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`service_id`) ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `accounts_services`
+--
+
+LOCK TABLES `accounts_services` WRITE;
+/*!40000 ALTER TABLE `accounts_services` DISABLE KEYS */;
+INSERT INTO `accounts_services` VALUES
+(3,1),
+(4,1),
+(5,2);
+/*!40000 ALTER TABLE `accounts_services` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `admins`
@@ -38,7 +107,7 @@ CREATE TABLE `admins` (
   UNIQUE KEY `username_UNIQUE` (`username`),
   KEY `fk_admins_1_idx` (`client_id`),
   CONSTRAINT `fk_admins_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -48,7 +117,10 @@ CREATE TABLE `admins` (
 LOCK TABLES `admins` WRITE;
 /*!40000 ALTER TABLE `admins` DISABLE KEYS */;
 INSERT INTO `admins` VALUES
-(1,NULL,'GlobalAdmin','0ec02c60874b9c472bf80a568fba27d3','global','Administrator','2023-01-01 12:00:00',NULL,NULL);
+(1,NULL,'GlobalAdmin','0ec02c60874b9c472bf80a568fba27d3','global','Dariusz Marcisz','2023-01-01 12:00:00','2023-08-05 21:07:30','test@mail.pl'),
+(16,7,'admin@3331111111','16d7a4fca7442dda3ad93c9a726597e4','dedicated','Heban','2023-08-05 05:59:49',NULL,''),
+(17,7,'admin2@3331111111','16d7a4fca7442dda3ad93c9a726597e4','dedicated','Heban 2','2023-08-05 07:46:03',NULL,''),
+(20,NULL,'pkul','16d7a4fca7442dda3ad93c9a726597e4','global','Paweł','2023-08-05 08:22:43',NULL,'');
 /*!40000 ALTER TABLE `admins` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -68,7 +140,7 @@ CREATE TABLE `clients` (
   `limit_admins` int(10) unsigned NOT NULL DEFAULT 5,
   PRIMARY KEY (`client_id`),
   UNIQUE KEY `NIP_IDX` (`nip`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,10 +151,8 @@ LOCK TABLES `clients` WRITE;
 /*!40000 ALTER TABLE `clients` DISABLE KEYS */;
 INSERT INTO `clients` VALUES
 (2,'2222222222','asdastest233aaa','test222fggsss','test2@com.pl',2),
-(3,'3333333333','test3','','test2@com.pl',2),
-(4,'4444444444','test4','','test@sss.pl',2),
-(5,'5555555555','test5','','555@sss.pl',2),
-(6,'9999999999','test10','','test10@test.pl',3);
+(7,'3331111111','heban','Kraków','heban@net.pl',2),
+(8,'6999444778','ai lab','Kraków','biuro@ailab.pl',5);
 /*!40000 ALTER TABLE `clients` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -115,12 +185,9 @@ LOCK TABLES `clients_services` WRITE;
 INSERT INTO `clients_services` VALUES
 ('1',2,1,8),
 ('1',2,2,2),
-('1',3,3,2),
-('1',3,2,4),
-('1',4,3,2),
-('1',5,3,1),
-('1',5,2,1),
-('1',6,1,2);
+('1',7,1,4),
+('1',7,2,1),
+('1',8,1,2);
 /*!40000 ALTER TABLE `clients_services` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -141,7 +208,7 @@ CREATE TABLE `domains` (
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `fk_domains_1_idx` (`client_id`),
   CONSTRAINT `fk_domains_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -151,7 +218,9 @@ CREATE TABLE `domains` (
 LOCK TABLES `domains` WRITE;
 /*!40000 ALTER TABLE `domains` DISABLE KEYS */;
 INSERT INTO `domains` VALUES
-(1,6,'test10.com',5,'2023-07-31 13:44:46');
+(4,7,'heban.net',100,'2023-08-05 06:03:47'),
+(5,7,'salonyhoff.pl',100,'2023-08-05 06:03:58'),
+(6,8,'ailab.pl',100,'2023-08-05 23:03:49');
 /*!40000 ALTER TABLE `domains` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -237,4 +306,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-08-01 21:39:05
+-- Dump completed on 2023-08-06 21:40:42
