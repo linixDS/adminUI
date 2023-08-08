@@ -13,6 +13,7 @@ export default {
                 Services : [],
                 currentSessServiceLimit: [],
                 ChoiceServices: [],
+                cacheChoiceServices: [],
                 
                 SearchAccountText: '',
                 
@@ -22,9 +23,11 @@ export default {
 
                 isEditable: false,
                 isValidUser: false,
+                isValidMail: false,
                 isValidName: false,
                 isValidPass1: false,
                 isValidPass2: false,
+                isNeedMail: true,
                 isChangePassword: false,
                 showContent: true,
                
@@ -49,9 +52,8 @@ export default {
                 ClientId: -1,
                 DomainId: -1,
                 DomainName: '',
-                accountData: {username: '', name: ''},
-                updateAccountData: {},
-                updateChoiceServices: []
+                accountData: {username: '', name: '', mail:''},
+                updateAccountData: {}
               }
     },
     
@@ -66,7 +68,6 @@ export default {
       },
 
       CheckForm:function() {
-        console.log('checkform');
               if  (this.accountData.username.length < 3) {
                 this.isValidUser = false;
                 return false;
@@ -79,7 +80,17 @@ export default {
                   return false;
               }
                 else
-                this.isValidName = true;                
+                this.isValidName = true;   
+              
+              if (this.isNeedMail && this.accountData.mail != null){
+                    if  (this.accountData.mail.length < 5) {
+                        this.isValidMail = false;
+                        return false;
+                    }
+                      else
+                    this.isValidMail = true;
+
+              }
 
               if (this.isChangePassword){
                       if (this.password1.length < 8){
@@ -113,6 +124,14 @@ export default {
     methods: {
       BackPage(){
           console.log("BACK !!!");
+
+          if (this.isEditable){
+            var temp = this.Accounts.find(account => account.username == this.updateAccountData.username);
+            if (temp){
+                  temp.name = this.updateAccountData.name;
+                  temp.mail = this.updateAccountData.mail;
+            }
+          }          
           this.ShowAccounts();
       },
 
@@ -133,49 +152,44 @@ export default {
                   return false;
           }
             else{
-
-                    const found = this.currentSessServiceLimit.find(item => item.id == service.id);
-                    if (found){
-                        if (found.active_accounts > found.limit_accounts)
-                            return true;
-                          else
-                            return false;
-                  }
-                    else
-                    return true;
+                    const found = this.cacheChoiceServices.indexOf(service.id);
+                    if (found > -1)
+                        return false;
+                    else {
+                      if (service.active_accounts >= service.limit_accounts)
+                          return true;
+                        else
+                          return false;
+                    }
             }
       },
 
       UncheckChoiceService(id){
-        console.log('Uncheck '+id);
           const indexToRemove = this.ChoiceServices.indexOf(id);
           if (indexToRemove !== -1) {
-            console.log('remove '+id);
               this.ChoiceServices.splice(indexToRemove, 1);
           }
       },
 
       handleCheckboxChange(event) {
-        const id = event.target.value;
-        const state = event.target.value;
+          const id = event.target.value;
+          const state = event.target.checked;
 
-        const found = this.currentSessServiceLimit.find(service => service.id == id);
-        if (found){
-           if (state){
-                const newval = found.active_accounts;
-                if (newval > found.limit_accounts)
-                    this.UncheckChoiceService(id);
-                  else
-                    found.active_accounts++;
-           }
-            else{
-              if (found.active_accounts > 0)
-                found.active_accounts--;
-            }
+          console.log('event: '+id+' state: '+state);
+          if (id == 1){
+                if (state)
+                  this.isNeedMail = false;
+                else
+                  this.isNeedMail = true;
+          }
 
-            console.log('Limit1 '+found.active_accounts+' z '+found.limit_accounts);
-        }
-
+          const limits = this.currentSessServiceLimit.find(service => service.id == id);
+          if (limits){
+              if (limits.active_accounts <= limits.limit_accounts && state == true)
+                limits.active_accounts++;
+                if (limits.active_accounts > 0 && state == false)
+                limits.active_accounts--;
+          }
       },
 
       ChangePassword() {
@@ -211,6 +225,7 @@ export default {
             this.showSpinLoading = false;
             this.showButtonPrev = false;
             this.showAccountContent = false;
+            this.showDeleteAccountContent = false;
             this.showContent = true;
             this.titlePage = 'Konta użytkowników:';
       },
@@ -221,9 +236,14 @@ export default {
               this.updateAccountData.name = account.name;
               this.updateAccountData.id = account.id;
               this.updateAccountData.username = account.username;
+              this.updateAccountData.mail = account.mail;
               this.updateAccountData.created = account.created;
               this.updateAccountData.client = this.ClientId;
               this.updateAccountData.domain = this.DomainId;
+
+              for (const choice of this.ChoiceServices){
+                    this.cacheChoiceServices.push(choice);
+              }
           }
 
           this.currentSessServiceLimit = [];
@@ -235,7 +255,59 @@ export default {
       },
       
   
-      
+      DeleteData(){
+        var dataAccount = {id: this.accountData.id, username: this.accountData.username, client: this.ClientId};
+        var data = {  token  : this.auth.SessToken, 
+                      account : dataAccount};
+  
+  
+        this.showSpinLoading = true;
+        console.log('----[ DELETE ACCOUNT ]-----');
+        console.log(JSON.stringify(data));
+  
+        fetch(  this.ServerUrl+'accounts.php', {
+              headers: { 'Content-type': 'application/json' },
+              method: "DELETE",
+              body: JSON.stringify(data)})
+              .then((res) => {
+                    console.log('StatusCode: ' + res.status);
+                    return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+              })
+              .then((json) => {
+                    console.log('-> RESULT:');
+                    console.log(json);
+  
+                    if (json.error) {
+                      console.log(json.error);
+                      this.ErrorMessage = json.error.message;
+                      this.BackPage();
+                    } else {
+                      this.SuccessMessage = "Administrator "+json.result.username+" został usunięty.";
+                      
+                      var idx = this.Accounts.indexOf(this.accountData);
+                      console.log('IDX = '+idx);
+                      if (idx !== -1) {
+                          this.Accounts.splice(idx, 1);
+                      }
+  
+                      this.ShowAccounts();
+                    }
+  
+                    
+              })
+              .catch((error) => {
+                    console.log('Error saveClient');
+                    if (error == "TypeError: Failed to fetch")
+                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
+                    else
+                      if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                          this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                      else
+                        this.ErrorMessage = 'Wyjątek: ' + error;
+                    this.BackPage();
+              });
+  
+    },         
       
 
       AddNewAccount() {
@@ -253,14 +325,15 @@ export default {
         this.isValidName = false;
         this.isValidPass1 = false;
         this.isValidPass2 = false;
+        this.isValidMail = false;
         this.isChangePassword = true;
-        this.accountData = {username: '', name: ''};
+        this.isNeedMail = true;
+        this.accountData = {username: '', name: '', mail: ''};
 
         this.password1 = '';
         this.password2 = '';
 
-  
-
+ 
         this.titlePage = 'Nowe konto:';
         this.showContent = false;
         this.showButtonPrev = true;
@@ -279,13 +352,13 @@ export default {
       this.CopyData(account);
       this.accountData = account;
 
-
+      this.isNeedMail = true;
       this.isValidUser = true;
       this.isValidName = true;
       this.isValidPass1 = true;
       this.isValidPass2 = false;
+      this.isValidMail = false;
       this.isChangePassword = false;  
-
 
       this.showSpinLoading = false;
       this.ErrorMessage = '';
@@ -293,8 +366,6 @@ export default {
 
       this.password1 = 'password';
       this.password2 = 'password';
-       
-
     
       this.titlePage = 'Edycja konta:  '+account.username;
       this.showContent = false;
@@ -317,24 +388,37 @@ export default {
 
         if (!this.isEditable)
           this.SaveNewAccount();
-        //else
-        //  this.UpdateData();
+        else
+          this.UpdateData();
     },
     
     SaveNewAccount() {
         console.log("---[ CREATE NEW ACCOUNT ]-----");
+        var servicesList = [];
+
+        for (var item of this.ChoiceServices){
+          var temp =  this.ChoiceServices.find( service => service.id == item );
+          if (temp){
+              let service = {id: temp.id};
+              servicesList.push(service);
+          }
+       }        
 
         var passwordHash = CryptoJS.MD5(this.password1);
         const passwordHashString = passwordHash.toString(); 
 
         this.accountData.password = passwordHashString;
         this.accountData.username = this.accountData.username+this.DomainName;
+        if (!this.isNeedMail)
+          this.accountData.mail = this.accountData.username;
+
         this.accountData.client = this.ClientId;
         this.accountData.domain = this.DomainId;
 
         var data = {  token  : this.auth.SessToken, 
                       account : this.accountData,
-                      services: this.ChoiceServices};
+                      services: servicesList
+                    };
 
 
         console.log(JSON.stringify(data));
@@ -378,7 +462,100 @@ export default {
                         this.ErrorMessage = 'Wyjątek: ' + error;
                     this.ShowAccounts();
               });
-    },    
+    },  
+    
+
+    CheckUpdateData(){
+      if (this.accountData.name != this.updateAccountData.name)
+          return true;
+
+      if (this.accountData.mail != this.updateAccountData.mail && this.isNeedMail)
+          return true;
+
+      if (this.isChangePassword) return true;
+
+      let len1 = this.ChoiceServices.length;
+      let len2 = this.cacheChoiceServices.length;
+      if (len1 !== len2)  return true;
+
+      for (const item of this.ChoiceServices) {
+          var temp =  this.cacheChoiceServices.indexOf(item);
+          if (temp == -1) return true;
+      }
+
+      return false;
+  },    
+    UpdateData(){
+      if (!this.CheckUpdateData()) {
+        this.SuccessMessage = 'Dane są aktualne, nie ma nic do zrobienia.';
+        return;
+      }
+
+      var servicesList = [];
+
+      for (var item of this.ChoiceServices){
+            var service = {id: item};
+            servicesList.push(service);
+      }     
+
+      var dataAccount = {id: this.accountData.id, username: this.accountData.username, name: this.accountData.name, client: this.ClientId};
+      var passwordHash = CryptoJS.MD5(this.password1);
+      const passwordHashString = passwordHash.toString(); 
+
+      if (!this.isNeedMail)
+        dataAccount.mail = this.accountData.username;
+      if (this.isChangePassword)
+        dataAccount.password = passwordHashString;
+
+
+
+      var data = {  token  : this.auth.SessToken, 
+                    account : dataAccount,
+                    services: servicesList};
+
+ 
+
+
+      this.showSpinLoading = true;
+      console.log('----[ UPDATE ACCOUNT ]-----');
+      console.log(JSON.stringify(data));
+
+      fetch(  this.ServerUrl+'accounts.php', {
+            headers: { 'Content-type': 'application/json' },
+            method: "PUT",
+            body: JSON.stringify(data)})
+            .then((res) => {
+                  console.log('StatusCode: ' + res.status);
+                  return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+            })
+            .then((json) => {
+                  console.log('-> RESULT:');
+                  console.log(json);
+
+                  if (json.error) {
+                    console.log(json.error);
+                    this.ErrorMessage = json.error.message;
+                    this.BackPage();
+                  } else {
+                    this.SuccessMessage = "Konto "+json.result.username+" zostało zaaktualizowane.";
+                    this.ShowAccounts();
+                  }
+
+                  
+            })
+            .catch((error) => {
+                  console.log('Error saveClient');
+                  if (error == "TypeError: Failed to fetch")
+                    this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
+                  else
+                    if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                        this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                    else
+                      this.ErrorMessage = 'Wyjątek: ' + error;
+                  this.BackPage();
+            });
+
+      },    
       
      
   
@@ -437,10 +614,10 @@ export default {
                 .then((json) => {
                     console.log(json);
                     if (json.error) {
-                    console.log(json.error);
-                    this.ErrorMessage = json.error.message;
+                      console.log(json.error);
+                      this.ErrorMessage = json.error.message;
                     } else {
-                    this.Domains = json.result.domains;
+                      this.Domains = json.result.domains;
                     }
                 })
                 .catch((error) => {
@@ -537,8 +714,9 @@ export default {
                     } else {
                       
                       for (const item of json.result.services ) {
+                        if (item.id == 1) this.isNeedMail = false;
                         this.ChoiceServices.push(item.id);
-                        this.updateChoiceServices.push(item.id);
+                        this.cacheChoiceServices.push(item.id);
                       }
                     }
               })
@@ -615,7 +793,7 @@ export default {
               </button>      
           </div>
           <div class="col-auto">
-              <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="BackPage" v-if="auth.isGlobalAdmin">
+              <button type="button" class="btn btn btn-outline-success" style="width: 100px;" v-on:click="BackPage">
                 NIE
               </button>      
           </div>
@@ -649,8 +827,19 @@ export default {
                     <div class="col-4">
                       <input type="text" maxlength="45" :class="isValidName ? 'form-control is-valid' : 'form-control is-invalid'" v-model="accountData.name"  :disabled="isDisableInputs">
                     </div>
-              </div>                 
+                </div> 
                 
+                <div class="row g-3 align-items-center" style="margin-bottom: 20px;" v-if="isNeedMail">
+                    <div class="col-2">
+                      <label class="col-form-label">E-mail:  </label>
+                    </div>
+                    <div class="col-4">
+                      <input type="text" maxlength="45" :class="isValidMail ? 'form-control is-valid' : 'form-control is-invalid'" v-model="accountData.mail"  :disabled="isDisableInputs">
+                    </div>
+                </div>                    
+                
+
+
                 <h5 class="text-primary">Hasło dostępu:</h5>
 
                 <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
@@ -689,7 +878,7 @@ export default {
                                     <label class="list-group-item d-flex gap-2">
                                             <input class="form-check-input flex-shrink-0" type="checkbox" 
                                                         :value="service.id" @change="handleCheckboxChange"  v-model="ChoiceServices" 
-                                                        :disabled="CheckLimit(service) && !isEditable">
+                                                        :disabled="CheckLimit(service)">
                                             <span>{{ service.name }}
                                             <small class="d-block text-body-secondary">{{ service.description }}</small>
                                             </span>

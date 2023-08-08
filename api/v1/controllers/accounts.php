@@ -4,6 +4,7 @@ include("./core/BaseController.php");
 include("./core/DB.php");
 include("./core/Session.php");
 include("./lib/AccountsClass.php");
+include("./lib/ServicesClass.php");
 
 class Controller extends BaseController
 {
@@ -39,11 +40,25 @@ class Controller extends BaseController
 	}
 
  	public function PUT($args){
+		if (!isset($args['token']))
+			return $this->SendError(401, 'Access denied'); 
+		if (!isset($args['account']))
+			return $this->SendError(401, 'Access denied'); 			
+		if (!isset($args['services']))
+			return $this->SendError(401, 'Access denied'); 
 
+		$class = new AccountsClass($args);
+		$class->updateAccount($args['token'], $args['account'], $args['services']);
 	}
 
  	public function DELETE($args){
+		if (!isset($args['token']))
+			return $this->SendError(401, 'Access denied 1'); 
+		if (!isset($args['account']))
+			return $this->SendError(401, 'Access denied 2'); 			
 
+		$class = new AccountsClass($args);
+		$class->deleteAccount($args['token'], $args['account']);
 	}       
 }
 

@@ -59,9 +59,11 @@ class ServicesClass extends BaseClass
                             array_push($serviceNew, $value);
                         }
             
-
-
+            
+                        
                         foreach ($new as $value) {
+                            if (!isset($value['limit_accounts'])) break;
+
                             $curr = $this->getCurrentService($value['id'], $current);
                             if ($curr != null){
                             if ($curr['limit_accounts'] != $value['limit_accounts'])
@@ -246,7 +248,30 @@ class ServicesClass extends BaseClass
         }
 
         return $data;
-    }  
+    } 
+    
+    public function getAccountServicesResultData($accountId)
+    {
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(500, $db->getLastError());
+
+
+        try {
+            $query = "SELECT service_id as id FROM accounts_services WHERE  account_id=? ORDER BY service_id";
+            $sth = $db->prepare($conn, $query);
+ 
+            $sth->execute([$accountId]);            
+    
+            $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $this->sendError(500, "Error SQL:" . $e);
+            return;
+        }
+
+        return $data;
+    }      
 
 
     public function getClientServices($token,$clientId)
@@ -381,9 +406,41 @@ class ServicesClass extends BaseClass
             $this->sendError(500, "Error SQL:" . $e);
             return;
         }
-
-        
     }    
+
+    public function insertAccountServiceFromData($conn, $db, $accountId, $service) {
+        $service_id = $service['id'];
+        try {
+            $query = "INSERT INTO accounts_services(account_id, service_id) VALUES (?,?);";
+            $sth = $db->prepare($conn, $query);
+
+            $sth->execute([$accountId, $service_id]);
+            return true;
+        } catch (Exception $e) {
+            $this->exceptionWrite($e);
+            
+
+            return false;
+        }
+    }
+
+    
+    public function removeAccountServiceFromData($conn, $db, $accountId, $service) {
+        $service_id = $service['id'];
+        try {
+            $query = "DELETE FROM accounts_services WHERE account_id=? AND service_id=? LIMIT 1;";
+            $sth = $db->prepare($conn, $query);
+
+            $sth->execute([$accountId, $service_id]);
+            return true;
+        } catch (Exception $e) {
+            $this->exceptionWrite($e);
+            
+
+            return false;
+        }
+    }   
+
 }
 
 ?>

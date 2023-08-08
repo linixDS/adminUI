@@ -36,7 +36,7 @@ class AccountsClass extends BaseClass
             else
                 $cid = $sess->GetClientID();
 
-            $query = "SELECT account_id as id,username,name,active,created FROM accounts WHERE domain_id=? AND client_id=? ORDER BY username;";
+            $query = "SELECT account_id as id,username,name,active,mail,created FROM accounts WHERE domain_id=? AND client_id=? ORDER BY username;";
             $sth = $db->prepare($conn, $query);
             $sth->execute([$domain, $cid]);
 
@@ -57,7 +57,7 @@ class AccountsClass extends BaseClass
             return $this->sendError(401, 'Access denied - adminData');
 
         if ((!isset($accountData['name'])) || (!isset($accountData['password'])) || (!isset($accountData['client'])) ||
-            (!isset($accountData['domain'])) || (!isset($accountData['username']))  )
+            (!isset($accountData['domain'])) || (!isset($accountData['username'])) || (!isset($accountData['mail'])) )
             return $this->sendError(401, 'Nieprawidłowe zapytanie - data account');
 
         $sess = new SessionController();
@@ -69,6 +69,7 @@ class AccountsClass extends BaseClass
         $name = $accountData['name'];
         $username = $accountData['username'];
         $password = $accountData['password'];
+        $mail = $accountData['mail'];
         $client_id = $accountData['client'];
         $domain_id = $accountData['domain'];
            
@@ -88,13 +89,14 @@ class AccountsClass extends BaseClass
 
         try {
             $db->BeginTransaction($conn);
-            $query  = "INSERT INTO accounts (username,password,name,domain_id,client_id) VALUES ";
-            $query .= "(:USERNAME, :PASSWORD, :NAME, :DOMAINID, :CLIENTID);";
+            $query  = "INSERT INTO accounts (username,password,name,mail,domain_id,client_id) VALUES ";
+            $query .= "(:USERNAME, :PASSWORD, :NAME, :MAIL, :DOMAINID, :CLIENTID);";
  
             $sth = $db->prepare($conn, $query);
             $sth->bindValue(':USERNAME', $username, PDO::PARAM_STR);
             $sth->bindValue(':PASSWORD', $password, PDO::PARAM_STR);
             $sth->bindValue(':NAME', $name, PDO::PARAM_STR);
+            $sth->bindValue(':MAIL', $mail, PDO::PARAM_STR);
             $sth->bindValue(':DOMAINID', $domain_id, PDO::PARAM_INT);
             $sth->bindValue(':CLIENTID', $client_id, PDO::PARAM_INT);
             $sth->execute();
@@ -114,7 +116,7 @@ class AccountsClass extends BaseClass
 
             $sth2 = $db->prepare($conn, $query);
             $sth2->execute();
-             
+           
 
             $accountData['id'] = $account_id;
             $accountData['active'] = 1;            
@@ -126,12 +128,151 @@ class AccountsClass extends BaseClass
             $db->Rollback($conn);
 
             if (str_contains($e,'Duplicate entry'))
-                $this->sendError(409, "Podana nazwa administratora jest już używana.");    
+                $this->sendError(409, "Podana nazwa konta jest już używana.");    
             else                
                 $this->sendError(501, "Error SQL:" . $e);
             return;
         }
     }  
+
+
+    public function updateAccount($token, $accountData, $servicesData){
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied - token');
+        if (!isset($accountData))
+            return $this->sendError(401, 'Access denied - data 1');  
+        if (!isset($servicesData))
+            return $this->sendError(401, 'Access denied - data 2');             
+            
+        $account = $accountData;
+        $services = $servicesData;
+
+        if ((!isset($account['name'])) || (!isset($account['username'])) || (!isset($account['id'])) || (!isset($account['client'])) )
+            return $this->sendError(401, 'Access denied - account');
+
+        if (isset($account['passowrd'])){
+            $password = $account['password'];
+            if (strlen($password) < 12)
+                return $this->sendError(401, 'Access denied - incorrect value');
+        }
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');
+
+
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(501, $db->getLastError());
+
+        $id = $account['id'];
+        $name = $account['name'];
+        $client = $account['client'];
+
+        $query = '';
+
+        try {
+            $db->BeginTransaction($conn);
+
+            $query = "UPDATE accounts SET name=:NAMEACCOUNT";
+            if (isset($account['mail']))
+                $query .= ",mail=:MAIL";
+            if (isset($account['password']))
+                $query .= ",password=:PASSWORD";
+            
+            $query .= " WHERE account_id=:ACCOUNTID LIMIT 1;";
+
+            $sth = $db->prepare($conn, $query);
+
+            $sth->bindValue(':NAMEACCOUNT', $name, PDO::PARAM_STR);
+            $sth->bindValue(':ACCOUNTID', $id, PDO::PARAM_INT);
+            if (isset($account['mail']))
+                $sth->bindValue(':MAIL', $account['mail'], PDO::PARAM_STR);
+            if (isset($passowrd))
+                $sth->bindValue(':PASSWORD', $password, PDO::PARAM_STR);
+
+            $sth->execute();
+                        
+
+            $classService = new ServicesClass(null);
+            $currentServices = $classService->getAccountServicesResultData($id);
+            $actions = $classService->getChangedServicesResultData($currentServices, $servicesData);
+           
+
+            if (count($actions['add']) > 0){
+                    $values = $actions['add']; 
+                    foreach ($values as $item) {
+                        $res = $classService->insertAccountServiceFromData($conn, $db, $id, $item);   
+                    }
+            }
+
+            if (count($actions['delete']) > 0){
+                    $values = $actions['delete']; 
+                    foreach ($values as $item) {
+                        $res = $classService->removeAccountServiceFromData($conn, $db, $id, $item);   
+                    }
+            }                
+
+
+            $db->Commit($conn);
+            return $this->sendResult(200, $accountData);
+        } catch (Exception $e) {
+            $db->Rollback($conn);
+           
+            $this->sendError(501, "Error SQL:" . $e);
+            return;
+        }
+    }
+    
+    public function deleteAccount($token, $accountData) {
+        if (!isset($token))
+            return $this->sendError(401, 'Access denied - token');
+        if (!isset($accountData))
+            return $this->sendError(401, 'Access denied - accountData');
+
+        if ((!isset($accountData['id'])) || (!isset($accountData['username'])) || (!isset($accountData['client'])) )
+            return $this->sendError(401, 'Nieprawidłowe zapytanie - data account');
+
+
+        $sess = new SessionController();
+        $res = $sess->isAuthClient($token);
+        if ($res == false)
+            return $this->sendError(401, 'Access denied - wrong token');
+
+        
+        if ( (!$sess->IsGlobalAdmin()) && ($adminData['type'] == 'global') )
+            return $this->sendError(401, 'Access denied - global');
+
+
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null)
+            return $this->sendError(501, $db->getLastError());
+
+        $username = $accountData['username'];
+      
+        $query = '';
+
+        try {
+            
+            $query  = "DELETE FROM accounts WHERE username=:USERNAME LIMIT 1;";
+ 
+            $sth = $db->prepare($conn, $query);
+            $sth->bindValue(':USERNAME', $username, PDO::PARAM_STR);
+
+            $sth->execute();
+
+            return $this->sendResult(200, $accountData);
+        } catch (Exception $e) {
+             if (str_contains($e,' Integrity constraint violation: 1451'))
+                $this->sendError(409, "Nie można usunąc konta, ponieważ konto jest powiązane z usługami. Najpierw wyłącz wszystkie usługi.");    
+            else                
+                $this->sendError(501, "Error SQL:" . $e);
+            return;
+        }
+    }      
 
 }
 
