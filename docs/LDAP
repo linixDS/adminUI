@@ -1,0 +1,64 @@
+Przydatne komendy
+
+ldapsearch -D "cn=Manager,dc=heban,dc=net" -W -b "dc=heban,dc=net"
+
+ldapadd -x -D cn=admin,dc=nodomain -W -f test.ldif
+
+ldapmodify -x -D "cn=admin,dc=nodomain" -W -f delete-group.ldif
+
+ldapsearch -x -LLL -b "ou=groups,dc=nodomain" -s sub "(cn=sogo)"
+
+test hasła
+ldapwhoami -D 'uid=test,ou=users,dc=nodomain' -x -W
+
+
+
+
+Dodawanie uprawnień do konfiga
+
+plik slapd.config
+
+database config
+access to *
+        by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+        by * none
+
+załadowanie pliku offline
+slaptest -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d/
+
+zmienić uprawnienia
+chown -R ldap:ldap slapd.d
+
+dodanie użytkownika root
+towrzymy plik: rootpw.ldif
+
+dn: olcDatabase={0}config,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}EGz3fd6LkIABZqvVHfmzAudcVbxJs2n3
+
+wykonujemy jako root
+ldapadd -Y EXTERNAL -H ldapi:/// -f rootpw.ldif
+
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+
+doveadm auth login user@domain password
+
+ładujemy base.ldif
+
+dodajemy użytkownika z 
+
+ldapadd -x -D cn=admin,dc=system,dc=local -W -f users.ldif
+
+ldapadd -x -D cn=admin,dc=system,dc=local -W -f groups.ldif
+
+Wyszukiwanie wg grupy
+ldapsearch -D "cn=admin,dc=system,dc=local" -W -b "cn=sogo,ou=groups,dc=system,dc=local" "(&(cn=sogo)(objectclass=groupOfNames))"
+
+
+UWAGI w bazie musi znalesc sie home, gid, uid
+
+
+
+

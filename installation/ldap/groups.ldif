@@ -1,0 +1,5 @@
+dn: cn=sogo,ou=groups,dc=system,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: sogo
+member: uid=darek@test.pl,ou=users,dc=system,dc=local

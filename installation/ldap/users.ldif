@@ -1,0 +1,15 @@
+dn: uid=darek@test.pl,ou=users,dc=system,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: darek@test.pl
+sn: Użytkownik
+givenName: Nowy
+uid: darek@test.pl
+uidNumber: 10002
+gidNumber: 10002
+homeDirectory: /home/darek@test.pl
+loginShell: /bin/nologin
+userPassword: darek

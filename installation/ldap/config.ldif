@@ -1,0 +1,32 @@
+dn: cn=config
+objectClass: olcGlobal
+cn: config
+olcArgsFile: /run/openldap/slapd.args
+olcPidFile: /run/openldap/slapd.pid
+
+# Schemas
+dn: cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: schema
+
+# TODO: Include further schemas as necessary
+include: file:///etc/openldap/schema/core.ldif
+
+# The config database
+dn: olcDatabase=config,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: config
+olcRootDN: cn=Manager,dc=system,dc=local
+
+# The database for our entries
+dn: olcDatabase=mdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: mdb
+olcSuffix: dc=system,dc=local
+olcRootDN: cn=Manager,dc=system,dc=local
+olcRootPW: Kamasutra
+olcDbDirectory: /var/lib/openldap
+# TODO: Create further indexes
+olcDbIndex: objectClass eq
+
