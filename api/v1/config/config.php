@@ -9,4 +9,5 @@
      }
 
      define("CONFIG_LOG_PATH", "/logs/");
+     define("MAIL_PATH", "/srv/mail");
 ?>

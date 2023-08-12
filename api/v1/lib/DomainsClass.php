@@ -148,10 +148,20 @@ class DomainsClass extends BaseClass
 
             $sth->execute();
 
+            $dir = MAIL_PATH.'/'.$name;
+            if (!mkdir($dir)){
+                $this->sendError(409, "Nie można utworzyć folderu dla domeny."); 
+                return;
+            }
 
+            chmod($dir, 0770);
+            chgrp($dir,'dovecot');
+
+    
             $db->Commit($conn);
 
             $domain['created'] = date('Y-m-d H:i:s');
+            $domain['dir'] = $dir;
             return $this->sendResult(201, $domain);            
         } catch (Exception $e) {
             $db->Rollback($conn);
@@ -258,6 +268,8 @@ class DomainsClass extends BaseClass
 
             $db->Commit($conn);
 
+            $dir = MAIL_PATH.'/'.$name;
+            system("rm -rf ".escapeshellarg($dir));
             return $this->sendResult(201, $domain);            
         } catch (Exception $e) {
             $db->Rollback($conn);
