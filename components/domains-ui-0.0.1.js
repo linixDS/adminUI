@@ -9,7 +9,6 @@ export default {
 	  return {
               ServerUrl: '',
               isEditable: false,
-              isValidMails: false,
               isValidName: false,
               isValidClient: false,
 
@@ -68,14 +67,7 @@ export default {
             else
                   this.isValidName = true;             
     
-            if  (this.domainData.mails < -1) {
-              console.log('LIMIT IS INCORRECT !!!');
-              this.isValidMails = false;
-              return false;
-            }
-              else
-              this.isValidMails = true;
-      
+     
              
             return true;
     },    
@@ -98,7 +90,6 @@ export default {
             var temp = this.Domains.find(domain => domain.name == this.updateDomainData.name);
             if (temp){
                   temp.name = this.updateDomainData.name;
-                  temp.mails = this.updateDomainData.mails;
                   temp.created = this.updateDomainData.created;
                   temp.client = this.updateDomainData.client;
             }
@@ -109,26 +100,23 @@ export default {
     },
 
     CopyDomainData(client){
-        this.updateDomainData = {name: '', mails: 100, client: -1};
+        this.updateDomainData = {name: '', client: -1};
         this.updateDomainData.name = client.name;
-        this.updateDomainData.mails = client.mails;
         this.updateDomainData.created = client.created;
         this.updateDomainData.client = client.client;
     },
 
 
     AddNewDomain() {
-
           this.isEditable = false;
           this.isValidName =  false;
-          this.isValidMails = false;
           this.isValidClient = false;
 
           this.showSpinLoading = false;
           this.ErrorMessage = '';
           this.SuccessMessage = '';
 
-          this.domainData=  {'name':'', 'mails': 100, client: -1};
+          this.domainData=  {'name':'', client: -1};
 
           this.titlePage = 'Nowa domena:';
           this.showContent = false;
@@ -138,7 +126,6 @@ export default {
 
     EditDomain(client) {
           console.log("---[ SHOW PAGE EDIT CLIENT ]-----");
-          this.CopyDomainData(client);
           this.domainData = client;
 
           this.isEditable = true;
@@ -221,66 +208,6 @@ export default {
             });
     },
 
-    CheckUpdateData(){
-        if ( (this.domainData.name != this.updateDomainData.name) ||
-            (this.domainData.mail != this.updateDomainData.mails))
-            return true;
-
-        return false;
-    },
-
-    UpdateData(){
-        if (!this.CheckUpdateData()) {
-          this.SuccessMessage = 'Dane są aktualne, nie ma nic do zrobienia.';
-          return;
-        }
-
-  
-        var data = {  token  : this.auth.SessToken, 
-                      domain : this.domainData};
-  
-  
-        this.showSpinLoading = true;
-        console.log('----[ UPDATE DOMAIN ]-----');
-        console.log(JSON.stringify(data));
-  
-        fetch(  this.ServerUrl+'domains.php', {
-              headers: { 'Content-type': 'application/json' },
-              method: "PUT",
-              body: JSON.stringify(data)})
-              .then((res) => {
-                    console.log('StatusCode: ' + res.status);
-                    return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
-              })
-              .then((json) => {
-                    console.log('-> RESULT:');
-                    console.log(json);
-  
-                    if (json.error) {
-                      console.log(json.error);
-                      this.ErrorMessage = json.error.message;
-                      this.BackPage();
-                    } else {
-                      this.SuccessMessage = "Dane domeny "+json.result.name+" zostały zaaktualizowane.";
-                      this.ShowDomains();
-                    }
-  
-                    
-              })
-              .catch((error) => {
-                    console.log('Error saveClient');
-                    if (error == "TypeError: Failed to fetch")
-                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.serverurl;
-                    else
-                      if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
-                          this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
-                      else
-                        this.ErrorMessage = 'Wyjątek: ' + error;
-                    this.BackPage();
-              });
-
-    },
-
 
     DeleteData(){
 
@@ -342,8 +269,6 @@ export default {
 
         if (!this.isEditable)
           this.SaveNewDomain();
-        else
-          this.UpdateData();
     },
 
     
@@ -458,7 +383,7 @@ export default {
   <div v-if="showDeleteDomainContent">
       <h5 class="text-warning" style="margin-bottom:10px;"><b>OSTRZEŻENIE</b></h5>
       <div class="text-danger" style="margin-bottom:20px;">
-      Aby usunąć domenę  z bazy, neleży wcześnij usunąć wszystkie konta pocztowe.
+      Aby usunąć domenę z bazy, należy wcześnij usunąć wszystkie konta.
       </div>
 
       <h5 class="text-danger" style="margin-bottom:10px;"><b>CZY NAPEWNO USUNĄĆ DOMENĘ ?</b></h5>
@@ -505,21 +430,10 @@ export default {
             </div>
           </div>
 
-          
-          
-          <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
-            <div class="col-2">
-              <label class="col-form-label">Limit kont: </label>
-            </div>
-            <div class="col-4">
-              <input type="number" min="1" max="50" :class="isValidMails ? 'form-control' : 'form-control is-invalid'" v-model="domainData.mails" :disabled="isDisableInputs">
-            </div>
-          </div>            
-          
         
           <div class="row g-3 align-items-center">
               <div class="col-auto">
-                <button class="btn btn-success" :disabled="isDisableInputs" v-if="CheckForm" v-on:click="SaveData">
+                <button class="btn btn-success" :disabled="isDisableInputs" v-if="CheckForm && !isEditable" v-on:click="SaveData">
                   <div v-if="showSpinLoading" class="spinner-border text-white spinner-border-sm" role="status"></div>&nbsp;&nbsp;Zapisz
                 </button>
               </div>

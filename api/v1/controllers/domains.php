@@ -37,14 +37,7 @@ class Controller extends BaseController
 	}
 
  	public function PUT($args){
-        if (!isset($args['token']))
-			return $this->SendError(401, 'Access denied - token 2'); 
-        if (!isset($args['domain']))
-			return $this->SendError(401, 'Access denied - data 2');
-		
-
-		$class = new DomainsClass($args);
-		$class->updateDomain( $args['token'], $args['domain']); 
+		return $this->SendError(501, 'Funkcja nie dostępna');
 	}
 
  	public function DELETE($args){

@@ -1,14 +1,11 @@
 hosts = localhost
 dn = cn=admin,dc=system,dc=local
 dnpass = Kamasutra
-auth_bind = yes
+
+default_pass_scheme = PLAIN
+auth_bind = no
 base = ou=users,dc=system,dc=local
 scope = subtree
-user_attrs = uid=user
+
 pass_attrs = uid=user,userPassword=password
-
-
-user_filter = (&(objectClass=inetOrgPerson)(uid=%u)(memberOf=cn=sogo,ou=groups,dc=system,dc=local))
-
-#pass_filter = (&(objectCategory=user)(uid=%u)(memberOf=cn=sogo,ou=groups,dc=system,dc=local))
-#pass_filter = (&(objectClass=inetOrgPerson)(uid=%u))
+pass_filter = (&(objectClass=inetOrgPerson)(uid=%u)(businessCategory=sogo))

@@ -389,7 +389,6 @@ class AccountsClass extends BaseClass
             return $this->sendError(401, 'Access denied - token');
         if (!isset($accountData))
             return $this->sendError(401, 'Access denied - accountData');
-
         if ((!isset($accountData['id'])) || (!isset($accountData['username'])) || (!isset($accountData['client'])) )
             return $this->sendError(401, 'Nieprawidłowe zapytanie - data account');
 
@@ -413,6 +412,10 @@ class AccountsClass extends BaseClass
       
         $query = '';
 
+        $names = explode('@',$username);
+        
+        $mailLocation = MAIL_PATH.'/'.$names[1].'/'.$names[0];
+
         try {
             
             $query  = "DELETE FROM accounts WHERE username=:USERNAME LIMIT 1;";
@@ -424,6 +427,11 @@ class AccountsClass extends BaseClass
 
 
             $this->LdapDeleteUser($accountData);
+
+            if (is_dir($mailLocation)){
+                system("rm -rf ".escapeshellarg($mailLocation));
+            }
+
             return $this->sendResult(200, $accountData);
         } catch (Exception $e) {
              if (str_contains($e,' Integrity constraint violation: 1451'))

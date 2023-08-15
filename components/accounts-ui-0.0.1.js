@@ -282,7 +282,7 @@ export default {
                       this.ErrorMessage = json.error.message;
                       this.BackPage();
                     } else {
-                      this.SuccessMessage = "Administrator "+json.result.username+" został usunięty.";
+                      this.SuccessMessage = "Konto "+json.result.username+" zostało usunięte.";
                       
                       var idx = this.Accounts.indexOf(this.accountData);
                       console.log('IDX = '+idx);
@@ -383,6 +383,7 @@ export default {
     },    
     
     SaveData(){
+        console.log("---[ SAVE DATA ]-----");
         this.SuccessMessage = '';
         this.ErrorMessage = '';
 
@@ -401,10 +402,10 @@ export default {
           servicesList.push(service);
        }        
 
-        var passwordHash = CryptoJS.MD5(this.password1);
-        const passwordHashString = passwordHash.toString(); 
+        //var passwordHash = CryptoJS.MD5(this.password1);
+        //const passwordHashString = passwordHash.toString(); 
 
-        this.accountData.password = passwordHashString;
+        this.accountData.password = this.password1;
         this.accountData.username = this.accountData.username+this.DomainName;
         if (!this.isNeedMail)
           this.accountData.mail = this.accountData.username;
@@ -464,31 +465,45 @@ export default {
     
 
     CheckUpdateData(){
-      if (this.accountData.name != this.updateAccountData.name)
+      if (this.accountData.name != this.updateAccountData.name){
           return true;
+      }
 
-      if (this.accountData.mail != this.updateAccountData.mail && this.isNeedMail)
+      if (this.accountData.mail != this.updateAccountData.mail && this.isNeedMail){
+      
           return true;
+      }
 
-      if (this.isChangePassword) return true;
+      if (this.isChangePassword){
+     
+        return true;
+      }
 
       let len1 = this.ChoiceServices.length;
       let len2 = this.cacheChoiceServices.length;
-      if (len1 !== len2)  return true;
+      if (len1 !== len2)  {
+    
+        return true;
+      }
 
       for (const item of this.ChoiceServices) {
           var temp =  this.cacheChoiceServices.indexOf(item);
           if (temp == -1) return true;
       }
 
+
       return false;
-  },    
+    },  
+    
+    
     UpdateData(){
+      console.log("---[ UPDATE ACCOUNT ]---");
       if (!this.CheckUpdateData()) {
         this.SuccessMessage = 'Dane są aktualne, nie ma nic do zrobienia.';
         return;
       }
 
+      console.log("sAVED");
       var servicesList = [];
 
       for (var item of this.ChoiceServices){
@@ -497,13 +512,14 @@ export default {
       }     
 
       var dataAccount = {id: this.accountData.id, username: this.accountData.username, name: this.accountData.name, client: this.ClientId};
-      var passwordHash = CryptoJS.MD5(this.password1);
-      const passwordHashString = passwordHash.toString(); 
+      
+      //var passwordHash = CryptoJS.MD5(this.password1);
+      //const passwordHashString = passwordHash.toString(); 
 
       if (!this.isNeedMail)
         dataAccount.mail = this.accountData.username;
       if (this.isChangePassword)
-        dataAccount.password = passwordHashString;
+        dataAccount.password = this.password1;
 
 
 
@@ -777,6 +793,8 @@ export default {
     <div v-if="showDeleteAccountContent">
       <h5 class="text-warning" style="margin-bottom:10px;"><b>OSTRZEŻENIE</b></h5>
       <div class="text-danger" style="margin-bottom:20px;">
+      <b>Usunięcie konta spowoduje nie odwracalne usunięcie wszystkich danych !<br>
+      Jeśli do konta była kiedykolwiek podpięta usługa poczty - zostanie ona usunięta !</b><br><br>
       Aby usunąć konto z bazy, należy wcześnij usunąć wszystkie wpisy powiązane tj.:<br>
       <ul>
         <li>odpiąć usługi,</li>

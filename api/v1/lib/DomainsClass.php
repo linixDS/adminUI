@@ -34,11 +34,11 @@ class DomainsClass extends BaseClass
 
         try{
             if ($sess->IsGlobalAdmin()) {
-                $query = "SELECT domain_id as id,name,client_id as client, created,limit_mails as mails FROM domains ORDER BY name;";
+                $query = "SELECT domain_id as id,name,client_id as client, created FROM domains ORDER BY name;";
                 $sth = $db->prepare($conn, $query);
                 $sth->execute();
             } else {
-                $query = "SELECT domain_id as id,name,client_id as client,created,limit_mails as mails FROM domains WHERE client_id=? ORDER BY name;";
+                $query = "SELECT domain_id as id,name,client_id as client,created FROM domains WHERE client_id=? ORDER BY name;";
                 $sth = $db->prepare($conn, $query);
                 $sth->execute([$cid]);
             }
@@ -74,7 +74,7 @@ class DomainsClass extends BaseClass
             return $this->sendError(501, $db->getLastError());
 
         try{
-            $query = "SELECT domain_id as id,name,client_id as client, created,limit_mails as mails FROM domains WHERE client_id=? ORDER BY name;";
+            $query = "SELECT domain_id as id,name,client_id as client, created FROM domains WHERE client_id=? ORDER BY name;";
             $sth = $db->prepare($conn, $query);
             $sth->execute([$client_id]);
 
@@ -113,7 +113,7 @@ class DomainsClass extends BaseClass
 
         $domain = $domainData;
 
-        if ((!isset($domain['name'])) || (!isset($domain['client'])) || (!isset($domain['mails'])) )
+        if ((!isset($domain['name'])) || (!isset($domain['client'])) )
             return $this->sendError(401, 'Access denied - domain');
 
         $sess = new SessionController();
@@ -132,19 +132,17 @@ class DomainsClass extends BaseClass
 
         $name = $domain['name'];
         $client = $domain['client'];
-        $limit = $domain['mails'];
 
         $query = '';
 
         try {
             $db->BeginTransaction($conn);
 
-            $query = "INSERT INTO domains (name,client_id,limit_mails) VALUES (:NAMEDOMAIN,:CLIENTID,:LIMIT1);";
+            $query = "INSERT INTO domains (name,client_id) VALUES (:NAMEDOMAIN,:CLIENTID);";
             $sth = $db->prepare($conn, $query);
 
             $sth->bindValue(':NAMEDOMAIN', $name, PDO::PARAM_STR);
             $sth->bindValue(':CLIENTID', $client, PDO::PARAM_INT);
-            $sth->bindValue(':LIMIT1', $limit, PDO::PARAM_INT);
 
             $sth->execute();
 
@@ -175,58 +173,6 @@ class DomainsClass extends BaseClass
 
     }
 
-    public function updateDomain($token, $domainData)
-    {
-        if (!isset($token))
-            return $this->sendError(401, 'Access denied - token 2a');
-        if (!isset($domainData))
-            return $this->sendError(401, 'Access denied - data');
-
-        $domain = $domainData;
-
-        if ( (!isset($domain['name'])) || (!isset($domain['mails'])) )
-            return $this->sendError(401, 'Access denied - domain');
-
-        $sess = new SessionController();
-        $res = $sess->isAuthClient($token);
-        if ($res == false)
-            return $this->sendError(401, 'Access denied - wrong token');
-
-        $uid = $sess->GetAdminUID();
-        if (!$sess->IsGlobalAdmin())
-            return $this->sendError(401, 'Access denied - global');
-
-        $db = new DB();
-        $conn = $db->getConnection();
-        if ($conn == null)
-            return $this->sendError(501, $db->getLastError());
-
-        $name = $domain['name'];
-        $limit = $domain['mails'];
-
-        $query = '';
-
-        try {
-            $db->BeginTransaction($conn);
-
-            $query = "UPDATE domains SET limit_mails=? WHERE name=? LIMIT 1;";
-            $sth = $db->prepare($conn, $query);
-
-            $sth->execute([$limit, $name]);
-
-            $db->Commit($conn);
-
-            return $this->sendResult(201, $domain);            
-        } catch (Exception $e) {
-            $db->Rollback($conn);
-
-            if (str_contains($e,'Duplicate entry'))
-                $this->sendError(409, "Duplikacja nazwy domeny: Podana nazwa domeny została wcześniej wprowadzona.");    
-            else                
-                $this->sendError(501, "Error SQL:" . $e);
-            return;
-        }
-    }
 
     public function deleteDomain($token, $domainData)
     {
