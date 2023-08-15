@@ -5,6 +5,7 @@ include("./core/DB.php");
 include("./core/Session.php");
 include("./lib/AccountsClass.php");
 include("./lib/ServicesClass.php");
+include("./lib/LdapClass.php");
 
 class Controller extends BaseController
 {

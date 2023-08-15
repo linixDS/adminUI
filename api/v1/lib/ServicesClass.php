@@ -227,6 +227,8 @@ class ServicesClass extends BaseClass
     }
 
 
+
+
     public function getClientServicesResultData($clientId)
     {
         $db = new DB();
@@ -329,7 +331,26 @@ class ServicesClass extends BaseClass
             $this->exceptionWrite($e);
             return false;
         }
-    }     
+    }    
+    
+    public function getAllServicesResultData($db, $conn)
+    {
+        if ($conn == null)
+            return $this->sendError(500, $db->getLastError());
+
+
+        try {
+            $query = "SELECT service_id as id,name,description,limit_accounts FROM services ORDER BY service_id;";
+            $sth = $db->prepare($conn, $query);
+            $sth->execute();
+    
+            $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return false;
+        }
+
+        return $data;
+    }    
 
     public function getAccessAccountServices($token,$clientId)
     {

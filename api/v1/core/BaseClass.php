@@ -5,15 +5,16 @@ define('BASE_CLASS_LOADED', true);
 
 
 class BaseClass {
+  
 
     public function SaveResponde($value){
         $logger = new LoggerClient();
         $logger->saveResponde($value);
     } 
 
-    public function debugWrite($class, $func, $value){
+    public function debugWrite($name, $value){
         $logger = new LoggerClient();
-        $logger->saveDebug($class, $func, $value);
+        $logger->saveDebug($name, $value);
     }
 
     

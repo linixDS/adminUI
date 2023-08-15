@@ -397,11 +397,8 @@ export default {
         var servicesList = [];
 
         for (var item of this.ChoiceServices){
-          var temp =  this.ChoiceServices.find( service => service.id == item );
-          if (temp){
-              let service = {id: temp.id};
-              servicesList.push(service);
-          }
+          let service = {id: item};
+          servicesList.push(service);
        }        
 
         var passwordHash = CryptoJS.MD5(this.password1);
@@ -422,6 +419,7 @@ export default {
 
 
         console.log(JSON.stringify(data));
+
 
                   
         this.showSpinLoading = true;

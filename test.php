@@ -1,90 +1,73 @@
 <?php
 
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+set_error_handler('error_handler');
+set_exception_handler('exception_handler');
 
-     function isService($id, $table){
-         foreach ($table as $value)
-              if ($value['id'] == $id) return true;
+// Funkcja do obsługi błędów
+function error_handler($errno, $errstr, $errfile, $errline)
+{
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+}
 
-         return false;
-     }
+// Funkcja do obsługi wyjątków
+function exception_handler($exception)
+{
+    $detail = array(
+        'error' => $exception->getMessage(),
+        'code' => $exception->getCode(),
+        'file' => $exception->getFile(),
+        'line' => $exception->getLine()
+    );
 
-     function getCurrentService($id, $table){
-         foreach ($table as $value){
-               if ($value['id'] == $id) return $value;
-         }
-  
-         return null;      
-     }
-
-     function getChangedServicesResultData($current, $new){
-              $serviceNew = array();
-              $serviceDelete = array();
-              $serviceUpdate = array();
-
-              /* Sprawdzamy bieżące usługi
-                 jeśli w nowych usługach czegoś nie znajdziemy to należy usunąć usuługę
-              */
-
-              foreach ($current as $value) {
-                  if (!isService($value['id'], $new)) 
-                     array_push($serviceDelete, $value);
-              }
-   
-
-               /* Sprawdzamy nowe usługi
-                 jeśli w bieżacych usługach czegoś nie znajdziemy to należy dodać usuługę
-              */
-              foreach ($new as $value) {
-               if (!isService($value['id'], $current)) 
-                  array_push($serviceNew, $value);
-           }
-
-              foreach ($new as $value) {
-                  $curr = getCurrentService($value['id'], $current);
-                  if ($curr != null){
-                     if ($curr['limit_accounts'] != $value['limit_accounts'])
-                     array_push($serviceUpdate, $value);
-                  }
-               }
-
-              $result = array();
-              $result['add'] =  $serviceNew;
-              $result['delete'] = $serviceDelete;
-              $result['update'] = $serviceUpdate;
-
-              return $result;
-     }
-
-     $current = array( 
-                        array('id'=>1,'limit_accounts'=>2),
-                        array('id'=>2,'limit_accounts'=>2),
-                     );
-     $new = array(
-                     array('id'=>1,'limit_accounts'=>5),
-                     array('id'=>3,'limit_accounts'=>2),
-     );
+    print_r($detail);
+}  
 
 
-     function test($current){
-            foreach ($current as $value){
-               echo ($value['id']);
-               echo "<br>";
-            }
-     }
-
-     echo "CURRENT: <br/>";
-     print_r($current);
-     echo "<br/>NEW</br>";
-     print_r($new);
-     echo "<br/>";
-     echo "RESULT";
-     echo "<br/>";
-     
-     $res = var_export(getChangedServicesResultData($current, $new), true);
-     //echo $res;
+include("./api/v1/config/ldap.php");
+include("./api/v1/lib/LdapClass.php");
 
 
+function  LdapAdd($accountData, $services) {
+
+    $dn = "uid=".$accountData['username'].",dc=system,dc=local";
+
+    if (count($services) > 0){
+        $newEntry = [
+            "objectClass" => ["inetOrgPerson", "organizationalPerson", "person", "top"],
+            "uid" => $accountData['username'],
+            "cn" => $accountData['username'],
+            "sn" => $accountData['name'],
+            "mail" => $accountData['mail'],
+            "userPassword" => $accountData['password'],
+            "businessCategory" => $services,
+        ];
+
+    }
+        else {
+            $newEntry = [
+                "objectClass" => ["inetOrgPerson", "organizationalPerson", "person", "top"],
+                "uid" => $accountData['username'],
+                "cn" => $accountData['username'],
+                "sn" => $accountData['name'],
+                "mail" => $accountData['mail'],
+                "userPassword" => $accountData['password'],
+            ];                
+        }
+
+
+    $ldap = new LdapClass();
+    $res =  $ldap->addEntry($dn, $newEntry);
+}
+
+$accountData['username'] = 'darek2@test.pl';
+$accountData['name'] = 'darek dd';
+$accountData['mail'] = 'ddd@sss.pl';
+$accountData['password'] = 'password';
+
+$services = [];
+
+LdapAdd($accountData, $services);
 
 ?>

@@ -142,11 +142,11 @@
 		
 		
 		
-		public function saveDebug($class, $func, $value)
+		public function saveDebug($name, $value)
 		{
 			$filename = getcwd().CONFIG_LOG_PATH."debug.log";
-			$message = strtoupper($class)."::".$func." => \t";
-			$message .= var_export($value, true);
+			$message = "[".$name."] => ";
+			$message .= json_encode($value);
 			return $this->writeLogDebug($filename, $message);
 		}			
 
