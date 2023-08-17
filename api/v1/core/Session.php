@@ -6,23 +6,6 @@ class SessionController
 	public function __construct(){
 	}
 	
-	public function getComputerName()
-	{
-		$ip = $this->getUserIP();
-		$name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
-		if (strlen($name) > 3)
-		{
-			$pos = strpos($name, '.');
-			if ($pos === false)
-				$convert = $name;
-			else
-				$convert = substr($name, 0, $pos);
-			
-			return $convert;
-		}
-			else
-				return $ip;
-	}
 	
 	public function getUserIP() 
 	{
@@ -52,13 +35,15 @@ class SessionController
 	}   
 
 
-	public function createTokenSessionId($user)
+	public function createTokenSessionId($user, $address = null)
 	{
 		session_start();
 		
 		$_SESSION['LoginSession'] 		= $user;
-		$_SESSION['ConnectionSession'] = $this->getUserIP();
-		
+		if ($address == null)
+			$_SESSION['ConnectionSession'] = $this->getUserIP();
+		else
+			$_SESSION['ConnectionSession'] = $address;
 		return session_id();
 	}
 	

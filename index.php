@@ -1,9 +1,8 @@
 <?php
 
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-/*set_error_handler('error_handler');
+//set_error_handler('error_handler');
 set_exception_handler('exception_handler');
 
 // Funkcja do obsługi błędów
@@ -12,12 +11,38 @@ function error_handler($errno, $errstr, $errfile, $errline)
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 
+
+include("config/config.php");
+
 function exception_handler($exception)
 {
-    goLoginPage('Error');
+    print_r($exception);
+ //   goLoginPage('Error: '.$exception->toString());
     exit;
 }    
-*/
+
+
+function getAddressIP() {
+    $ipaddress = '';
+    if (isset($_SERVER['HTTP_CLIENT_IP']))
+        $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+    else if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    else if(isset($_SERVER['HTTP_X_FORWARDED']))
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+    else if(isset($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']))
+        $ipaddress = $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
+    else if(isset($_SERVER['HTTP_FORWARDED_FOR']))
+        $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+    else if(isset($_SERVER['HTTP_FORWARDED']))
+        $ipaddress = $_SERVER['HTTP_FORWARDED'];
+    else if(isset($_SERVER['REMOTE_ADDR']))
+        $ipaddress = $_SERVER['REMOTE_ADDR'];
+;
+    
+    return $ipaddress;
+}
+
 function goLoginPage($error){
     if ($error != null)
         header('Location: ./login.php?message='.$error);
@@ -27,21 +52,25 @@ function goLoginPage($error){
 }
 
 
+
     if ( (!isset($_POST['username'])) || (!isset($_POST['password'])) ){
         goLoginPage(null);
     }
 
     $username = $_POST['username'];
     $password = $_POST['password'];
+    $address  = getAddressIP();
+    
 
     $post_data = array (  
         "username" => $username,  
-        "password" => $password);
+        "password" => $password,
+        "address" => $address);
  
 
     $json = json_encode($post_data);
 
-    $url = "http:/localhost/api/v1/login.php";
+    $url = SERVER_API_ADDRESS."/api/v1/login.php";
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL,$url);
@@ -69,13 +98,16 @@ function goLoginPage($error){
         }
             else {
                 $result = json_decode($result_json, true);
-                $message = $result['error']['message'];
+                if (isset($result['error']))
+                    $message = $result['error']['message'];
+                else
+                    $message = "Responde Status Code: ".$status;
                 goLoginPage($message);
             }
 
     }
 
     curl_close($ch);
-
+//
 
 ?>

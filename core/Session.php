@@ -6,23 +6,6 @@ class SessionController
 	public function __construct(){
 	}
 	
-	public function getComputerName()
-	{
-		$ip = $this->getUserIP();
-		$name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
-		if (strlen($name) > 3)
-		{
-			$pos = strpos($name, '.');
-			if ($pos === false)
-				$convert = $name;
-			else
-				$convert = substr($name, 0, $pos);
-			
-			return $convert;
-		}
-			else
-				return $ip;
-	}
 	
 	public function getUserIP() 
 	{

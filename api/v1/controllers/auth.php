@@ -46,8 +46,13 @@ class Controller extends BaseController
         if ($data == null)
             return $this->SendError(401, 'Wrong password or username'); 
         
+
         $sess = new SessionController();
-        $id = $sess->createTokenSessionId($data);
+        $address = null;
+        if (isset($args['address']))
+            $address = $args['address'];
+
+        $id = $sess->createTokenSessionId($data, $address);
         
         $result = array();
         $result['token'] = $id;
