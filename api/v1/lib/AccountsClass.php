@@ -15,7 +15,7 @@ class AccountsClass extends BaseClass
 
     private function LdapRemoveService($accountData, $service_name) {
 
-        $dn = "uid=".$accountData['username'].",ou=users,dc=system,dc=local";
+        $dn = "uid=".$accountData['username'].",ou=users,".CONFIG_LDAP_DN;
 
         $Entry = [
                     "objectClass" => ["inetOrgPerson", "organizationalPerson", "person", "top"],
@@ -29,7 +29,7 @@ class AccountsClass extends BaseClass
     }
 
     private function LdapDeleteUser($accountData){
-        $dn = "uid=".$accountData['username'].",ou=users,dc=system,dc=local";
+        $dn = "uid=".$accountData['username'].",ou=users,".CONFIG_LDAP_DN;
         $ldap = new LdapClass(null);
         $res =  $ldap->delete($dn);
     }
@@ -41,7 +41,7 @@ class AccountsClass extends BaseClass
         $convertName = Array("name" => "sn", "password" => "userPassword", "mail" => "mail");
 
         $username = $accountData['username'];
-        $dn = "uid=".$username.",ou=users,dc=system,dc=local";
+        $dn = "uid=".$username.",ou=users,".CONFIG_LDAP_DN;
 
         if (isset($accountData['username']))   unset($accountData['username']);
         if (isset($accountData['id']))   unset($accountData['id']);        
@@ -93,8 +93,7 @@ class AccountsClass extends BaseClass
 
     private function LdapAdd($accountData, $services) {
 
-        $dn = "uid=".$accountData['username'].",ou=users,dc=system,dc=local";
-
+        $dn = "uid=".$accountData['username'].",ou=users,".CONFIG_LDAP_DN;
         if (count($services) > 0){
             $newEntry = [
                 "objectClass" => ["inetOrgPerson", "organizationalPerson", "person", "top"],

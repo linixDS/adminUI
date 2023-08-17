@@ -18,6 +18,10 @@
 --
 -- Table structure for table `accounts`
 --
+CREATE USER 'adminUI'@'localhost' IDENTIFIED BY 'adminUI';
+GRANT SELECT,INSERT,UPDATE,DELETE ON admin_panel.* TO 'adminUI'@'localhost';
+FLUSH PRIVILEGES;
+
 
 DROP TABLE IF EXISTS `accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -32,6 +36,7 @@ CREATE TABLE `accounts` (
   `name` varchar(45) NOT NULL,
   `created` datetime NOT NULL DEFAULT current_timestamp(),
   `changed` varchar(45) DEFAULT NULL,
+  `mail` varchar(85) DEFAULT NULL,
   PRIMARY KEY (`account_id`),
   UNIQUE KEY `name_UNIQUE` (`username`),
   KEY `fk_accounts_1_idx` (`domain_id`),
