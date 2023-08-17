@@ -1,5 +1,5 @@
 <?php
 
-    define("SERVER_API_ADDRESS","http://192.168.110.10");
+    define("SERVER_API_ADDRESS","http://192.168.10.241:8078");
 
 ?>

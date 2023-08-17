@@ -40,7 +40,7 @@ class Controller extends BaseController
 
  	public function POST($args){
         if ((!isset($args['username'])) || (!isset($args['password'])) ){
-            $this->fail2ban($args);
+            $this->fail2ban('No argument');
             return $this->SendError(400, 'Bad request'); 
         }
 			
@@ -57,7 +57,7 @@ class Controller extends BaseController
         $data = $sth->fetch(PDO::FETCH_ASSOC);
         
         if ($data == null) {
-            $this->fail2ban($args);
+            $this->fail2ban($args['username']);
             return $this->SendError(401, 'Wrong password or username'); 
         }
         
