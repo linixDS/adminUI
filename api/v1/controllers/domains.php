@@ -44,7 +44,7 @@ class Controller extends BaseController
         if (!isset($args['token']))
 			return $this->SendError(400, 'Access denied - token'); 
 		if (!isset($args['domain']))
-			return $this->SendError(400, 'Access denied - domain');		
+			return $this->SendError(400, 'Access denied - domain 2');		
 
 		$class = new DomainsClass($args);
 		$class->deleteDomain($args['token'], $args['domain']);

@@ -147,15 +147,11 @@ class DomainsClass extends BaseClass
             $sth->execute();
 
             $dir = MAIL_PATH.'/'.$name;
-            if (!mkdir($dir)){
-                $this->sendError(409, "Nie można utworzyć folderu dla domeny."); 
-                return;
+            if (!is_dir($dir)){
+                mkdir($dir);
+                chmod($dir, 0770);
             }
 
-            chmod($dir, 0770);
-            chgrp($dir,'dovecot');
-
-    
             $db->Commit($conn);
 
             $domain['created'] = date('Y-m-d H:i:s');
@@ -181,9 +177,9 @@ class DomainsClass extends BaseClass
         if (!isset($domainData))
             return $this->sendError(401, 'Access denied - data');
 
-        $domain = $domainData;
+        $domain = $domainData['domain'];
 
-        if ( (!isset($domain['name'])) || (!isset($domain['mails'])) )
+        if (!isset($domain['name']))
             return $this->sendError(401, 'Access denied - domain');
 
         $sess = new SessionController();
@@ -215,7 +211,9 @@ class DomainsClass extends BaseClass
             $db->Commit($conn);
 
             $dir = MAIL_PATH.'/'.$name;
-            system("rm -rf ".escapeshellarg($dir));
+            if (is_dir($dir))
+                system("rm -rf ".escapeshellarg($dir));
+            
             return $this->sendResult(201, $domain);            
         } catch (Exception $e) {
             $db->Rollback($conn);

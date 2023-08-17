@@ -44,10 +44,18 @@ function getAddressIP() {
 }
 
 function goLoginPage($error){
-    if ($error != null)
-        header('Location: ./login.php?message='.$error);
-    else
-        header('Location: ./login.php');   
+    
+    
+    $url = "Location: ./login.php";
+    if ($error != null){
+        $error = str_replace('\'','',$error);
+        $url = $url."?message=".$error;
+    }
+
+    
+    $url = str_replace(PHP_EOL,'',$url);
+
+    header($url);   
     exit();    
 }
 
