@@ -2,7 +2,7 @@
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-//set_error_handler('error_handler');
+set_error_handler('error_handler');
 set_exception_handler('exception_handler');
 
 // Funkcja do obsługi błędów
@@ -105,9 +105,13 @@ function goLoginPage($error){
             echo $buffer;
         }
             else {
+                
                 $result = json_decode($result_json, true);
-                if (isset($result['error']))
+                print_r($result);
+                if (isset($result['error'])){
                     $message = $result['error']['message'];
+                    $mesage = 'sdfsdfsd';
+                }
                 else
                     $message = "Responde Status Code: ".$status;
                 goLoginPage($message);

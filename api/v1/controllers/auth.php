@@ -28,9 +28,22 @@ class Controller extends BaseController
         return $this->SendResult(200, $result); 
 	}	
 	
+
+    private function fail2ban($login) {
+
+            if(!defined('LOGGER_CLASS_LOADED')) 
+                include("./lib/LoggerClient.php");
+            $log = new LoggerClient();
+            $log->saveFailedLog($login);            
+
+    }
+
  	public function POST($args){
-        if ((!isset($args['username'])) || (!isset($args['password'])) )
-			return $this->SendError(400, 'Bad request'); 
+        if ((!isset($args['username'])) || (!isset($args['password'])) ){
+            $this->fail2ban($args);
+            return $this->SendError(400, 'Bad request'); 
+        }
+			
         
         $db = new DB();
         
@@ -43,8 +56,10 @@ class Controller extends BaseController
         $sth->execute([':username' => $args['username'], 'password' => $args['password']]);
         $data = $sth->fetch(PDO::FETCH_ASSOC);
         
-        if ($data == null)
+        if ($data == null) {
+            $this->fail2ban($args);
             return $this->SendError(401, 'Wrong password or username'); 
+        }
         
 
         $sess = new SessionController();

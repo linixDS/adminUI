@@ -70,6 +70,8 @@
 			return false;
 		}
 
+
+
 		private function writeLog2($filename, $message){
 			if (file_exists($filename)){
 				$handle = fopen($filename,"a+");
@@ -148,7 +150,28 @@
 			$message = "[".$name."] => ";
 			$message .= json_encode($value);
 			return $this->writeLogDebug($filename, $message);
+		}
+		
+		public function saveFailedLog($login)
+		{
+			$filename = getcwd().CONFIG_LOG_PATH."failed-auth.log";
+
+			if (file_exists($filename)){
+				$handle = fopen($filename,"a+");
+			}
+				else
+					$handle = fopen($filename, "w");
+			
+			if ($handle){
+				$txt = sprintf("[%s]\t%s\t%s\r\n", date("Y-m-d H:i:s", time()), $this->request_from, $login) ;
+				fwrite($handle, $txt);
+				fclose($handle);
+				return true;
+			}
+
 		}			
+		
+		
 
 		
 	}
