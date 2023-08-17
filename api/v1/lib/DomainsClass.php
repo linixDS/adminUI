@@ -146,16 +146,10 @@ class DomainsClass extends BaseClass
 
             $sth->execute();
 
-            $dir = MAIL_PATH.'/'.$name;
-            if (!is_dir($dir)){
-                mkdir($dir);
-                chmod($dir, 0770);
-            }
 
             $db->Commit($conn);
 
             $domain['created'] = date('Y-m-d H:i:s');
-            $domain['dir'] = $dir;
             return $this->sendResult(201, $domain);            
         } catch (Exception $e) {
             $db->Rollback($conn);
@@ -210,10 +204,7 @@ class DomainsClass extends BaseClass
 
             $db->Commit($conn);
 
-            $dir = MAIL_PATH.'/'.$name;
-            if (is_dir($dir))
-                system("rm -rf ".escapeshellarg($dir));
-            
+          
             return $this->sendResult(201, $domain);            
         } catch (Exception $e) {
             $db->Rollback($conn);

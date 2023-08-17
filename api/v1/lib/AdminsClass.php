@@ -285,7 +285,7 @@ class AdminsClass extends BaseClass
         if (!isset($adminData))
             return $this->sendError(401, 'Access denied - adminData');
 
-        if ((!isset($adminData['name'])) || (!isset($adminData['username'])) || (!isset($adminData['client'])) )
+        if ((!isset($adminData['name'])) || (!isset($adminData['username'])) )
             return $this->sendError(401, 'Nieprawidłowe zapytanie - data account');
 
 
@@ -293,8 +293,7 @@ class AdminsClass extends BaseClass
         $res = $sess->isAuthClient($token);
         if ($res == false)
             return $this->sendError(401, 'Access denied - wrong token');
-
-        
+       
 
 
         $db = new DB();
@@ -309,7 +308,7 @@ class AdminsClass extends BaseClass
         try {
             $db->BeginTransaction($conn);
             
-            $query  = "DELETE FROM accounts WHERE username=:USERNAME LIMIT 1;";
+            $query  = "DELETE FROM admins WHERE username=:USERNAME LIMIT 1;";
  
             $sth = $db->prepare($conn, $query);
             $sth->bindValue(':USERNAME', $username, PDO::PARAM_STR);
