@@ -152,7 +152,7 @@
 			return $this->writeLogDebug($filename, $message);
 		}
 		
-		public function saveFailedLog($login)
+		public function saveFailedLog($login, $address)
 		{
 			$filename = getcwd().CONFIG_LOG_PATH."failed-auth.log";
 
@@ -163,7 +163,7 @@
 					$handle = fopen($filename, "w");
 			
 			if ($handle){
-				$txt = sprintf("%s - %s - FAILED AUTH: %s\r\n", $this->request_from, date("Y-m-d H:i:s", time()), $login) ;
+				$txt = sprintf("%s - %s - FAILED AUTH: %s\r\n", $address, date("Y-m-d H:i:s", time()), $login) ;
 				fwrite($handle, $txt);
 				fclose($handle);
 				return true;

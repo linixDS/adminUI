@@ -29,18 +29,20 @@ class Controller extends BaseController
 	}	
 	
 
-    private function fail2ban($login) {
+    private function fail2ban($login, $address) {
 
             if(!defined('LOGGER_CLASS_LOADED')) 
                 include("./lib/LoggerClient.php");
             $log = new LoggerClient();
-            $log->saveFailedLog($login);            
+            $log->saveFailedLog($login, $address);            
 
     }
 
  	public function POST($args){
+        $sess = new SessionController();
+        
         if ((!isset($args['username'])) || (!isset($args['password'])) ){
-            $this->fail2ban('No argument');
+            $this->fail2ban('No argument', $sess->getUserIP()),;
             return $this->SendError(400, 'Bad request'); 
         }
 			
@@ -55,17 +57,19 @@ class Controller extends BaseController
         $sth = $db->prepare($conn, $query);
         $sth->execute([':username' => $args['username'], 'password' => $args['password']]);
         $data = $sth->fetch(PDO::FETCH_ASSOC);
+
         
+        $address = $sess->getUserIp();
+        if (isset($args['address']))
+            $address = $args['address'];
+
         if ($data == null) {
-            $this->fail2ban($args['username']);
+            $this->fail2ban($args['username'], $sess->getUserIP());
             return $this->SendError(401, 'Wrong password or username'); 
         }
         
 
-        $sess = new SessionController();
-        $address = null;
-        if (isset($args['address']))
-            $address = $args['address'];
+        
 
         $id = $sess->createTokenSessionId($data, $address);
         
