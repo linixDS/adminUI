@@ -38,7 +38,7 @@ class AccountsClass extends BaseClass
     
     private function LdapEditUser($accountData, $services) {
 
-        $convertName = Array("name" => "sn", "password" => "userPassword", "mail" => "mail");
+        $convertName = Array("name" => "sn", "password" => "userPassword", "mail" => "mail", "active" => "description");
 
         $username = $accountData['username'];
         $dn = "uid=".$username.",ou=users,".CONFIG_LDAP_DN;
@@ -46,6 +46,11 @@ class AccountsClass extends BaseClass
         if (isset($accountData['username']))   unset($accountData['username']);
         if (isset($accountData['id']))   unset($accountData['id']);        
         $ldapModifications = [];
+
+        if ($accountData['active'] == 1)
+            $accountData['active'] = "enabled";
+        else
+            $accountData['active'] = "disabled";
 
         foreach ($accountData as $attribute => $value) {
 
@@ -92,7 +97,6 @@ class AccountsClass extends BaseClass
     }       
 
     private function LdapAdd($accountData, $services) {
-
         $dn = "uid=".$accountData['username'].",ou=users,".CONFIG_LDAP_DN;
         if (count($services) > 0){
             $newEntry = [
@@ -101,6 +105,7 @@ class AccountsClass extends BaseClass
                 "cn" => $accountData['username'],
                 "sn" => $accountData['name'],
                 "mail" => $accountData['mail'],
+                "description" => "enabled",
                 "userPassword" => $accountData['password'],
                 "businessCategory" => $services,
             ];
@@ -281,7 +286,8 @@ class AccountsClass extends BaseClass
         $account = $accountData;
         $services = $servicesData;
 
-        if ((!isset($account['name'])) || (!isset($account['username'])) || (!isset($account['id'])) || (!isset($account['client'])) )
+        if ((!isset($account['name'])) || (!isset($account['username'])) || 
+            (!isset($account['id'])) || (!isset($account['client']))  || (!isset($account['active'])) )
             return $this->sendError(401, 'Access denied - account');
 
         if (isset($account['passowrd'])){
@@ -308,6 +314,7 @@ class AccountsClass extends BaseClass
 
         $id = $account['id'];
         $name = $account['name'];
+        $active = $account['active'];
         $client = $account['client'];
 
         $query = '';
@@ -315,7 +322,7 @@ class AccountsClass extends BaseClass
         try {
             $db->BeginTransaction($conn);
 
-            $query = "UPDATE accounts SET name=:NAMEACCOUNT";
+            $query = "UPDATE accounts SET name=:NAMEACCOUNT,active=:ACTIVE";
             if (isset($account['mail']))
                 $query .= ",mail=:MAIL";
             if (isset($account['password']))
@@ -326,6 +333,7 @@ class AccountsClass extends BaseClass
             $sth = $db->prepare($conn, $query);
 
             $sth->bindValue(':NAMEACCOUNT', $name, PDO::PARAM_STR);
+            $sth->bindValue(':ACTIVE', $active, PDO::PARAM_INT);
             $sth->bindValue(':ACCOUNTID', $id, PDO::PARAM_INT);
             if (isset($account['mail']))
                 $sth->bindValue(':MAIL', $account['mail'], PDO::PARAM_STR);

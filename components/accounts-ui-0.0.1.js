@@ -129,6 +129,7 @@ export default {
             var temp = this.Accounts.find(account => account.username == this.updateAccountData.username);
             if (temp){
                   temp.name = this.updateAccountData.name;
+                  temp.active = this.updateAccountData.active;
                   temp.mail = this.updateAccountData.mail;
             }
           }          
@@ -235,6 +236,7 @@ export default {
               this.updateAccountData = {username: '', name: ''};
               this.updateAccountData.name = account.name;
               this.updateAccountData.id = account.id;
+              this.updateAccountData.active = account.active;
               this.updateAccountData.username = account.username;
               this.updateAccountData.mail = account.mail;
               this.updateAccountData.created = account.created;
@@ -421,7 +423,6 @@ export default {
 
         console.log(JSON.stringify(data));
 
-
                   
         this.showSpinLoading = true;
 
@@ -474,6 +475,10 @@ export default {
           return true;
       }
 
+      if (this.accountData.active != this.updateAccountData.active){
+        return true;
+      }      
+
       if (this.isChangePassword){
      
         return true;
@@ -511,7 +516,7 @@ export default {
             servicesList.push(service);
       }     
 
-      var dataAccount = {id: this.accountData.id, username: this.accountData.username, name: this.accountData.name, client: this.ClientId};
+      var dataAccount = {id: this.accountData.id, active: this.accountData.active, username: this.accountData.username, name: this.accountData.name, client: this.ClientId};
       
       //var passwordHash = CryptoJS.MD5(this.password1);
       //const passwordHashString = passwordHash.toString(); 
@@ -527,12 +532,10 @@ export default {
                     account : dataAccount,
                     services: servicesList};
 
- 
-
-
       this.showSpinLoading = true;
       console.log('----[ UPDATE ACCOUNT ]-----');
       console.log(JSON.stringify(data));
+
 
       fetch(  this.ServerUrl+'accounts.php', {
             headers: { 'Content-type': 'application/json' },
@@ -821,7 +824,6 @@ export default {
   
   
     <div v-if="showAccountContent">
-
                 <h5 class="text-primary">Dane do logowania:</h5>
 
                 <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
@@ -852,7 +854,16 @@ export default {
                     <div class="col-4">
                       <input type="text" maxlength="45" :class="isValidMail ? 'form-control is-valid' : 'form-control is-invalid'" v-model="accountData.mail"  :disabled="isDisableInputs">
                     </div>
-                </div>                    
+                </div>  
+                
+                <div class="row g-3 align-items-center" style="margin-bottom: 20px;" v-if="isEditable">
+                    <div class="col-2">
+                      <label class="col-form-label">Konto aktywne  </label>
+                    </div>
+                    <div class="col-4">
+                      <input type="checkbox" true-value="1" false-value="0" class="form-check-input flex-shrink-0" v-model="accountData.active"  :disabled="isDisableInputs">
+                    </div>
+                </div>                   
                 
 
 
