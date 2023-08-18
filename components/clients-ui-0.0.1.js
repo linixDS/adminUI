@@ -13,6 +13,8 @@ export default {
               isValidNIP: false,
               isValidMail: false,
               isValidAdmins: false,
+              enableQuota: false,
+             
 
               Clients : [],
               Services: [],
@@ -116,10 +118,32 @@ export default {
               temp.city = this.updateClientData.city;
               temp.mail = this.updateClientData.mail;
               temp.admins = this.updateClientData.admins;
+              temp.quota = this.updateClientData.quota;
         }
 
 
         this.ShowClients();
+    },
+
+    ChangeChoiceService(){
+        var found = false;  
+
+        for (const item of this.clientChoiceServices) {
+            if (item == 1){
+              found = true;        
+              break;
+            }
+        }
+
+        if (found){
+            this.enableQuota = true;
+        }
+          else {
+            this.enableQuota = false;
+            this.clientData.quota = 0;
+          }
+
+
     },
 
     CopyClientData(client){
@@ -130,16 +154,20 @@ export default {
         this.updateClientData.city = client.city;
         this.updateClientData.mail = client.mail;
         this.updateClientData.admins = client.admins;
+        this.updateClientData.quota = client.quota;
     },
 
     RestoreServices(){
         this.clientServices = [];
         for (const item of this.Services) {
+            if (item.id == 1) this.enableQuota = true;
+
             let service = {id: 0, name: '', description: '', limit_accounts: 0};
             service.id = item.id;
             service.name = item.name;
             service.description = item.description;
             service.limit_accounts = item.limit_accounts;
+            service.quota = item.quota;
 
             this.clientServices.push(service);
         }
@@ -153,6 +181,7 @@ export default {
           this.isValidNIP = false;
           this.isValidMail = false;
           this.isValidAdmins = false;
+          this.enableQuota = false;
 
           this.showSpinLoading = false;
           this.ErrorMessage = '';
@@ -172,6 +201,7 @@ export default {
 
     EditClient(client) {
           console.log("---[ SHOW PAGE EDIT CLIENT ]-----");
+          this.enableQuota = false;
           this.RestoreServices();
           this.CopyClientData(client);
           this.clientData = client;
@@ -220,7 +250,12 @@ export default {
     
     SaveNewClient() {
       var servicesList = [];
+      var enableServiceSogo = false;
+
       for (var item of this.clientChoiceServices){
+
+           if (item == 1) enableServiceSogo = true;
+
            var temp =  this.clientServices.find( service => service.id == item );
            if (temp){
                let service = {id: temp.id, limit_accounts: temp.limit_accounts};
@@ -228,6 +263,7 @@ export default {
            }
       }
 
+      if (!enableServiceSogo) this.clientData.quota = 0;
 
       var data = {  token  : this.auth.SessToken, 
                     client : this.clientData,
@@ -279,7 +315,8 @@ export default {
         if ( (this.clientData.name != this.updateClientData.name) ||
             (this.clientData.city != this.updateClientData.city) ||
             (this.clientData.mail != this.updateClientData.mail) || 
-            (this.clientData.admins != this.updateClientData.admins))
+            (this.clientData.admins != this.updateClientData.admins) || 
+            (this.clientData.quota != this.updateClientData.quota) )
             return true;
 
 
@@ -317,7 +354,11 @@ export default {
         }
 
         var servicesList = [];
+        var enableServiceSogo = false;
+
         for (var item of this.clientChoiceServices){
+             if (item == 1) enableServiceSogo=true;
+
              var temp =  this.clientServices.find( service => service.id == item );
              if (temp){
                  let service = {id: temp.id, limit_accounts: temp.limit_accounts};
@@ -325,6 +366,7 @@ export default {
              }
         }
   
+        if (!enableServiceSogo) this.clientData.quota = 0;
   
         var data = {  token  : this.auth.SessToken, 
                       client : this.clientData,
@@ -334,6 +376,8 @@ export default {
         this.showSpinLoading = true;
         console.log('----[ UPDATE CLIENT ]-----');
         console.log(JSON.stringify(data));
+
+
   
         fetch(  this.ServerUrl+'clients.php', {
               headers: { 'Content-type': 'application/json' },
@@ -665,7 +709,20 @@ export default {
             <div class="col-4">
               <input type="number" min="1" max="50" :class="isValidAdmins ? 'form-control' : 'form-control is-invalid'" v-model="clientData.admins" :disabled="isDisableInputs">
             </div>
-          </div>            
+          </div>     
+          
+          <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
+            <div class="col-2">
+              <label class="col-form-label">Powierzchnia dyskowa: </label>
+            </div>
+            <div class="col-4">
+              <input type="number" min="0"  class="form-control" v-model="clientData.quota" :disabled="isDisableInputs || !enableQuota"> 
+            </div>
+            <div class="col-2">
+              MB
+            </div>
+
+          </div>             
           
           <h5 class="text-primary">Usługi:</h5>
           
@@ -676,7 +733,7 @@ export default {
                         <div class="row" style="margin-bottom: 20px;">
                               <div class="col-8">
                                   <label class="list-group-item d-flex gap-2">
-                                          <input class="form-check-input flex-shrink-0" type="checkbox" :value="service.id" v-model="clientChoiceServices">
+                                          <input class="form-check-input flex-shrink-0" type="checkbox" :value="service.id" v-model="clientChoiceServices" @change="ChangeChoiceService">
                                           <span>{{ service.name }}
                                           <small class="d-block text-body-secondary">{{ service.description }}</small>
                                           </span>
@@ -689,7 +746,6 @@ export default {
                               <div class="col">
                                   <input type="number" class="form-control" v-model="service.limit_accounts" :key="index" :disabled="isDisableInputs">
                               </div> 
-
                         </div>
                     </div>
 

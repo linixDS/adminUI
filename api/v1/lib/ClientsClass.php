@@ -30,7 +30,8 @@ class ClientsClass extends BaseClass
             return $this->sendError(501, $db->getLastError());
 
         try {
-            $query = "SELECT client_id as id,name,nip,city,mail,limit_admins as admins FROM clients ORDER BY name;";
+            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,IF(size>0,size div 1024,0) as quota FROM clients ";
+            $query.= "LEFT JOIN clients_quota ON (clients_quota.client_id=clients.client_id) ORDER BY name;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute();
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -73,7 +74,8 @@ class ClientsClass extends BaseClass
             return $this->sendError(501, $db->getLastError());
 
         try {
-            $query = "SELECT client_id as id,name,nip,city,mail,limit_admins as admins FROM clients WHERE client_id=? LIMIT 1;";
+            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,IF(size>0,size div 1024,0) as quota FROM clients ";
+            $query.= "LEFT JOIN clients_quota ON (clients_quota.client_id=clients.client_id) WHERE client_id=? LIMIT 1;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute([$cid]);
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -98,7 +100,7 @@ class ClientsClass extends BaseClass
         $services = $serviceData;
 
         if ((!isset($client['name'])) || (!isset($client['nip'])) || (!isset($client['city'])) || 
-            (!isset($client['mail'])) || (!isset($client['admins'])))
+            (!isset($client['mail'])) || (!isset($client['admins'])) || (!isset($client['quota'])))
             return $this->sendError(401, 'Access denied - client');
 
         $sess = new SessionController();
@@ -120,6 +122,8 @@ class ClientsClass extends BaseClass
         $city = $client['city'];
         $mail = $client['mail'];
         $admins = $client['admins'];
+        $quota = $client['quota'];
+
         $query = '';
 
         try {
@@ -138,6 +142,15 @@ class ClientsClass extends BaseClass
 
             $client_id = $db->GetLastInsertId($conn);
          
+            if ($quota > 0){
+                $quota = $quota * 1024;
+
+                $query = "INSERT INTO clients_quota (client_id,size) VALUES (?,?);";
+                $sth2 = $db->prepare($conn, $query);
+                $sth2->execute([$client_id, $quota]);
+            }
+
+
             $query = "INSERT INTO clients_services (client_id,service_id,limit_accounts) VALUES ";
             for ($i = 0; $i < count($services); $i++) {
                 $service_id = $services[$i]['id'];
@@ -182,7 +195,7 @@ class ClientsClass extends BaseClass
         $services = $servicesData;
 
         if ((!isset($client['name'])) || (!isset($client['nip'])) || (!isset($client['city'])) || 
-            (!isset($client['mail'])) || (!isset($client['admins'])))
+            (!isset($client['mail'])) || (!isset($client['admins'])) || (!isset($client['quota'])) )
             return $this->sendError(401, 'Access denied - client');
 
         $sess = new SessionController();
@@ -205,6 +218,7 @@ class ClientsClass extends BaseClass
         $city = $client['city'];
         $mail = $client['mail'];
         $admins = $client['admins'];
+        $quota = $client['quota'];
 
         $query = '';
 
@@ -222,7 +236,13 @@ class ClientsClass extends BaseClass
 
             $sth->execute();
             
-            
+            if ($quota > 0){
+                $quota = $quota * 1024;
+
+                $query = "UPDATE clients_quota SET size=? WHERE client_id=? LIMIT 1;";
+                $sth = $db->prepare($conn, $query);
+                $sth2->execute([$quota, $id]);
+            }            
 
             $classService = new ServicesClass(null);
             $currentServices = $classService->getClientServicesResultData($id);
@@ -298,11 +318,14 @@ class ClientsClass extends BaseClass
         try {
             $db->BeginTransaction($conn);
 
+            $query = "DELETE FROM clients_quota WHERE client_id IN (SELECT client_id FROM clients WHERE nip=?);";
+            $sth = $db->prepare($conn, $query);
+            $sth->execute([$nip]);    
+
             $query = "DELETE FROM clients WHERE nip=? LIMIT 1;";
             $sth = $db->prepare($conn, $query);
-
             $sth->execute([$nip]);
-            
+
             $db->Commit($conn);
             return $this->sendResult(200, $clientData);
         } catch (Exception $e) {

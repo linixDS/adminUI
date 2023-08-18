@@ -23,6 +23,33 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON admin_panel.* TO 'adminUI'@'localhost';
 FLUSH PRIVILEGES;
 
 
+DROP TABLE IF EXISTS `accounts_quota`;
+CREATE TABLE `admin_panel`.`accounts_quota` (
+  `account_id` INT UNSIGNED NOT NULL,
+  `size` INT UNSIGNED NOT NULL DEFAULT 0,
+  INDEX `fk_account_quota_1_idx` (`account_id` ASC) VISIBLE,
+  CONSTRAINT `fk_account_quota_1`
+    FOREIGN KEY (`account_id`)
+    REFERENCES `admin_panel`.`accounts` (`account_id`)
+    ON DELETE RESTRICT
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+DROP TABLE IF EXISTS `clients_quota`;
+CREATE TABLE `admin_panel`.`clients_quota` (
+  `client_id` INT UNSIGNED NOT NULL,
+  `size` INT UNSIGNED NOT NULL DEFAULT 0,
+  INDEX `fk_clients_quota_1_idx` (`client_id` ASC) VISIBLE,
+  CONSTRAINT `fk_clients_quota_1`
+    FOREIGN KEY (`client_id`)
+    REFERENCES `admin_panel`.`clients` (`client_id`)
+    ON DELETE RESTRICT
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+
 DROP TABLE IF EXISTS `accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;

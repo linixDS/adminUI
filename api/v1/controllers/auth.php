@@ -40,9 +40,8 @@ class Controller extends BaseController
 
  	public function POST($args){
         $sess = new SessionController();
-        
         if ((!isset($args['username'])) || (!isset($args['password'])) ){
-            $this->fail2ban('No argument', $sess->getUserIP()),;
+            $this->fail2ban('No argument', $sess->getUserIP());
             return $this->SendError(400, 'Bad request'); 
         }
 			
