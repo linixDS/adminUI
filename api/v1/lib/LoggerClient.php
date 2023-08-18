@@ -163,7 +163,7 @@
 					$handle = fopen($filename, "w");
 			
 			if ($handle){
-				$txt = sprintf("[%s]\t%s\tFAILED AUTH: %s\r\n", date("Y-m-d H:i:s", time()), $this->request_from, $login) ;
+				$txt = sprintf("%s - %s - FAILED AUTH: %s\r\n", $this->request_from, date("Y-m-d H:i:s", time()), $login) ;
 				fwrite($handle, $txt);
 				fclose($handle);
 				return true;
