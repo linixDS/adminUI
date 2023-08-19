@@ -165,6 +165,9 @@ class ClientsClass extends BaseClass
 
             $sth2 = $db->prepare($conn, $query);
             $sth2->execute();
+
+            $event = new EventClass(null);
+            $event->event_add_client($db, $conn, $sess->getUserName(), "Add new client ".$name);              
              
             $db->Commit($conn);
 
@@ -278,6 +281,9 @@ class ClientsClass extends BaseClass
 
 
 
+            $event = new EventClass(null);
+            $event->event_change_client($db, $conn, $sess->getUserName(), "Change client data ".$name);                
+
             $db->Commit($conn);
             return $this->sendResult(200, $client);
         } catch (Exception $e) {
@@ -331,6 +337,9 @@ class ClientsClass extends BaseClass
             $query = "DELETE FROM clients WHERE nip=? LIMIT 1;";
             $sth = $db->prepare($conn, $query);
             $sth->execute([$nip]);
+
+            $event = new EventClass(null);
+            $event->event_delete_client($db, $conn, $sess->getUserName(), "Delete client ".$client['name']);                  
 
             $db->Commit($conn);
             return $this->sendResult(200, $clientData);

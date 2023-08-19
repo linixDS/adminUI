@@ -52,6 +52,8 @@ class Controller extends BaseController
         if ($conn == null)
             return $this->SendError(500, $db->getLastError()); 
         
+        $event = new EventClass(null);
+        
         $query = "SELECT admin_id as id,name,username,type,client_id,mail FROM admins WHERE username=:username AND password=md5(:password);";
         $sth = $db->prepare($conn, $query);
         $sth->execute([':username' => $args['username'], 'password' => $args['password']]);
@@ -64,6 +66,7 @@ class Controller extends BaseController
 
         if ($data == null) {
             $this->fail2ban($args['username'], $sess->getUserIP());
+            $event->event_login_fail($db, $conn, $args['username'], "Address IP ".$address);
             return $this->SendError(401, 'Wrong password or username'); 
         }
         
@@ -71,6 +74,7 @@ class Controller extends BaseController
         
 
         $id = $sess->createTokenSessionId($data, $address);
+        $event->event_login_success($db, $conn, $args['username'], "Address IP ".$address);
         
         $result = array();
         $result['token'] = $id;

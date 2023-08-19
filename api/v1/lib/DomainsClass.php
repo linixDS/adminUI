@@ -146,6 +146,8 @@ class DomainsClass extends BaseClass
 
             $sth->execute();
 
+            $event = new EventClass(null);
+            $event->event_add_domain($db, $conn, $domainData['name'], "Add new domain from ".$sess->getUserName());            
 
             $db->Commit($conn);
 
@@ -168,13 +170,11 @@ class DomainsClass extends BaseClass
     {
         if (!isset($token))
             return $this->sendError(401, 'Access denied - token 2a');
-        if (!isset($domainData))
-            return $this->sendError(401, 'Access denied - data');
 
-        $domain = $domainData['domain'];
-
-        if (!isset($domain['name']))
+        if (!isset($domainData['name']))
             return $this->sendError(401, 'Access denied - domain');
+
+   
 
         $sess = new SessionController();
         $res = $sess->isAuthClient($token);
@@ -190,7 +190,7 @@ class DomainsClass extends BaseClass
         if ($conn == null)
             return $this->sendError(501, $db->getLastError());
 
-        $name = $domain['name'];
+        $name = $domainData['name'];
 
         $query = '';
 
@@ -202,10 +202,14 @@ class DomainsClass extends BaseClass
 
             $sth->execute([$name]);
 
+            $event = new EventClass(null);
+            $event->event_add_domain($db, $conn, $name, "Delete domain from ".$sess->getUserName());            
+
+
             $db->Commit($conn);
 
           
-            return $this->sendResult(201, $domain);            
+            return $this->sendResult(201, $domainData);            
         } catch (Exception $e) {
             $db->Rollback($conn);
 

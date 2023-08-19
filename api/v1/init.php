@@ -41,6 +41,7 @@ include ("./config/config.php");
 include ("./config/ldap.php");
 include ("./config/db.php");
 include ("./core/Route.php");
+include ("./lib/EventClass.php");
 
 
 ?>

@@ -50,19 +50,19 @@ CREATE TABLE `admin_panel`.`clients_quota` (
 ENGINE = InnoDB;
 
 CREATE TABLE `admin_panel`.`jobs_work` (
+  `job_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `created` VARCHAR(45) NOT NULL DEFAULT 'NOW()',
   `runscript` VARCHAR(45) NOT NULL,
-  `scriptargs` VARCHAR(120) NULL,
-  `username` VARCHAR(45) NOT NULL,
-  `desc` TEXT(1024) NULL)
+  `scriptargs` VARCHAR(255) NULL,
+  `username` VARCHAR(65) NOT NULL,
+  `desc` TEXT(1024) NULL,
+  PRIMARY KEY (`job_id`))
 ENGINE = MyISAM;
-
-
 DROP TRIGGER IF EXISTS `admin_panel`.`jobs_work_AFTER_DELETE`;
 
 DELIMITER $$
 USE `admin_panel`$$
-CREATE TRIGGER `admin_panel`.`jobs_work_AFTER_DELETE` AFTER DELETE ON `jobs_work` FOR EACH ROW
+CREATE DEFINER=`root`@`localhost` TRIGGER `admin_panel`.`jobs_work_AFTER_DELETE` AFTER DELETE ON `jobs_work` FOR EACH ROW
 BEGIN
 	INSERT INTO `admin_panel`.`events_logs` (event_created, event_type, username, event_desc) VALUES
     (NOW(), 'removeAccount', OLD.username, OLD.desc);
@@ -70,9 +70,10 @@ END$$
 DELIMITER ;
 
 
+
 CREATE TABLE `admin_panel`.`events_log` (
-  `event_created` INT NOT NULL DEFAULT NOW(),
-  `event_type` ENUM('addClient', 'updateClient', 'deleteClient', 'changePassword', 'addDomain', 'updateDomain', 'deleteDomain', 'addAccount', 'updateAccount', 'removeAccout', 'login', 'logout', 'fail-login') NOT NULL,
+  `event_created` DATETIME DEFAULT NOW(),
+  `event_type` ENUM('addClient', 'updateClient', 'deleteClient', 'changePassword', 'addDomain', 'updateDomain', 'deleteDomain', 'addAccount', 'updateAccount', 'removeAccount', 'login', 'logout', 'fail-login') NOT NULL,
   `username` VARCHAR(65) NOT NULL,
   `event_desc` TEXT(1024) NOT NULL,
   INDEX `event_type_IDX` (`event_type` ASC) VISIBLE)

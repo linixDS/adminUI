@@ -5,7 +5,6 @@ define('BASE_CLASS_LOADED', true);
 
 
 class BaseClass {
-  
 
     public function SaveResponde($value){
         $logger = new LoggerClient();

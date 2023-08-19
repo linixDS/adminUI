@@ -266,6 +266,10 @@ class AccountsClass extends BaseClass
                 $sth2->execute();
             }
            
+
+            $event = new EventClass(null);
+            $event->event_add_account($db, $conn, $accountData['username'], "Add new account from ".$sess->getUserName());
+
             $this->LdapAdd($accountData, $serviceAdd);
 
 
@@ -420,8 +424,19 @@ class AccountsClass extends BaseClass
 
                 $job = new JobClass(null);
                 $job->removeAccount($db, $conn, $account['username'], $adminName);
-            }              
+            }       
+            
+            $event = new EventClass(null);
+            if ($disableSOGo == true)
+                $desc = "Change account (disable SOGo) from admin ".$sess->getUserName()." - remove mail";
+            else
+                $desc = "Change account from admin ".$sess->getUserName();
 
+            $event->event_change_account($db, $conn, $account['username'], $desc);
+            if (isset($account['password']))
+                $event->event_change_password($db, $conn, $account['username'], "Change password from ".$sess->getUserName());
+            
+            
             $this->LdapEditUser($account, $serviceChange);
 
             $db->Commit($conn);
@@ -471,6 +486,10 @@ class AccountsClass extends BaseClass
             $sth->bindValue(':USERNAME', $username, PDO::PARAM_STR);
 
             $sth->execute();
+
+
+            $event = new EventClass(null);
+            $event->event_delete_account($db, $conn, $accountData['username'], "Remove account from ".$sess->getUserName());
 
             $this->LdapDeleteUser($accountData);
 
