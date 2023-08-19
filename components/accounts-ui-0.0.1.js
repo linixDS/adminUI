@@ -11,6 +11,7 @@ export default {
                 Domains : [],
                 Accounts : [],
                 Services : [],
+                CurrentQuota : [],
                 currentSessServiceLimit: [],
                 ChoiceServices: [],
                 cacheChoiceServices: [],
@@ -19,6 +20,7 @@ export default {
                 
                 ErrorMessage: '',
                 SuccessMessage: '',
+                WarningMessage: '',
                     
 
                 isEditable: false,
@@ -66,6 +68,8 @@ export default {
               else
                   return this.Accounts;
       },
+
+ 
 
       CheckForm:function() {
               if  (this.accountData.username.length < 3) {
@@ -130,11 +134,22 @@ export default {
             if (temp){
                   temp.name = this.updateAccountData.name;
                   temp.active = this.updateAccountData.active;
+                  temp.quota = this.updateAccountData.quota;
+                  temp.bytes = this.updateAccountData.bytes;
                   temp.mail = this.updateAccountData.mail;
             }
           }          
           this.ShowAccounts();
       },
+
+      onChangeQuota(){
+        if (this.accountData.quota < this.accountData.bytes)
+            this.accountData.quota = this.accountData.bytes;
+
+        if (this.accountData.quota > this.CurrentQuota.free)
+            this.accountData.quota = this.CurrentQuota.free;
+
+      },         
 
       ReloadServices(){
           for (const item of this.currentSessServiceLimit){
@@ -172,16 +187,23 @@ export default {
           }
       },
 
+
       handleCheckboxChange(event) {
           const id = event.target.value;
           const state = event.target.checked;
 
           console.log('event: '+id+' state: '+state);
           if (id == 1){
-                if (state)
+                if (state){
                   this.isNeedMail = false;
-                else
+                  if (this.isEditable)
+                      this.WarningMessage = '';
+                }
+                else{
                   this.isNeedMail = true;
+                  if (this.isEditable)
+                    this.WarningMessage = 'OSTRZEŻENIE: Wyłączenie usługi SOGo spowoduje trwałe usunięcie skrzynki pocztowej !';
+                }
           }
 
           const limits = this.currentSessServiceLimit.find(service => service.id == id);
@@ -207,6 +229,7 @@ export default {
         console.log('Change client: '+this.ClientId);
         this.GetDomains(this.ClientId);
         this.GetServicesClient(this.ClientId);
+        this.GetQuota(this.ClientId);
       },
 
       ChangeDomain(){
@@ -242,6 +265,8 @@ export default {
               this.updateAccountData.created = account.created;
               this.updateAccountData.client = this.ClientId;
               this.updateAccountData.domain = this.DomainId;
+              this.updateAccountData.quota = account.quota;
+              this.updateAccountData.bytes = account.bytes;
 
               for (const choice of this.ChoiceServices){
                     this.cacheChoiceServices.push(choice);
@@ -318,6 +343,8 @@ export default {
         this.CopyData(null);
         this.ErrorMessage = '';
         this.SuccessMessage ='';
+        this.WarningMessage = '';
+
         this.ChoiceServices = [];
         this.updateAccountData = {};
 
@@ -330,7 +357,7 @@ export default {
         this.isValidMail = false;
         this.isChangePassword = true;
         this.isNeedMail = true;
-        this.accountData = {username: '', name: '', mail: ''};
+        this.accountData = {username: '', name: '', mail: '', quota: '0', bytes: '0'};
 
         this.password1 = '';
         this.password2 = '';
@@ -365,6 +392,7 @@ export default {
       this.showSpinLoading = false;
       this.ErrorMessage = '';
       this.SuccessMessage = '';
+      this.WarningMessage = '';
 
       this.password1 = 'password';
       this.password2 = 'password';
@@ -376,6 +404,8 @@ export default {
     },    
     
     ShowDeletePage() {
+      this.WarningMessage = '';
+
       this.showSpinLoading = false;
       this.showButtonPrev = true;
       this.showAccountContent = false;
@@ -396,7 +426,7 @@ export default {
     },
     
     SaveNewAccount() {
-        console.log("---[ CREATE NEW ACCOUNT ]-----");
+        console.log('---[ CREATE NEW ACCOUNT ]-----');
         var servicesList = [];
 
         for (var item of this.ChoiceServices){
@@ -411,9 +441,12 @@ export default {
         this.accountData.username = this.accountData.username+this.DomainName;
         if (!this.isNeedMail)
           this.accountData.mail = this.accountData.username;
+        else
+          delete this.accountData.quota;
 
         this.accountData.client = this.ClientId;
         this.accountData.domain = this.DomainId;
+
 
         var data = {  token  : this.auth.SessToken, 
                       account : this.accountData,
@@ -423,7 +456,7 @@ export default {
 
         console.log(JSON.stringify(data));
 
-                  
+                 
         this.showSpinLoading = true;
 
 
@@ -475,6 +508,11 @@ export default {
           return true;
       }
 
+      if (this.accountData.quota != this.updateAccountData.quota && !this.isNeedMail){
+      
+        return true;
+      }      
+
       if (this.accountData.active != this.updateAccountData.active){
         return true;
       }      
@@ -508,7 +546,6 @@ export default {
         return;
       }
 
-      console.log("sAVED");
       var servicesList = [];
 
       for (var item of this.ChoiceServices){
@@ -516,13 +553,17 @@ export default {
             servicesList.push(service);
       }     
 
-      var dataAccount = {id: this.accountData.id, active: this.accountData.active, username: this.accountData.username, name: this.accountData.name, client: this.ClientId};
       
+      var dataAccount = {id: this.accountData.id, active: this.accountData.active, username: this.accountData.username, name: this.accountData.name, client: this.ClientId};
       //var passwordHash = CryptoJS.MD5(this.password1);
       //const passwordHashString = passwordHash.toString(); 
 
-      if (!this.isNeedMail)
+      if (!this.isNeedMail) {
         dataAccount.mail = this.accountData.username;
+        dataAccount.quota = this.accountData.quota;
+      }
+
+
       if (this.isChangePassword)
         dataAccount.password = this.password1;
 
@@ -713,6 +754,40 @@ export default {
                                 this.ErrorMessage = 'Wyjątek: ' + error;
                     });	  
         },  
+
+        GetQuota(clientId) {
+          console.log('GET QUOTA');
+          var url = this.ServerUrl+'quota.php?token='+this.auth.SessToken+'&client='+clientId;
+          console.log(url);
+              fetch( url)
+                  .then((res) => {
+                          console.log('StatusCode: ' + res.status);
+                          return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+                  })
+                  .then((json) => {
+                          console.log(json);
+
+                          if (json.error) {
+                          console.log(json.error);
+                          this.ErrorMessage = json.error.message;
+                          } else {
+                          
+                              this.CurrentQuota = json.result.quota;
+                              console.log('Quota');
+                              console.log(this.CurrentQuota);
+                          }
+                  })
+                  .catch((error) => {
+                          console.log(error);
+                          if (error == "TypeError: Failed to fetch")
+                          this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
+                          else
+                          if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                              this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                          else
+                              this.ErrorMessage = 'Wyjątek: ' + error;
+                  });	  
+      },          
         
         GetServicesAccount(accountId) {
               var url = this.ServerUrl+'services.php?token='+this.auth.SessToken+'&account='+accountId;
@@ -893,7 +968,31 @@ export default {
                     </div>
                 </div> 
                 
+                <div style="margin-bottom: 20px;" v-if="!isNeedMail"> 
+                    <h5 class="text-primary">Konto pocztowy:</h5>
+                    <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
+                      <div class="col-2">
+                        <label class="col-form-label">Wielkość skrzynki: </label>
+                      </div>
+                      <div class="col-2">
+                        <input type="number" @change="onChangeQuota" :min="accountData.bytes" :max="CurrentQuota.free" class="form-control" v-model="accountData.quota" :disabled="isDisableInputs"> 
+                      </div>
+                      <div class="col-4">
+                        MB <small class="text-success">(dostępne {{ CurrentQuota.free }} z {{ CurrentQuota.limit }} MB)</small>
+                      </div>
+                    </div>   
+                </div>               
+                
+
+
                 <h5 class="text-primary">Podłączenie do usług:</h5>
+
+
+
+                <!--- Display WarningMessage message --->
+                <div class="alert alert-warning" v-if="WarningMessage" style="margin-bottom: 20px;">
+                  {{ WarningMessage }}
+                </div> 
 
 
                 <div class="row g-3" style="margin-bottom: 20px;">
@@ -919,9 +1018,10 @@ export default {
                         </div>
                     </div>
                 </div>     
+              
                 
                 
-                <div class="row g-3 align-items-center">
+                <div class="row g-3 align-items-center" style="margin-bottom: 40px">
                     <div class="col-auto">
                       <button class="btn btn-success" :disabled="isDisableInputs" v-if="CheckForm" v-on:click="SaveData">
                         <div v-if="showSpinLoading" class="spinner-border text-white spinner-border-sm" role="status"></div>&nbsp;&nbsp;Zapisz
@@ -936,7 +1036,14 @@ export default {
                         Usuń
                       </button>
                     </div>             
-                </div>                 
+                </div> 
+                
+                
+
+                <div class="text-warning" v-if="isEditable">
+                  <div><b>OSTRZEŻENIE !!!</b></div>
+                  <div>Wyłączenie usługi SOGo spowoduje trwałe usnięcie konta pocztowego.</div>
+                </div>
 
     </div>
       

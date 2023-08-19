@@ -26,7 +26,8 @@ FLUSH PRIVILEGES;
 DROP TABLE IF EXISTS `accounts_quota`;
 CREATE TABLE `admin_panel`.`accounts_quota` (
   `account_id` INT UNSIGNED NOT NULL,
-  `size` INT UNSIGNED NOT NULL DEFAULT 0,
+  `size` BIGINT(20) NOT NULL DEFAULT 0,
+  `use_bytes` BIGINT(20) NOT NULL DEFAULT 0,
   INDEX `fk_account_quota_1_idx` (`account_id` ASC) VISIBLE,
   CONSTRAINT `fk_account_quota_1`
     FOREIGN KEY (`account_id`)
@@ -39,7 +40,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `clients_quota`;
 CREATE TABLE `admin_panel`.`clients_quota` (
   `client_id` INT UNSIGNED NOT NULL,
-  `size` INT UNSIGNED NOT NULL DEFAULT 0,
+  `size` BIGINT(20) NOT NULL DEFAULT 0,
   INDEX `fk_clients_quota_1_idx` (`client_id` ASC) VISIBLE,
   CONSTRAINT `fk_clients_quota_1`
     FOREIGN KEY (`client_id`)
@@ -47,6 +48,36 @@ CREATE TABLE `admin_panel`.`clients_quota` (
     ON DELETE RESTRICT
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE TABLE `admin_panel`.`jobs_work` (
+  `created` VARCHAR(45) NOT NULL DEFAULT 'NOW()',
+  `runscript` VARCHAR(45) NOT NULL,
+  `scriptargs` VARCHAR(120) NULL,
+  `username` VARCHAR(45) NOT NULL,
+  `desc` TEXT(1024) NULL)
+ENGINE = MyISAM;
+
+
+DROP TRIGGER IF EXISTS `admin_panel`.`jobs_work_AFTER_DELETE`;
+
+DELIMITER $$
+USE `admin_panel`$$
+CREATE TRIGGER `admin_panel`.`jobs_work_AFTER_DELETE` AFTER DELETE ON `jobs_work` FOR EACH ROW
+BEGIN
+	INSERT INTO `admin_panel`.`events_logs` (event_created, event_type, username, event_desc) VALUES
+    (NOW(), 'removeAccount', OLD.username, OLD.desc);
+END$$
+DELIMITER ;
+
+
+CREATE TABLE `admin_panel`.`events_log` (
+  `event_created` INT NOT NULL DEFAULT NOW(),
+  `event_type` ENUM('addClient', 'updateClient', 'deleteClient', 'changePassword', 'addDomain', 'updateDomain', 'deleteDomain', 'addAccount', 'updateAccount', 'removeAccout', 'login', 'logout', 'fail-login') NOT NULL,
+  `username` VARCHAR(65) NOT NULL,
+  `event_desc` TEXT(1024) NOT NULL,
+  INDEX `event_type_IDX` (`event_type` ASC) VISIBLE)
+ENGINE = MyISAM;
+
 
 
 

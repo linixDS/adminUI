@@ -241,7 +241,13 @@ class ClientsClass extends BaseClass
 
                 $query = "UPDATE clients_quota SET size=? WHERE client_id=? LIMIT 1;";
                 $sth = $db->prepare($conn, $query);
-                $sth2->execute([$quota, $id]);
+                $sth->execute([$quota, $id]);
+
+                if ($sth->rowCount() == 0){
+                    $query = "INSERT INTO clients_quota (client_id,size) VALUES (?,?);";
+                    $sth = $db->prepare($conn, $query);
+                    $sth->execute([$id,$quota]);
+                }
             }            
 
             $classService = new ServicesClass(null);

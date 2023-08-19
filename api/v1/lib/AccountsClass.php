@@ -150,7 +150,9 @@ class AccountsClass extends BaseClass
             else
                 $cid = $sess->GetClientID();
 
-            $query = "SELECT account_id as id,username,name,active,mail,created FROM accounts WHERE domain_id=? AND client_id=? ORDER BY username;";
+            $query = "SELECT accounts.account_id as id,username,name,active,mail,created,IF(size>0,size div 1024,0) as quota,IF(use_bytes>0,(use_bytes div 1024)+1,0) as bytes FROM accounts ";
+            $query.= "LEFT JOIN accounts_quota ON (accounts_quota.account_id=accounts.account_id) ";
+            $query.= "WHERE domain_id=? AND client_id=? ORDER BY username;";
             $sth = $db->prepare($conn, $query);
             $sth->execute([$domain, $cid]);
 
@@ -238,6 +240,16 @@ class AccountsClass extends BaseClass
 
             $account_id = $db->GetLastInsertId($conn);
 
+            if (isset($accountData['quota'])){
+                $quota = $accountData['quota'];
+               
+                $quota = $quota * 1024;
+
+                $query = "INSERT INTO accounts_quota (account_id,size) VALUES (?,?);";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$account_id,$quota]);
+            }              
+
             if (count($services) > 0){
                 $query = "INSERT INTO accounts_services (account_id,service_id) VALUES ";
                 for ($i = 0; $i < count($services); $i++) {
@@ -301,6 +313,9 @@ class AccountsClass extends BaseClass
         if ($res == false)
             return $this->sendError(401, 'Access denied - wrong token');
 
+        $adminName = $sess->GetUserName();
+        if ($adminName == null)
+            return $this->sendError(401, 'Access denied - wrong admin name');
 
         $db = new DB();
         $conn = $db->getConnection();
@@ -341,6 +356,22 @@ class AccountsClass extends BaseClass
                 $sth->bindValue(':PASSWORD', $password, PDO::PARAM_STR);
 
             $sth->execute();
+
+            if (isset($account['quota'])){
+                $quota = $account['quota'];
+               
+                $quota = $quota * 1024;
+
+                $query = "UPDATE accounts_quota SET size=? WHERE account_id=? LIMIT 1;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$quota, $id]);
+
+                if ($sth->rowCount() == 0){
+                    $query = "INSERT INTO accounts_quota (account_id,size) VALUES (?,?);";
+                    $sth = $db->prepare($conn, $query);
+                    $sth->execute([$id,$quota]);
+                }
+            }              
                         
 
             $classService = new ServicesClass(null);
@@ -363,11 +394,14 @@ class AccountsClass extends BaseClass
                     }
             }
 
+
+            $disableSOGo = false;
             if (count($actions['delete']) > 0){
                     $values = $actions['delete']; 
                     foreach ($values as $item) {
                         $key = array_search($item['id'], array_column($allService, 'id'));
                         if ($key !== false) {
+                            if ($item['id'] == 1) $disableSOGo =true;
                             $service_name = $allService[$key]['name'];
 
                             array_push($servicesDelName, $service_name);
@@ -378,6 +412,15 @@ class AccountsClass extends BaseClass
 
             $serviceChange['add'] = $servicesAddName;
             $serviceChange['del'] = $servicesDelName;
+
+            if ($disableSOGo == true){
+                $query = "DELETE FROM accounts_quota  WHERE account_id=? LIMIT 1;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$id]);
+
+                $job = new JobClass(null);
+                $job->removeAccount($db, $conn, $account['username'], $adminName);
+            }              
 
             $this->LdapEditUser($account, $serviceChange);
 
@@ -419,9 +462,6 @@ class AccountsClass extends BaseClass
       
         $query = '';
 
-        $names = explode('@',$username);
-        
-        $mailLocation = MAIL_PATH.'/'.$names[1].'/'.$names[0];
 
         try {
             
@@ -432,12 +472,7 @@ class AccountsClass extends BaseClass
 
             $sth->execute();
 
-
             $this->LdapDeleteUser($accountData);
-
-            if (is_dir($mailLocation)){
-                system("rm -rf ".escapeshellarg($mailLocation));
-            }
 
             return $this->sendResult(200, $accountData);
         } catch (Exception $e) {

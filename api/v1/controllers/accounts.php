@@ -5,7 +5,9 @@ include("./core/DB.php");
 include("./core/Session.php");
 include("./lib/AccountsClass.php");
 include("./lib/ServicesClass.php");
+include("./lib/QuotaClass.php");
 include("./lib/LdapClass.php");
+include("./lib/JobClass.php");
 
 class Controller extends BaseController
 {
