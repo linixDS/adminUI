@@ -22,6 +22,7 @@ CREATE USER 'adminUI'@'localhost' IDENTIFIED BY 'adminUI';
 GRANT SELECT,INSERT,UPDATE,DELETE ON admin_panel.* TO 'adminUI'@'localhost';
 FLUSH PRIVILEGES;
 
+USE admin_panel;
 
 DROP TABLE IF EXISTS `accounts_quota`;
 CREATE TABLE `admin_panel`.`accounts_quota` (
@@ -49,9 +50,11 @@ CREATE TABLE `admin_panel`.`clients_quota` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+DROP TABLE IF EXISTS `jobs_work`;
 CREATE TABLE `admin_panel`.`jobs_work` (
   `job_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `created` VARCHAR(45) NOT NULL DEFAULT 'NOW()',
+  `actived` VARCHAR(45) NOT NULL DEFAULT 'NOW()',
   `runscript` VARCHAR(45) NOT NULL,
   `scriptargs` VARCHAR(255) NULL,
   `username` VARCHAR(65) NOT NULL,
@@ -61,7 +64,6 @@ ENGINE = MyISAM;
 DROP TRIGGER IF EXISTS `admin_panel`.`jobs_work_AFTER_DELETE`;
 
 DELIMITER $$
-USE `admin_panel`$$
 CREATE DEFINER=`root`@`localhost` TRIGGER `admin_panel`.`jobs_work_AFTER_DELETE` AFTER DELETE ON `jobs_work` FOR EACH ROW
 BEGIN
 	INSERT INTO `admin_panel`.`events_logs` (event_created, event_type, username, event_desc) VALUES
@@ -70,7 +72,7 @@ END$$
 DELIMITER ;
 
 
-
+DROP TABLE IF EXISTS `events_log`;
 CREATE TABLE `admin_panel`.`events_log` (
   `event_created` DATETIME DEFAULT NOW(),
   `event_type` ENUM('addClient', 'updateClient', 'deleteClient', 'changePassword', 'addDomain', 'updateDomain', 'deleteDomain', 'addAccount', 'updateAccount', 'removeAccount', 'login', 'logout', 'fail-login') NOT NULL,
@@ -105,20 +107,7 @@ CREATE TABLE `accounts` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `accounts`
---
 
-LOCK TABLES `accounts` WRITE;
-/*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
-INSERT INTO `accounts` VALUES
-(1,1,'d.marcisz@salonyhoff.pl','test',5,7,'test1','2023-08-05 22:56:15',NULL),
-(2,0,'pkul@salonyhoff.pl','test',5,7,'test2','2023-08-05 22:56:41',NULL),
-(3,1,'test@salonyhoff.pl','16d7a4fca7442dda3ad93c9a726597e4',5,7,'test','2023-08-06 10:26:41',NULL),
-(4,1,'test@heban.net','16d7a4fca7442dda3ad93c9a726597e4',4,7,'Test','2023-08-06 10:28:24',NULL),
-(5,1,'workflow@salonyhoff.pl','16d7a4fca7442dda3ad93c9a726597e4',5,7,'Workflow','2023-08-06 21:12:33',NULL);
-/*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `accounts_services`
@@ -137,18 +126,6 @@ CREATE TABLE `accounts_services` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `accounts_services`
---
-
-LOCK TABLES `accounts_services` WRITE;
-/*!40000 ALTER TABLE `accounts_services` DISABLE KEYS */;
-INSERT INTO `accounts_services` VALUES
-(3,1),
-(4,1),
-(5,2);
-/*!40000 ALTER TABLE `accounts_services` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `admins`
@@ -181,11 +158,7 @@ CREATE TABLE `admins` (
 LOCK TABLES `admins` WRITE;
 /*!40000 ALTER TABLE `admins` DISABLE KEYS */;
 INSERT INTO `admins` VALUES
-(1,NULL,'GlobalAdmin','0ec02c60874b9c472bf80a568fba27d3','global','Dariusz Marcisz','2023-01-01 12:00:00','2023-08-05 21:07:30','test@mail.pl'),
-(16,7,'admin@3331111111','16d7a4fca7442dda3ad93c9a726597e4','dedicated','Heban','2023-08-05 05:59:49',NULL,''),
-(17,7,'admin2@3331111111','16d7a4fca7442dda3ad93c9a726597e4','dedicated','Heban 2','2023-08-05 07:46:03',NULL,''),
-(20,NULL,'pkul','16d7a4fca7442dda3ad93c9a726597e4','global','Paweł','2023-08-05 08:22:43',NULL,'');
-/*!40000 ALTER TABLE `admins` ENABLE KEYS */;
+(1,NULL,'GlobalAdmin','0ec02c60874b9c472bf80a568fba27d3','global','Dariusz Marcisz','2023-01-01 12:00:00','2023-08-05 21:07:30','test@mail.pl');
 UNLOCK TABLES;
 
 --
@@ -208,19 +181,6 @@ CREATE TABLE `clients` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `clients`
---
-
-LOCK TABLES `clients` WRITE;
-/*!40000 ALTER TABLE `clients` DISABLE KEYS */;
-INSERT INTO `clients` VALUES
-(2,'2222222222','asdastest233aaa','test222fggsss','test2@com.pl',2),
-(7,'3331111111','heban','Kraków','heban@net.pl',2),
-(8,'6999444778','ai lab','Kraków','biuro@ailab.pl',5);
-/*!40000 ALTER TABLE `clients` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `clients_services`
 --
 
@@ -240,20 +200,6 @@ CREATE TABLE `clients_services` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `clients_services`
---
-
-LOCK TABLES `clients_services` WRITE;
-/*!40000 ALTER TABLE `clients_services` DISABLE KEYS */;
-INSERT INTO `clients_services` VALUES
-('1',2,1,8),
-('1',2,2,2),
-('1',7,1,4),
-('1',7,2,1),
-('1',8,1,2);
-/*!40000 ALTER TABLE `clients_services` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `domains`
@@ -274,19 +220,6 @@ CREATE TABLE `domains` (
   CONSTRAINT `fk_domains_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `domains`
---
-
-LOCK TABLES `domains` WRITE;
-/*!40000 ALTER TABLE `domains` DISABLE KEYS */;
-INSERT INTO `domains` VALUES
-(4,7,'heban.net',100,'2023-08-05 06:03:47'),
-(5,7,'salonyhoff.pl',100,'2023-08-05 06:03:58'),
-(6,8,'ailab.pl',100,'2023-08-05 23:03:49');
-/*!40000 ALTER TABLE `domains` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `mails`
@@ -316,14 +249,6 @@ CREATE TABLE `mails` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `mails`
---
-
-LOCK TABLES `mails` WRITE;
-/*!40000 ALTER TABLE `mails` DISABLE KEYS */;
-/*!40000 ALTER TABLE `mails` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `services`
