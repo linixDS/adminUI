@@ -19,6 +19,7 @@ export default {
               Clients : [],
               Services: [],
               
+              CurrentQuota: [],
               SearchClientText: '',
               
               ErrorMessage: '',
@@ -125,6 +126,11 @@ export default {
         this.ShowClients();
     },
 
+    onChangeQuota(){
+      if (this.clientData.quota < this.CurrentQuota.usage)
+          this.clientData.quota = this.CurrentQuota.usage;
+    },       
+
     ChangeChoiceService(){
         var found = false;  
 
@@ -186,6 +192,8 @@ export default {
           this.showSpinLoading = false;
           this.ErrorMessage = '';
           this.SuccessMessage = '';
+          this.clientData.quota = 0;
+          this.CurrentQuota.usage = 0;
 
              
 
@@ -204,6 +212,7 @@ export default {
           this.enableQuota = false;
           this.RestoreServices();
           this.CopyClientData(client);
+          this.GetQuota(client.id);
           this.clientData = client;
 
           this.isEditable = true;
@@ -481,7 +490,39 @@ export default {
           this.UpdateData();
     },
 
-    
+    GetQuota(clientId) {
+      console.log('GET QUOTA');
+      var url = this.ServerUrl+'quota.php?token='+this.auth.SessToken+'&client='+clientId;
+      console.log(url);
+          fetch( url)
+              .then((res) => {
+                      console.log('StatusCode: ' + res.status);
+                      return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+              })
+              .then((json) => {
+                      console.log(json);
+
+                      if (json.error) {
+                      console.log(json.error);
+                      this.ErrorMessage = json.error.message;
+                      } else {
+                      
+                          this.CurrentQuota = json.result.quota;
+                          console.log('Quota');
+                          console.log(this.CurrentQuota);
+                      }
+              })
+              .catch((error) => {
+                      console.log(error);
+                      if (error == "TypeError: Failed to fetch")
+                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
+                      else
+                      if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                          this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                      else
+                          this.ErrorMessage = 'Wyjątek: ' + error;
+              });	  
+    },         
 
     GetClients() {
           fetch( this.ServerUrl +'clients.php?token=' + this.auth.SessToken)
@@ -716,14 +757,16 @@ export default {
               <label class="col-form-label">Powierzchnia dyskowa: </label>
             </div>
             <div class="col-4">
-              <input type="number" min="0"  class="form-control" v-model="clientData.quota" :disabled="isDisableInputs || !enableQuota"> 
+              <input type="number" @change="onChangeQuota" :min="CurrentQuota.usage" class="form-control" v-model="clientData.quota" :disabled="isDisableInputs || !enableQuota"> 
             </div>
             <div class="col-2">
-              MB
+              MB <small class="text-success" v-if="CurrentQuota.usage > 0">(zajęte {{ CurrentQuota.usage }} MB)</small>
             </div>
 
           </div>             
           
+
+
           <h5 class="text-primary">Usługi:</h5>
           
           <div class="row g-3" style="margin-bottom: 20px;">

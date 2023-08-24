@@ -375,6 +375,7 @@ export default {
       this.ChoiceServices = [];
 
       this.GetServicesAccount(account.id);
+      this.GetQuota(this.ClientId);
       this.isEditable = true;
       this.showDeleteAccountContent=false;      
 
