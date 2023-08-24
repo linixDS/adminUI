@@ -150,7 +150,7 @@ class AccountsClass extends BaseClass
             else
                 $cid = $sess->GetClientID();
 
-            $query = "SELECT accounts.account_id as id,username,name,active,mail,created,IF(size>0,size div 1024,0) as quota,IF(use_bytes>0,(use_bytes div 1024)+1,0) as bytes FROM accounts ";
+            $query = "SELECT accounts.account_id as id,username,active,name,mail,created,IF(size>0,size div 1024,0) as quota,IF(use_bytes>0,(use_bytes div 1024)+1,0) as bytes FROM accounts ";
             $query.= "LEFT JOIN accounts_quota ON (accounts_quota.account_id=accounts.account_id) ";
             $query.= "WHERE domain_id=? AND client_id=? ORDER BY username;";
             $sth = $db->prepare($conn, $query);
@@ -251,11 +251,11 @@ class AccountsClass extends BaseClass
             }              
 
             if (count($services) > 0){
-                $query = "INSERT INTO accounts_services (account_id,service_id) VALUES ";
+                $query = "INSERT INTO accounts_services (account_id,service_id,client_id) VALUES ";
                 for ($i = 0; $i < count($services); $i++) {
                     $service_id = $services[$i]['id'];
     
-                    $query .= '(' . $account_id . ',' . $service_id.')';
+                    $query .= '(' . $account_id . ',' . $service_id.','.$client_id.')';
                     if ($i < count($services) - 1) {
                         $query .= ',';
                     } else
@@ -394,7 +394,7 @@ class AccountsClass extends BaseClass
                             array_push($servicesAddName, $service_name);
                         }
 
-                        $res = $classService->insertAccountServiceFromData($conn, $db, $id, $item);   
+                        $res = $classService->insertAccountServiceFromData($conn, $db, $id, $item, $client);   
                     }
             }
 

@@ -86,15 +86,6 @@ export default {
                 else
                 this.isValidName = true;   
               
-              if (this.isNeedMail && this.accountData.mail != null){
-                    if  (this.accountData.mail.length < 5) {
-                        this.isValidMail = false;
-                        return false;
-                    }
-                      else
-                    this.isValidMail = true;
-
-              }
 
               if (this.isChangePassword){
                       if (this.password1.length < 8){
@@ -116,7 +107,16 @@ export default {
                 this.isValidPass1 = true;
 
               if (this.ChoiceServices.length < 1 && !this.isEditable)
-                return false;                
+                return false;   
+              
+              if (this.isNeedMail && this.accountData.mail != null){
+                  if  (this.accountData.mail.length < 5) {
+                      this.isValidMail = false;
+                      return false;
+                  }
+                    else
+                  this.isValidMail = true;
+              }                
 
               return true;
         },        
@@ -229,7 +229,6 @@ export default {
         console.log('Change client: '+this.ClientId);
         this.GetDomains(this.ClientId);
         this.GetServicesClient(this.ClientId);
-        this.GetQuota(this.ClientId);
       },
 
       ChangeDomain(){
@@ -341,6 +340,7 @@ export default {
         console.log('---[ Services ]-----' );
         console.log(this.Services);
         this.CopyData(null);
+        this.GetQuota(this.ClientId);
         this.ErrorMessage = '';
         this.SuccessMessage ='';
         this.WarningMessage = '';

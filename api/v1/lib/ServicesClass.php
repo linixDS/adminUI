@@ -93,7 +93,7 @@ class ServicesClass extends BaseClass
         } catch (Exception $e) {
             $this->exceptionWrite($e);
             
-
+            $this->sendError(500, "Error SQL 222:" . $e->getMessage());
             return false;
         }
     }
@@ -110,7 +110,7 @@ class ServicesClass extends BaseClass
         } catch (Exception $e) {
             $this->exceptionWrite($e);
             
-
+            $this->sendError(500, "Error SQL 222:" . $e->getMessage());
             return false;
         }
     }
@@ -125,7 +125,11 @@ class ServicesClass extends BaseClass
             return true;
         } catch (Exception $e) {
             $this->exceptionWrite($e);
-            
+
+            if (str_contains($e->getMessage(),'Cannot delete or update a parent'))
+                $this->sendError(409, "Nie można wyłączyć usługi, ponieważ jest ona powiązana z kontem użytkownika."); 
+            else
+                $this->sendError(500, "Error SQL 222:" . $e->getMessage());
 
             return false;
         }
@@ -150,6 +154,7 @@ class ServicesClass extends BaseClass
 
             return $sth->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
+            $this->sendError(500, "Error SQL 222:" . $e->getMessage());
             return null;
     }
 
@@ -238,7 +243,7 @@ class ServicesClass extends BaseClass
 
 
         try {
-            $query = "SELECT service_id as id,limit_accounts FROM clients_services WHERE active=1 AND client_id=:CLIENTID ORDER BY service_id";
+            $query = "SELECT service_id as id,limit_accounts FROM clients_services WHERE client_id=:CLIENTID ORDER BY service_id";
             $sth = $db->prepare($conn, $query);
             $sth->bindValue(':CLIENTID', $clientId, PDO::PARAM_INT);
             $sth->execute();            
@@ -296,7 +301,7 @@ class ServicesClass extends BaseClass
 
 
         try {
-            $query = "SELECT service_id as id,limit_accounts FROM clients_services WHERE active=1 AND client_id=:CLIENTID ORDER BY service_id";
+            $query = "SELECT service_id as id,limit_accounts FROM clients_services WHERE client_id=:CLIENTID ORDER BY service_id";
             $sth = $db->prepare($conn, $query);
             $sth->bindValue(':CLIENTID', $clientId, PDO::PARAM_INT);
             $sth->execute();            
@@ -372,7 +377,7 @@ class ServicesClass extends BaseClass
         try {
             $query  = "SELECT services.service_id as id,name,description, clients_services.limit_accounts FROM clients_services ";
             $query .= "LEFT JOIN services ON clients_services.service_id = services.service_id ";
-            $query .= "WHERE clients_services.active=1 AND clients_services.client_id=? ORDER BY name";
+            $query .= "WHERE clients_services.client_id=? ORDER BY name";
             $sth = $db->prepare($conn, $query);
             $sth->execute([$clientId]);            
     
@@ -429,18 +434,17 @@ class ServicesClass extends BaseClass
         }
     }    
 
-    public function insertAccountServiceFromData($conn, $db, $accountId, $service) {
+    public function insertAccountServiceFromData($conn, $db, $accountId, $service, $clientId) {
         $service_id = $service['id'];
         try {
-            $query = "INSERT INTO accounts_services(account_id, service_id) VALUES (?,?);";
+            $query = "INSERT INTO accounts_services(account_id, service_id,client_id) VALUES (?,?,?);";
             $sth = $db->prepare($conn, $query);
 
-            $sth->execute([$accountId, $service_id]);
+            $sth->execute([$accountId, $service_id, $clientId]);
             return true;
         } catch (Exception $e) {
             $this->exceptionWrite($e);
-            
-
+            $this->sendError(500, "Error SQL:" . $e->getMessage());
             return false;
         }
     }
@@ -456,6 +460,7 @@ class ServicesClass extends BaseClass
             return true;
         } catch (Exception $e) {
             $this->exceptionWrite($e);
+            $this->sendError(500, "Error SQL:" . $e->getMessage());
             
 
             return false;

@@ -30,8 +30,7 @@ class ClientsClass extends BaseClass
             return $this->sendError(501, $db->getLastError());
 
         try {
-            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,IF(size>0,size div 1024,0) as quota FROM clients ";
-            $query.= "LEFT JOIN clients_quota ON (clients_quota.client_id=clients.client_id) ORDER BY name;";
+            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,maxquota as quota FROM clients ORDER BY name;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute();
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -74,8 +73,7 @@ class ClientsClass extends BaseClass
             return $this->sendError(501, $db->getLastError());
 
         try {
-            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,IF(size>0,size div 1024,0) as quota FROM clients ";
-            $query.= "LEFT JOIN clients_quota ON (clients_quota.client_id=clients.client_id) WHERE client_id=? LIMIT 1;";
+            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,maxquota as quota FROM clients WHERE client_id=? LIMIT 1;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute([$cid]);
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -129,7 +127,7 @@ class ClientsClass extends BaseClass
         try {
             $db->BeginTransaction($conn);
 
-            $query = "INSERT INTO clients (name,nip,city,mail,limit_admins) VALUES (:NAMECLIENT,:NIP,:CITY,:MAIL,:ADMINS);";
+            $query = "INSERT INTO clients (name,nip,city,mail,limit_admins,maxquota) VALUES (:NAMECLIENT,:NIP,:CITY,:MAIL,:ADMINS,:QOUTA);";
             $sth = $db->prepare($conn, $query);
 
             $sth->bindValue(':NAMECLIENT', $name, PDO::PARAM_STR);
@@ -137,19 +135,12 @@ class ClientsClass extends BaseClass
             $sth->bindValue(':CITY', $city, PDO::PARAM_STR);
             $sth->bindValue(':MAIL', $mail, PDO::PARAM_STR);
             $sth->bindValue(':ADMINS', $admins, PDO::PARAM_INT);
+            $sth->bindValue(':QOUTA', $quota, PDO::PARAM_INT);
 
             $sth->execute();
 
             $client_id = $db->GetLastInsertId($conn);
          
-            if ($quota > 0){
-                $quota = $quota * 1024;
-
-                $query = "INSERT INTO clients_quota (client_id,size) VALUES (?,?);";
-                $sth2 = $db->prepare($conn, $query);
-                $sth2->execute([$client_id, $quota]);
-            }
-
 
             $query = "INSERT INTO clients_services (client_id,service_id,limit_accounts) VALUES ";
             for ($i = 0; $i < count($services); $i++) {
@@ -176,7 +167,6 @@ class ClientsClass extends BaseClass
             return $this->sendResult(201, $client);
         } catch (Exception $e) {
             $db->Rollback($conn);
-
             if (str_contains($e,'Duplicate entry'))
                 $this->sendError(409, "Duplikacja numeru NIP: Podanany numer NIP został wcześniej wprowadzony.");    
             else                
@@ -228,7 +218,7 @@ class ClientsClass extends BaseClass
         try {
             $db->BeginTransaction($conn);
 
-            $query = "UPDATE clients SET name=:NAMECLIENT,city=:CITY,mail=:MAIL,limit_admins=:ADMINS WHERE client_id=:CLIENTID";
+            $query = "UPDATE clients SET name=:NAMECLIENT,city=:CITY,mail=:MAIL,limit_admins=:ADMINS,maxquota=:QUOTA WHERE client_id=:CLIENTID";
             $sth = $db->prepare($conn, $query);
 
             $sth->bindValue(':NAMECLIENT', $name, PDO::PARAM_STR);
@@ -236,23 +226,10 @@ class ClientsClass extends BaseClass
             $sth->bindValue(':CITY', $city, PDO::PARAM_STR);
             $sth->bindValue(':MAIL', $mail, PDO::PARAM_STR);
             $sth->bindValue(':ADMINS', $admins, PDO::PARAM_INT);
+            $sth->bindValue(':QUOTA', $quota, PDO::PARAM_INT);
 
             $sth->execute();
             
-            if ($quota > 0){
-                $quota = $quota * 1024;
-
-                $query = "UPDATE clients_quota SET size=? WHERE client_id=? LIMIT 1;";
-                $sth = $db->prepare($conn, $query);
-                $sth->execute([$quota, $id]);
-
-                if ($sth->rowCount() == 0){
-                    $query = "INSERT INTO clients_quota (client_id,size) VALUES (?,?);";
-                    $sth = $db->prepare($conn, $query);
-                    $sth->execute([$id,$quota]);
-                }
-            }            
-
             $classService = new ServicesClass(null);
             $currentServices = $classService->getClientServicesResultData($id);
             $actions = $classService->getChangedServicesResultData($currentServices, $servicesData);
@@ -329,10 +306,6 @@ class ClientsClass extends BaseClass
         $nip = $client['nip'];
         try {
             $db->BeginTransaction($conn);
-
-            $query = "DELETE FROM clients_quota WHERE client_id IN (SELECT client_id FROM clients WHERE nip=?);";
-            $sth = $db->prepare($conn, $query);
-            $sth->execute([$nip]);    
 
             $query = "DELETE FROM clients WHERE nip=? LIMIT 1;";
             $sth = $db->prepare($conn, $query);

@@ -18,7 +18,7 @@ class QuotaClass extends BaseClass
 
 
         try {
-            $query = "SELECT IF(size>0,size div 1024,0) as quota FROM clients_quota WHERE client_id=? LIMIT 1;";
+            $query = "SELECT maxquota as quota FROM clients WHERE client_id=? LIMIT 1;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute([$clientId]);
 
