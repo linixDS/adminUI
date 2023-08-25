@@ -8,16 +8,37 @@ set_exception_handler('exception_handler');
 // Funkcja do obsługi błędów
 function error_handler($errno, $errstr, $errfile, $errline)
 {
+    print_r($errstr);
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 
 
 include("config/config.php");
 
+
+
+
+function goLoginPage($error){
+    
+    
+    $url = "Location: ./login.php";
+    if ($error != null){
+        $error = str_replace('\'','',$error);
+        $url = $url."?message=".$error;
+    }
+
+    
+    $url = str_replace(PHP_EOL,'',$url);
+
+    header($url);   
+    exit();    
+}
+
+
 function exception_handler($exception)
 {
     print_r($exception);
- //   goLoginPage('Error: '.$exception->toString());
+    //goLoginPage('Error: '.$exception->toString());
     exit;
 }    
 
@@ -43,27 +64,13 @@ function getAddressIP() {
     return $ipaddress;
 }
 
-function goLoginPage($error){
-    
-    
-    $url = "Location: ./login.php";
-    if ($error != null){
-        $error = str_replace('\'','',$error);
-        $url = $url."?message=".$error;
-    }
-
-    
-    $url = str_replace(PHP_EOL,'',$url);
-
-    header($url);   
-    exit();    
-}
-
 
 
     if ( (!isset($_POST['username'])) || (!isset($_POST['password'])) ){
         goLoginPage(null);
     }
+
+
 
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -79,6 +86,7 @@ function goLoginPage($error){
     $json = json_encode($post_data);
 
     $url = SERVER_API_ADDRESS."/api/v1/login.php";
+ 
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL,$url);
@@ -88,8 +96,9 @@ function goLoginPage($error){
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, True);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, True);
 
-
     $result_json = curl_exec($ch);
+
+
     if (!curl_errno($ch)) {
         $status=curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($status == 200){
@@ -101,11 +110,9 @@ function goLoginPage($error){
 
           //  $text = "const key='".$token."';";
             $buffer = str_replace("<TOKEN>", $text, $buffer);
-
             echo $buffer;
         }
             else {
-                
                 $result = json_decode($result_json, true);
                 print_r($result);
                 if (isset($result['error'])){
@@ -118,8 +125,12 @@ function goLoginPage($error){
             }
 
     }
+        else {
+            goLoginPage("Nie można połączyć się z usługą!");
+
+        }
 
     curl_close($ch);
-//
+
 
 ?>
