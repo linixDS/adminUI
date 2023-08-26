@@ -134,7 +134,7 @@ export default {
             if (temp){
                   temp.name = this.updateAccountData.name;
                   temp.active = this.updateAccountData.active;
-                  temp.quota = this.updateAccountData.quota;
+                  temp.maxquota = this.updateAccountData.maxquota;
                   temp.bytes = this.updateAccountData.bytes;
                   temp.mail = this.updateAccountData.mail;
             }
@@ -143,11 +143,11 @@ export default {
       },
 
       onChangeQuota(){
-        if (this.accountData.quota < this.accountData.bytes)
-            this.accountData.quota = this.accountData.bytes;
+        if (this.accountData.maxquota < this.accountData.bytes)
+            this.accountData.maxquota = this.accountData.bytes;
 
-        if (this.accountData.quota > this.CurrentQuota.free)
-            this.accountData.quota = this.CurrentQuota.free;
+        if (this.accountData.maxquota > this.CurrentQuota.free)
+            this.accountData.maxquota = this.CurrentQuota.free;
 
       },         
 
@@ -264,7 +264,7 @@ export default {
               this.updateAccountData.created = account.created;
               this.updateAccountData.client = this.ClientId;
               this.updateAccountData.domain = this.DomainId;
-              this.updateAccountData.quota = account.quota;
+              this.updateAccountData.maxquota = account.maxquota;
               this.updateAccountData.bytes = account.bytes;
 
               for (const choice of this.ChoiceServices){
@@ -357,7 +357,7 @@ export default {
         this.isValidMail = false;
         this.isChangePassword = true;
         this.isNeedMail = true;
-        this.accountData = {username: '', name: '', mail: '', quota: '0', bytes: '0'};
+        this.accountData = {username: '', name: '', mail: '', maxquota: '0', bytes: '0'};
 
         this.password1 = '';
         this.password2 = '';
@@ -443,7 +443,7 @@ export default {
         if (!this.isNeedMail)
           this.accountData.mail = this.accountData.username;
         else
-          delete this.accountData.quota;
+          delete this.accountData.maxquota;
 
         this.accountData.client = this.ClientId;
         this.accountData.domain = this.DomainId;
@@ -509,7 +509,7 @@ export default {
           return true;
       }
 
-      if (this.accountData.quota != this.updateAccountData.quota && !this.isNeedMail){
+      if (this.accountData.maxquota != this.updateAccountData.maxquota && !this.isNeedMail){
       
         return true;
       }      
@@ -561,7 +561,7 @@ export default {
 
       if (!this.isNeedMail) {
         dataAccount.mail = this.accountData.username;
-        dataAccount.quota = this.accountData.quota;
+        dataAccount.maxquota = this.accountData.maxquota;
       }
 
 
@@ -976,7 +976,7 @@ export default {
                         <label class="col-form-label">Wielkość skrzynki: </label>
                       </div>
                       <div class="col-2">
-                        <input type="number" @change="onChangeQuota" :min="accountData.bytes" :max="CurrentQuota.free" class="form-control" v-model="accountData.quota" :disabled="isDisableInputs"> 
+                        <input type="number" @change="onChangeQuota" :min="accountData.bytes" :max="CurrentQuota.free" class="form-control" v-model="accountData.maxquota" :disabled="isDisableInputs"> 
                       </div>
                       <div class="col-4">
                         MB <small class="text-success">(dostępne {{ CurrentQuota.free }} z {{ CurrentQuota.limit }} MB)</small>

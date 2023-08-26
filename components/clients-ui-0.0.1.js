@@ -119,7 +119,7 @@ export default {
               temp.city = this.updateClientData.city;
               temp.mail = this.updateClientData.mail;
               temp.admins = this.updateClientData.admins;
-              temp.quota = this.updateClientData.quota;
+              temp.maxquota = this.updateClientData.maxquota;
         }
 
 
@@ -127,8 +127,8 @@ export default {
     },
 
     onChangeQuota(){
-      if (this.clientData.quota < this.CurrentQuota.usage)
-          this.clientData.quota = this.CurrentQuota.usage;
+      if (this.clientData.maxquota < this.CurrentQuota.usage)
+          this.clientData.maxquota = this.CurrentQuota.usage;
     },       
 
     ChangeChoiceService(){
@@ -146,7 +146,7 @@ export default {
         }
           else {
             this.enableQuota = false;
-            this.clientData.quota = 0;
+            this.clientData.maxquota = 0;
           }
 
 
@@ -160,7 +160,7 @@ export default {
         this.updateClientData.city = client.city;
         this.updateClientData.mail = client.mail;
         this.updateClientData.admins = client.admins;
-        this.updateClientData.quota = client.quota;
+        this.updateClientData.maxquota = client.maxquota;
     },
 
     RestoreServices(){
@@ -173,7 +173,7 @@ export default {
             service.name = item.name;
             service.description = item.description;
             service.limit_accounts = item.limit_accounts;
-            service.quota = item.quota;
+            service.maxquota = item.maxquota;
 
             this.clientServices.push(service);
         }
@@ -192,7 +192,7 @@ export default {
           this.showSpinLoading = false;
           this.ErrorMessage = '';
           this.SuccessMessage = '';
-          this.clientData.quota = 0;
+          this.clientData.maxquota = 0;
           this.CurrentQuota.usage = 0;
 
              
@@ -272,7 +272,7 @@ export default {
            }
       }
 
-      if (!enableServiceSogo) this.clientData.quota = 0;
+      if (!enableServiceSogo) this.clientData.maxquota = 0;
 
       var data = {  token  : this.auth.SessToken, 
                     client : this.clientData,
@@ -325,7 +325,7 @@ export default {
             (this.clientData.city != this.updateClientData.city) ||
             (this.clientData.mail != this.updateClientData.mail) || 
             (this.clientData.admins != this.updateClientData.admins) || 
-            (this.clientData.quota != this.updateClientData.quota) )
+            (this.clientData.maxquota != this.updateClientData.maxquota) )
             return true;
 
 
@@ -375,7 +375,7 @@ export default {
              }
         }
   
-        if (!enableServiceSogo) this.clientData.quota = 0;
+        if (!enableServiceSogo) this.clientData.maxquota = 0;
   
         var data = {  token  : this.auth.SessToken, 
                       client : this.clientData,
@@ -757,7 +757,7 @@ export default {
               <label class="col-form-label">Powierzchnia dyskowa: </label>
             </div>
             <div class="col-4">
-              <input type="number" @change="onChangeQuota" :min="CurrentQuota.usage" class="form-control" v-model="clientData.quota" :disabled="isDisableInputs || !enableQuota"> 
+              <input type="number" @change="onChangeQuota" :min="CurrentQuota.usage" class="form-control" v-model="clientData.maxquota" :disabled="isDisableInputs || !enableQuota"> 
             </div>
             <div class="col-2">
               MB <small class="text-success" v-if="CurrentQuota.usage > 0">(zajęte {{ CurrentQuota.usage }} MB)</small>

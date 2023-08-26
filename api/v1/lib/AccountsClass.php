@@ -150,7 +150,7 @@ class AccountsClass extends BaseClass
             else
                 $cid = $sess->GetClientID();
 
-            $query = "SELECT accounts.account_id as id,username,active,name,mail,created,IF(size>0,size div 1024,0) as quota,IF(use_bytes>0,(use_bytes div 1024)+1,0) as bytes FROM accounts ";
+            $query = "SELECT accounts.account_id as id,username,active,name,mail,created,IF(maxquota>0,maxquota div 1024,0),IF(use_bytes>0,(use_bytes div 1024)+1,0) as bytes FROM accounts ";
             $query.= "LEFT JOIN accounts_quota ON (accounts_quota.account_id=accounts.account_id) ";
             $query.= "WHERE domain_id=? AND client_id=? ORDER BY username;";
             $sth = $db->prepare($conn, $query);
@@ -240,12 +240,12 @@ class AccountsClass extends BaseClass
 
             $account_id = $db->GetLastInsertId($conn);
 
-            if (isset($accountData['quota'])){
-                $quota = $accountData['quota'];
+            if (isset($accountData['maxquota'])){
+                $quota = $accountData['maxquota'];
                
                 $quota = $quota * 1024;
 
-                $query = "INSERT INTO accounts_quota (account_id,size) VALUES (?,?);";
+                $query = "INSERT INTO accounts_quota (account_id,maxquota) VALUES (?,?);";
                 $sth = $db->prepare($conn, $query);
                 $sth->execute([$account_id,$quota]);
             }              
@@ -361,17 +361,17 @@ class AccountsClass extends BaseClass
 
             $sth->execute();
 
-            if (isset($account['quota'])){
-                $quota = $account['quota'];
+            if (isset($account['maxquota'])){
+                $quota = $account['maxquota'];
                
                 $quota = $quota * 1024;
 
-                $query = "UPDATE accounts_quota SET size=? WHERE account_id=? LIMIT 1;";
+                $query = "UPDATE accounts_quota SET maxquota=? WHERE account_id=? LIMIT 1;";
                 $sth = $db->prepare($conn, $query);
                 $sth->execute([$quota, $id]);
 
                 if ($sth->rowCount() == 0){
-                    $query = "INSERT INTO accounts_quota (account_id,size) VALUES (?,?);";
+                    $query = "INSERT INTO accounts_quota (account_id,quota) VALUES (?,?);";
                     $sth = $db->prepare($conn, $query);
                     $sth->execute([$id,$quota]);
                 }

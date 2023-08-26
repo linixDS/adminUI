@@ -18,7 +18,7 @@ class QuotaClass extends BaseClass
 
 
         try {
-            $query = "SELECT maxquota as quota FROM clients WHERE client_id=? LIMIT 1;";
+            $query = "SELECT maxquota FROM clients WHERE client_id=? LIMIT 1;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute([$clientId]);
 
@@ -26,7 +26,7 @@ class QuotaClass extends BaseClass
             if ($sth->rowCount()==0)
                 return 0;
             else
-                return $data['quota'];
+                return $data['maxquota'];
         } catch (Exception $e) {
             $this->sendError(500, "Error SQL:" . $e);
             return;
@@ -39,7 +39,7 @@ class QuotaClass extends BaseClass
 
 
         try {
-            $query = "SELECT SUM(size) as size FROM accounts_quota WHERE account_id IN (SELECT account_id FROM accounts WHERE client_id=?)";
+            $query = "SELECT SUM(maxquota) as maxquota FROM accounts_quota WHERE account_id IN (SELECT account_id FROM accounts WHERE client_id=?)";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute([$clientId]);
 
@@ -47,7 +47,7 @@ class QuotaClass extends BaseClass
             if ($sth->rowCount()==0)
                 return 0;
             else
-                return $data['size'];
+                return $data['maxquota'];
         } catch (Exception $e) {
             $this->sendError(500, "Error SQL:" . $e);
             return;

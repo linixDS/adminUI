@@ -30,7 +30,7 @@ class ClientsClass extends BaseClass
             return $this->sendError(501, $db->getLastError());
 
         try {
-            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,maxquota as quota FROM clients ORDER BY name;";
+            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,maxquota FROM clients ORDER BY name;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute();
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -73,7 +73,7 @@ class ClientsClass extends BaseClass
             return $this->sendError(501, $db->getLastError());
 
         try {
-            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,maxquota as quota FROM clients WHERE client_id=? LIMIT 1;";
+            $query = "SELECT clients.client_id as id,name,nip,city,mail,limit_admins as admins,maxquota FROM clients WHERE client_id=? LIMIT 1;";
 			$sth = $db->prepare($conn, $query);
 			$sth->execute([$cid]);
             $data = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -98,7 +98,7 @@ class ClientsClass extends BaseClass
         $services = $serviceData;
 
         if ((!isset($client['name'])) || (!isset($client['nip'])) || (!isset($client['city'])) || 
-            (!isset($client['mail'])) || (!isset($client['admins'])) || (!isset($client['quota'])))
+            (!isset($client['mail'])) || (!isset($client['admins'])) || (!isset($client['maxquota'])))
             return $this->sendError(401, 'Access denied - client');
 
         $sess = new SessionController();
@@ -120,7 +120,7 @@ class ClientsClass extends BaseClass
         $city = $client['city'];
         $mail = $client['mail'];
         $admins = $client['admins'];
-        $quota = $client['quota'];
+        $quota = $client['maxquota'];
 
         $query = '';
 
@@ -188,7 +188,7 @@ class ClientsClass extends BaseClass
         $services = $servicesData;
 
         if ((!isset($client['name'])) || (!isset($client['nip'])) || (!isset($client['city'])) || 
-            (!isset($client['mail'])) || (!isset($client['admins'])) || (!isset($client['quota'])) )
+            (!isset($client['mail'])) || (!isset($client['admins'])) || (!isset($client['maxquota'])) )
             return $this->sendError(401, 'Access denied - client');
 
         $sess = new SessionController();
@@ -211,7 +211,7 @@ class ClientsClass extends BaseClass
         $city = $client['city'];
         $mail = $client['mail'];
         $admins = $client['admins'];
-        $quota = $client['quota'];
+        $quota = $client['maxquota'];
 
         $query = '';
 
