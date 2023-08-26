@@ -69,10 +69,12 @@ class Controller extends BaseController
             $event->event_login_fail($db, $conn, $args['username'], "Address IP ".$address);
             return $this->SendError(401, 'Wrong password or username'); 
         }
-        
 
+        $query = "UPDATE admins SET last_login=NOW() WHERE admin_id=?;";
+        $sth = $db->prepare($conn, $query);
+        $id = $data['id'];
+        $sth->execute([$id]);
         
-
         $id = $sess->createTokenSessionId($data, $address);
         $event->event_login_success($db, $conn, $args['username'], "Address IP ".$address);
         

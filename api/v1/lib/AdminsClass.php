@@ -226,7 +226,7 @@ class AdminsClass extends BaseClass
         if ( (!$sess->IsGlobalAdmin()) && ($adminData['type'] == 'global') )
             return $this->sendError(401, 'Access denied - global');
 
-        if (isset($adminData['passowrd'])){
+        if (isset($adminData['password'])){
             $password = $adminData['password'];
             if (strlen($password) < 12)
                 return $this->sendError(401, 'Access denied - incorrect value');
@@ -246,8 +246,8 @@ class AdminsClass extends BaseClass
         try {
             $db->BeginTransaction($conn);
             
-            if (isset($adminData['passowrd'])) {
-                $query  = "UPDATE admins SET name=:NAME,mail=:MAIL,password=:PASSWORD,changed=NOW() WHERE username=:USERNAME LIMIT 1;";
+            if (isset($adminData['password'])) {
+                $query  = "UPDATE admins SET name=:NAME,mail=:MAIL,password=:NEWPASSWORD,changed=NOW(),change_password=NOW() WHERE username=:USERNAME LIMIT 1;";
             }
                 else {
                     $query  = "UPDATE admins SET name=:NAME,mail=:MAIL,changed=NOW() WHERE username=:USERNAME LIMIT 1;";
@@ -258,12 +258,11 @@ class AdminsClass extends BaseClass
             $sth->bindValue(':USERNAME', $username, PDO::PARAM_STR);
             $sth->bindValue(':NAME', $name, PDO::PARAM_STR);
             $sth->bindValue(':MAIL', $mail, PDO::PARAM_STR);
-            if (isset($adminData['passowrd'])) 
-                $sth->bindValue(':PASSWORD', $password, PDO::PARAM_STR);
+            if (isset($adminData['password'])) 
+                $sth->bindValue(':NEWPASSWORD', $password, PDO::PARAM_STR);
 
 
             $sth->execute();
-
 
             $db->Commit($conn);
 

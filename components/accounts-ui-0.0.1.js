@@ -561,7 +561,9 @@ export default {
 
       if (!this.isNeedMail) {
         dataAccount.mail = this.accountData.username;
-        dataAccount.maxquota = this.accountData.maxquota;
+
+        if (this.updateAccountData.maxquota != this.accountData.maxquota)
+            dataAccount.maxquota = this.accountData.maxquota;
       }
 
 

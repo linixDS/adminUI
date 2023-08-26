@@ -8,9 +8,9 @@ set_exception_handler('exception_handler');
 // Funkcja do obsługi błędów
 function error_handler($errno, $errstr, $errfile, $errline)
 {
-    print_r($errstr);
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
+
 
 
 include("config/config.php");
@@ -37,9 +37,8 @@ function goLoginPage($error){
 
 function exception_handler($exception)
 {
-    print_r($exception);
-    //goLoginPage('Error: '.$exception->toString());
-    exit;
+    goLoginPage('Error: '.$exception->toString());
+    exit();
 }    
 
 

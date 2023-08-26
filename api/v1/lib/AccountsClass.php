@@ -306,9 +306,9 @@ class AccountsClass extends BaseClass
             (!isset($account['id'])) || (!isset($account['client']))  || (!isset($account['active'])) )
             return $this->sendError(401, 'Access denied - account');
 
-        if (isset($account['passowrd'])){
+        if (isset($account['password'])){
             $password = $account['password'];
-            if (strlen($password) < 12)
+            if (strlen($password) < 8)
                 return $this->sendError(401, 'Access denied - incorrect value');
         }
 
@@ -345,7 +345,7 @@ class AccountsClass extends BaseClass
             if (isset($account['mail']))
                 $query .= ",mail=:MAIL";
             if (isset($account['password']))
-                $query .= ",password=:PASSWORD";
+                $query .= ",password=:PASSWORD,change_password=NOW()";
             
             $query .= " WHERE account_id=:ACCOUNTID LIMIT 1;";
 
@@ -356,27 +356,11 @@ class AccountsClass extends BaseClass
             $sth->bindValue(':ACCOUNTID', $id, PDO::PARAM_INT);
             if (isset($account['mail']))
                 $sth->bindValue(':MAIL', $account['mail'], PDO::PARAM_STR);
-            if (isset($passowrd))
+            if (isset($password))
                 $sth->bindValue(':PASSWORD', $password, PDO::PARAM_STR);
 
             $sth->execute();
 
-            if (isset($account['maxquota'])){
-                $quota = $account['maxquota'];
-               
-                $quota = $quota * 1024;
-
-                $query = "UPDATE accounts_quota SET maxquota=? WHERE account_id=? LIMIT 1;";
-                $sth = $db->prepare($conn, $query);
-                $sth->execute([$quota, $id]);
-
-                if ($sth->rowCount() == 0){
-                    $query = "INSERT INTO accounts_quota (account_id,quota) VALUES (?,?);";
-                    $sth = $db->prepare($conn, $query);
-                    $sth->execute([$id,$quota]);
-                }
-            }              
-                        
 
             $classService = new ServicesClass(null);
             $currentServices = $classService->getAccountServicesResultData($id);
@@ -424,7 +408,24 @@ class AccountsClass extends BaseClass
 
                 $job = new JobClass(null);
                 $job->removeAccount($db, $conn, $account['username'], $adminName);
-            }       
+            }
+                else{
+                    if (isset($account['maxquota'])){
+                        $quota = $account['maxquota'];
+                       
+                        $quota = $quota * 1024;
+        
+                        $query = "UPDATE accounts_quota SET maxquota=? WHERE account_id=? LIMIT 1;";
+                        $sth = $db->prepare($conn, $query);
+                        $sth->execute([$quota, $id]);
+        
+                        if ($sth->rowCount() == 0){
+                            $query = "INSERT INTO accounts_quota (account_id,maxquota) VALUES (?,?);";
+                            $sth = $db->prepare($conn, $query);
+                            $sth->execute([$id,$quota]);
+                        }
+                    }  
+                }
             
             $event = new EventClass(null);
             if ($disableSOGo == true)

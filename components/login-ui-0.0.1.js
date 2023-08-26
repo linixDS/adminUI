@@ -6,6 +6,7 @@ export default {
 
     data(){
         return {
+            isDisabled: false,
             showSpinLoading: false,
             username: '',
             password: ''
@@ -26,16 +27,25 @@ export default {
     },
 
     methods: {
-
+        isSubmit(){
+            if  (this.username.length < 3)
+                return false;
+            if  (this.password.length < 3)
+                return false;
+    
+            return true;
+        },
+    
         onLoginSend(){
             console.log('Login');
             this.showSpinLoading = true;
-            this.isDisableButton = true;
+            this.isDisabled = true;
+
+            if (this.isSubmit())
+                this.$refs.form.submit();
         },
 
-        onSubmit() {
 
-        }
     },
 
     mounted() {
@@ -64,14 +74,14 @@ export default {
 
                 <div class="col-lg-12 login-form">
                     <div class="col-lg-12 login-form">
-                        <form action="./index.php" method="POST" >
+                        <form ref="form" action="./index.php" method="POST" >
                             <div class="form-group">
                                 <label class="form-control-label">LOGIN:</label>
-                                <input type="text" class="form-control" v-model="username" name="username">
+                                <input type="text" class="form-control" v-model="username" name="username" >
                             </div>
                             <div class="form-group">
                                 <label class="form-control-label">HASŁO:</label>
-                                <input type="password" class="form-control" v-model="password" name="password">
+                                <input type="password" class="form-control" v-model="password" name="password" >
                             </div>
 
                             <div class="col-lg-12 login-btm">
@@ -79,7 +89,7 @@ export default {
                                    {{ ErrorMessage }}
                                 </div>
                                 <div class="col-lg-6 login-btm login-button" >
-                                    <button class="btn btn-outline-primary" :disabled="isDisableButton" @click="onLoginSend">
+                                    <button type="submit" class="btn btn-outline-primary" :disabled="isDisableButton" v-on:click="onLoginSend">
                                         <div v-if="showSpinLoading" class="spinner-border text-white spinner-border-sm" role="status"></div>
                                         Zaloguj
                                     </button>
