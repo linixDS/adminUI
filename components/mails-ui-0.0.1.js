@@ -1,3 +1,6 @@
+import AliasUi from './alias-ui-0.0.1.js';
+import ForwardsUi from './forwards-ui-0.0.1.js';
+
 export default {
   
     props: 
@@ -10,31 +13,34 @@ export default {
                 Clients : [],
                 Domains : [],
                 Mails : [],
-                ChoiceServices: [],
+                SelectMails: [],
                 
                 SearchMailText: '',
                 
                 ErrorMessage: '',
                 SuccessMessage: '',
-                    
+                AllSelected: false,
 
-                isEditable: false,
-
+                isDisableInputs: false,
                 showContent: true,
+                showEmailContent: false,
                 showButtonPrev: false,
-                showSpinLoading: false,
-                isDisableInputs: false,    
+                showForwardsContent: false,
+                showAliasContent: false,
 
              
-                
                 titlePage: 'Konta pocztowe:',
-
+                mailData: [],
 
                 ClientId: -1,
                 DomainId: -1
               }
     },
     
+    components: {
+      AliasUi,
+      ForwardsUi
+    },    
     
     computed: {
       filterMailsByName: function(){
@@ -51,6 +57,13 @@ export default {
     methods: {
       BackPage(){
           console.log("BACK !!!");
+          this.showButtonPrev = false;
+          this.showEmailContent = false;
+
+
+          this.showForwardsContent = false;
+          this.showAliasContent = false;
+          this.showContent = true;
       },
       
       ChangeClient(){
@@ -67,13 +80,43 @@ export default {
        
       ShowMails() {
             console.log("---[ SHOW PAGE MAILS ]-----");
-            this.showSpinLoading = false;
             this.showButtonPrev = false;
             this.showContent = true;
             this.titlePage = 'Konta pocztowe:';
       },
 
-  
+      GlobalSelect() {
+          this.SelectMails = [];
+          if (!this.AllSelected) return;
+          for (const item of this.Mails){
+              this.SelectMails.push(item.id);
+          }
+      },
+
+      ShowAlias() {
+        this.showForwardsContent = false;
+        this.showAliasContent = true;        
+      },
+
+      ShowForwards() {
+        this.showAliasContent = false; 
+        this.showForwardsContent = true;;
+      },
+
+      EditMailBox(mail) {
+        console.log("---[ SHOW PAGE EDIT MAIL ]-----");
+
+        this.mailData = mail;
+
+        this.ErrorMessage = '';
+        this.SuccessMessage = '';
+      
+        this.titlePage = 'Edycja konta:  '+mail.username;
+        this.showContent = false;
+        this.showButtonPrev = true;
+        this.showEmailContent = true;
+    },    
+
       GetClients() {
             var url = this.ServerUrl +'clients.php?token=' + this.auth.SessToken;
             if (!this.auth.isGlobalAdmin)
@@ -148,6 +191,7 @@ export default {
         }, 
 
         GetMails(domainId) {
+            this.SelectMails = [];
             console.log('GET DOMAINS');
             var url = this.ServerUrl+'mails.php?token='+this.auth.SessToken+'&domain='+domainId+'&client='+this.ClientId;
 
@@ -190,15 +234,12 @@ export default {
       this.GetClients();
     },
     
-    components: {
-               
-    },
-  
+ 
     template: `
       <div style="margin-bottom: 25px;">
         <div class="row">
                 <div class="col-1" style="width: 50px;" v-if="showButtonPrev">
-                    <button class="btn btn-outline-primary" v-on:click="BackPage" :disabled="isDisableInputs">
+                    <button class="btn btn-outline-primary" v-on:click="BackPage">
                       <i class="fas fa-chevron-left"></i>
                     </button>
                 </div>
@@ -220,7 +261,47 @@ export default {
     
     </div>
   
+    <div v-if="showEmailContent">
+          <div class="row g-3 align-items-center" style="margin-bottom: 20px;">
+              <div class="col-2">
+                <label class="col-form-label">E-mail:  </label>
+              </div>
+              <div class="col-6">
+                <input type="text" maxlength="85" class="form-control" v-model="mailData.username"  disabled>
+              </div>
+          </div> 
 
+          <hr style="color: blue; margin-bottom: 20px;">
+
+          <div class="row g-3 align-items-center" style="margin-bottom: 20px">
+              <div class="col-auto">
+                <button :class="showAliasContent ? 'btn btn-primary' : 'btn btn-outline-primary'" v-on:click="ShowAlias">Alias</button>
+              </div>
+              <div class="col-auto">
+                <button :class="showForwardsContent ? 'btn btn-primary' : 'btn btn-outline-primary'" v-on:click="ShowForwards">Przekierowania</button>
+              </div>	
+              <div class="col-auto">
+                <button class="btn btn-outline-primary" v-on:click="BackPage">Podpis</button>
+              </div>	                            	
+          </div>
+          
+          <hr style="color: blue; margin-bottom: 20px;">
+
+          
+          <Alias-ui  :auth="auth" :mail="mailData"  v-if="showAliasContent">  </Alias-ui>              
+          
+          <Forwards-ui  :auth="auth" :mail="mailData"  v-if="showForwardsContent">  </Forwards-ui>    
+
+          
+        
+
+          
+          <div class="row g-3 align-items-center" style="margin-top: 50px">
+              <div class="col-auto">
+                <button class="btn btn-outline-primary" v-on:click="BackPage">Zamknij</button>
+              </div>	
+          </div>           
+    </div>
       
       
       <div v-if="showContent">
@@ -263,17 +344,26 @@ export default {
               <table class="table table-striped table-hover">
                   <thead class="table-dark">
                               <tr>
-                                <th scope="col" style="width: 45px;">#</th>
-                                <th scope="col">Użytkownik</th>
+                                <th scope="col" style="width: 45px;">
+                                <input type="checkbox" class="form-check-input flex-shrink-0"  v-model="AllSelected" @change="GlobalSelect()">
+                                </th>
+                                <th scope="col">Konto</th>
+                                <th scope="col" style="width: 150px;">Akcja</th>
                               </tr>
                   </thead>
                   <tbody>
                                 <tr v-for="(mail,index) in filterMailsByName">
-                                  <th scope="row">{{ index+1 }}</th>
+                                  <th scope="row"><input type="checkbox" :value="mail.id" v-model="SelectMails" class="form-check-input flex-shrink-0"></th>
                                   <td :class="mail.active==1 ? 'text-success' : 'text-danger'">{{ mail.username }}</td>
+                                  <td>
+                                      <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="EditMailBox(mail)">
+                                        <i class="fas fa-pen"></i>
+                                        Edycja
+                                      </button>
+                                  </td>                                  
                                 </tr>   					
-                            </tbody>
-                      </table>
+                    </tbody>
+              </table>
             </div>
 
       </div>

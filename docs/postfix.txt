@@ -1,0 +1,1 @@
+https://wiki.gentoo.org/wiki/Complete_Virtual_Mail_Server/Postfix_to_Database#MySQL

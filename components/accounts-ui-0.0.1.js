@@ -196,10 +196,12 @@ export default {
           if (id == 1){
                 if (state){
                   this.isNeedMail = false;
+                  this.accountData.maxquota = 1;
                   if (this.isEditable)
                       this.WarningMessage = '';
                 }
                 else{
+                  delete this.accountData.maxquota;
                   this.isNeedMail = true;
                   if (this.isEditable)
                     this.WarningMessage = 'OSTRZEŻENIE: Wyłączenie usługi SOGo spowoduje trwałe usunięcie skrzynki pocztowej !';

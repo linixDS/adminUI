@@ -19,8 +19,6 @@
 -- Table structure for table `accounts`
 --
 
-USE admin_panel;
-
 DROP TABLE IF EXISTS `accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -158,9 +156,9 @@ CREATE TABLE `admins` (
 LOCK TABLES `admins` WRITE;
 /*!40000 ALTER TABLE `admins` DISABLE KEYS */;
 INSERT INTO `admins` VALUES
-(1,NULL,'GlobalAdmin','f36ce1a4e44a154fa2fff77b18235397','global','Dariusz Marcisz','test@mail.pl','2023-01-01 12:00:00','2023-08-26 10:21:54','2023-08-26 11:16:29','2023-08-26 10:21:54'),
-(22,NULL,'k.klimczyk','bf058be667ba9a24f3dd3f4c5f83ba2a','global','Krzysztof Klimczyk','k.klimczyk@heban.net','2023-08-26 09:21:45',NULL,NULL,NULL),
-(23,NULL,'pkul','bf058be667ba9a24f3dd3f4c5f83ba2a','global','Paweł Kulikiewicz','','2023-08-26 09:22:17',NULL,NULL,NULL);
+(1,NULL,'GlobalAdmin','f36ce1a4e44a154fa2fff77b18235397','global','Dariusz Marcisz','test@mail.pl','2023-01-01 12:00:00','2023-08-26 10:21:54','2023-08-27 21:43:08','2023-08-26 10:21:54'),
+(2,NULL,'k.klimczyk','bf058be667ba9a24f3dd3f4c5f83ba2a','global','Krzysztof Klimczyk','k.klimczyk@heban.net','2023-08-26 09:21:45',NULL,NULL,NULL),
+(3,NULL,'pkul','bf058be667ba9a24f3dd3f4c5f83ba2a','global','Paweł Kulikiewicz','','2023-08-26 09:22:17',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `admins` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -277,7 +275,7 @@ CREATE TABLE `jobs_work` (
   `username` varchar(65) NOT NULL,
   `desc` text DEFAULT NULL,
   PRIMARY KEY (`job_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -313,10 +311,12 @@ CREATE TABLE `mail_forwardings` (
   `account_id` int(10) unsigned NOT NULL,
   `address` varchar(255) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `forwarding` varchar(255) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  `alias` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`forward_id`),
   KEY `ACCOUNT_IDX` (`account_id`),
+  KEY `ALIAS_DX` (`alias`),
   KEY `ADDRESS_IDX` (`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin COMMENT='alias = 0 - adres główny\nalias = 1 - alians\nalias = 2 - forward';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -357,7 +357,6 @@ INSERT INTO `services` VALUES
 UNLOCK TABLES;
 
 
-
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -368,4 +367,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-08-26 11:29:32
+-- Dump completed on 2023-08-27 21:43:45
