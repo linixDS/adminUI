@@ -337,8 +337,17 @@ class AccountsClass extends BaseClass
         $client = $account['client'];
 
         $query = '';
+        
 
         try {
+            $query = "SELECT active,username FRO FROM accounts WHERE account_id=? LIMIT 1;";
+            $sth = $db->prepare($conn, $query);
+            $sth->execute([$id]);
+            $data = $sth->fetch(PDO::FETCH_ASSOC);
+            $curr_active = $data['active'];
+            $username = $data['username'];
+
+
             $db->BeginTransaction($conn);
 
             $query = "UPDATE accounts SET name=:NAMEACCOUNT,active=:ACTIVE";
@@ -361,6 +370,19 @@ class AccountsClass extends BaseClass
 
             $sth->execute();
 
+            if ($curr_active != $active){
+                $query = "UPDATE sogo.sogo_user_profile SET c_uid=? WHERE c_uid=? LIMIT 1;";
+                $sth = $db->prepare($conn, $query);
+                $disable_username = $username."_disabled";
+                if ($active == 1){
+                    
+                    $sth->execute([$username, $disable_username]);
+                }
+                    else {
+                        $sth->execute([$disable_username,$username]);
+                    }
+            }
+           
 
             $classService = new ServicesClass(null);
             $currentServices = $classService->getAccountServicesResultData($id);
