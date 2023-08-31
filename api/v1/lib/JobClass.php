@@ -31,7 +31,7 @@ class JobClass extends BaseClass
             $names = explode('@',$accountName);
             $mailLocation = MAIL_PATH.'/'.$names[1].'/'.$names[0];
             $desc = "Remove account ".$accountName." from admin ".$adminName;
-            $this->insertRecord($db, $conn, 'remove-mail.sh', $mailLocation, $accountName, $desc);
+            $this->insertRecord($db, $conn, 'remove-mail', $mailLocation, $accountName, $desc);
         } catch (Exception $e) {
             $this->sendError(500, "Error SQL 1:" . $e);
             return;
