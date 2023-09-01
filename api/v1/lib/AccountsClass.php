@@ -340,6 +340,7 @@ class AccountsClass extends BaseClass
         
 
         try {
+            /*
             $query = "SELECT active,username FRO FROM accounts WHERE account_id=? LIMIT 1;";
             $sth = $db->prepare($conn, $query);
             $sth->execute([$id]);
@@ -347,6 +348,7 @@ class AccountsClass extends BaseClass
             $curr_active = $data['active'];
             $username = $data['username'];
 
+*/
 
             $db->BeginTransaction($conn);
 
@@ -370,6 +372,8 @@ class AccountsClass extends BaseClass
 
             $sth->execute();
 
+
+            /*
             if ($curr_active != $active){
                 $query = "UPDATE sogo.sogo_user_profile SET c_uid=? WHERE c_uid=? LIMIT 1;";
                 $sth = $db->prepare($conn, $query);
@@ -382,6 +386,7 @@ class AccountsClass extends BaseClass
                         $sth->execute([$disable_username,$username]);
                     }
             }
+            */
            
 
             $classService = new ServicesClass(null);
@@ -422,6 +427,8 @@ class AccountsClass extends BaseClass
 
             $serviceChange['add'] = $servicesAddName;
             $serviceChange['del'] = $servicesDelName;
+
+
 
             if ($disableSOGo == true){
                 $query = "DELETE FROM accounts_quota  WHERE account_id=? LIMIT 1;";
