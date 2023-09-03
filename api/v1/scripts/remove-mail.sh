@@ -6,11 +6,13 @@ if [[ $# -eq 0 ]] ; then
 fi
 
 
-DIR=/srv/mail/$1/test/test
+DIR=/srv/mail/$1
 if [ -d "$DIR" ]; then
     echo '::Removing mailbox: $DIR'
     rm -rf $DIR
     echo '::Done'
+    exit 0
 else
     echo "Error: Directory not found: $DIR"
+    exit 1
 fi

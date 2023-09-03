@@ -10,4 +10,5 @@
 
      define("CONFIG_LOG_PATH", "/logs/");
      define("MAIL_PATH", "/srv/mail");
+     define("SCRIPT_PATH", "/srv/www/adminUI/api/v1/scripts");
 ?>

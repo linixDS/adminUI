@@ -1,0 +1,86 @@
+#!/usr/bin/php
+<?php
+    error_reporting(E_ALL);
+    ini_set('display_errors', 0);
+    set_error_handler('error_handler');
+    set_exception_handler('exception_handler');
+
+    // Funkcja do obsługi błędów
+    function error_handler($errno, $errstr, $errfile, $errline)
+    {
+        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    }
+
+    // Funkcja do obsługi wyjątków
+    function exception_handler($exception)
+    {
+        print_r($exception);
+        exit(-1);
+    } 
+
+    include "/srv/www/adminUI/api/v1/config/config.php";
+    include "/srv/www/adminUI/api/v1/config/db.php";
+    include "/srv/www/adminUI/api/v1/core/DB.php";
+    include "/srv/www/adminUI/api/v1/core/BaseClass.php";    
+    include "/srv/www/adminUI/api/v1/lib/JobClass.php";  
+
+
+    function Jobs(){
+        $db = new DB();
+        $conn = $db->getConnection();
+        if ($conn == null){
+            echo "ERROR: ".$db->getLastError();
+            exit(-1);
+        }
+    
+        $class = new JobClass(null);
+        $result = $class->getAllJobs($db, $conn);
+    
+        if ($result === FALSE) exit(-1);
+        printf("%-5s\t%-25s\t%-25s\t%-25s\r\n","#ID","StartTime","Execute","Arguments");
+        printf("%-5s\t%-25s\t%-25s\t%-25s\r\n","-----","-------------------","-----------------------","-------------------");
+    
+     
+
+        for ($idx=0; $idx<count($result);$idx++){
+            $jobId = $result[$idx]['id'];
+            $start = $result[$idx]['startJob'];
+            $script = $result[$idx]['runscript'];
+            $scriptArgs = $result[$idx]['scriptargs'];
+            printf("%5s\t%-25s\t%-25s\t%-25s\r\n",$jobId,$start,$script,$scriptArgs);
+        }
+        echo "\r\n";
+
+    }
+
+    function Help(){
+        echo "admin-tool - v1.0\r\n\r\n";
+        echo "usage: admin-tool <command>\r\n\r\n";
+        echo "Command\r\n";
+        echo "----------------------\r\n";
+        echo "get-jobs\tPrint all waiting jobsr\n";
+    }
+
+    if(count($argv) != 2)
+    {
+        Help();
+        exit(-1);
+    }
+
+
+    if ($argv[1] != "get-jobs"){
+        echo "Error: Command not found !\r\n";
+        exit(-1);
+    }
+
+    if ($argv[1] == "get-jobs"){
+        Jobs();
+        exit(0);
+    }
+
+  
+
+
+
+
+?>

@@ -42,6 +42,69 @@ class JobClass extends BaseClass
     }  
 
 
+    public function removeJob($db,$conn,$jobId){
+        try {
+            $query = "DELETE FROM jobs_work WHERE job_id=?";
+
+            $sth = $db->prepare($conn, $query);
+            $sth->execute([$jobId]);
+
+            return true;
+        } catch (Exception $e) {
+            echo "EXCEPTION: ".$e->getMessage()."\r\n";
+            return false;
+        }
+    }      
+
+    public function getActivedJobs($db,$conn,$request = false){
+        try {
+            $query = "SELECT job_id as id,created,startJob,runscript,scriptargs FROM jobs_work WHERE startJob <= NOW() ORDER BY startJob";
+
+            $sth = $db->prepare($conn, $query);
+            $sth->execute();
+            $jobs = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($request){
+                $data['jobs'] = $jobs;
+                return $this->sendResult(200, $data);
+            }
+                else
+                return $jobs;
+
+        } catch (Exception $e) {
+            if ($request)
+                $this->sendError(500, "Error SQL 1:" . $e);
+            else
+                echo "EXCEPTION: ".$e->getMessage()."\r\n";
+            return false;
+        }
+    } 
+    
+    public function getAllJobs($db,$conn,$request = false){
+        try {
+            $query = "SELECT job_id as id,created,startJob,runscript,scriptargs FROM jobs_work ORDER BY startJob";
+
+            $sth = $db->prepare($conn, $query);
+            $sth->execute();
+            $jobs = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($request){
+                $data['jobs'] = $jobs;
+                return $this->sendResult(200, $data);
+            }
+                else
+                return $jobs;
+
+        } catch (Exception $e) {
+            if ($request)
+                $this->sendError(500, "Error SQL 1:" . $e);
+            else
+                echo "EXCEPTION: ".$e->getMessage()."\r\n";
+            return false;
+        }
+    }      
+
+
     public function changeStructureDomain($db,$conn, $action, $domain){
         try {
             $desc = "Change struture domain(".$domain.") in service sogo";
