@@ -146,6 +146,10 @@ class DomainsClass extends BaseClass
 
             $sth->execute();
 
+
+            $job = new JobClass(null);
+            $job->changeStructureDomain($db, $conn, "add", $name);
+
             $event = new EventClass(null);
             $event->event_add_domain($db, $conn, $domainData['name'], "Add new domain from ".$sess->getUserName());            
 
@@ -201,6 +205,10 @@ class DomainsClass extends BaseClass
             $sth = $db->prepare($conn, $query);
 
             $sth->execute([$name]);
+
+
+            $job = new JobClass(null);
+            $job->changeStructureDomain($db, $conn, "remove", $name);
 
             $event = new EventClass(null);
             $event->event_add_domain($db, $conn, $name, "Delete domain from ".$sess->getUserName());            

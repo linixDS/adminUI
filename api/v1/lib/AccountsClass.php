@@ -340,15 +340,6 @@ class AccountsClass extends BaseClass
         
 
         try {
-            /*
-            $query = "SELECT active,username FRO FROM accounts WHERE account_id=? LIMIT 1;";
-            $sth = $db->prepare($conn, $query);
-            $sth->execute([$id]);
-            $data = $sth->fetch(PDO::FETCH_ASSOC);
-            $curr_active = $data['active'];
-            $username = $data['username'];
-
-*/
 
             $db->BeginTransaction($conn);
 
@@ -373,20 +364,6 @@ class AccountsClass extends BaseClass
             $sth->execute();
 
 
-            /*
-            if ($curr_active != $active){
-                $query = "UPDATE sogo.sogo_user_profile SET c_uid=? WHERE c_uid=? LIMIT 1;";
-                $sth = $db->prepare($conn, $query);
-                $disable_username = $username."_disabled";
-                if ($active == 1){
-                    
-                    $sth->execute([$username, $disable_username]);
-                }
-                    else {
-                        $sth->execute([$disable_username,$username]);
-                    }
-            }
-            */
            
 
             $classService = new ServicesClass(null);
@@ -440,6 +417,9 @@ class AccountsClass extends BaseClass
             }
                 else{
                     if (isset($account['maxquota'])){
+                        $job = new JobClass(null);
+                        $job->cancelRemoveAccount($db, $conn, $account['username']);
+
                         $quota = $account['maxquota'];
                        
                         $quota = $quota * 1024;
@@ -453,6 +433,7 @@ class AccountsClass extends BaseClass
                             $sth = $db->prepare($conn, $query);
                             $sth->execute([$id,$quota]);
                         }
+
                     }  
                 }
             

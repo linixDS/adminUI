@@ -274,6 +274,8 @@ export default {
     
 
     GetDomains() {
+          this.ErrorMessage = '';
+          this.SuccessMessage = '';      
           console.log('GET DOMAINS');
           fetch( this.ServerUrl+'domains.php?token='+this.auth.SessToken)
                 .then((res) => {
@@ -303,6 +305,8 @@ export default {
 
 
     GetClients() {
+      this.ErrorMessage = '';
+      this.SuccessMessage = '';      
       console.log('GET clients');
       fetch( this.ServerUrl +'clients.php?token=' + this.auth.SessToken)
             .then((res) => {
@@ -329,8 +333,53 @@ export default {
                   this.ErrorMessage = 'Wyjątek: ' + error;
             });
 
-      },    
+      }, 
       
+      
+      SendCommand(){
+        this.ErrorMessage = '';
+        this.SuccessMessage = '';
+        var commandData = {name: 'sogo', action: 'reload'};
+        var data = {  token  : this.auth.SessToken, 
+                      command : commandData};
+  
+  
+        this.showSpinLoading = true;
+        console.log('----[ SEND COMMAND ]-----');
+        console.log(JSON.stringify(data));
+  
+        fetch(  this.ServerUrl+'command.php', {
+              headers: { 'Content-type': 'application/json' },
+              method: "POST",
+              body: JSON.stringify(data)})
+              .then((res) => {
+                    console.log('StatusCode: ' + res.status);
+                    return res.json(); // Dodajemy return, aby zwrócić wynik jako Promise
+              })
+              .then((json) => {
+                    console.log('-> RESULT:');
+                    console.log(json);
+  
+                    if (json.error) {
+                      console.log(json.error);
+                      this.ErrorMessage = json.error.message;
+                    } else {
+                      this.SuccessMessage = "Polecenie zostanie wykonane.";
+                    }
+  
+                    
+              })
+              .catch((error) => {
+                    if (error == "TypeError: Failed to fetch")
+                      this.ErrorMessage = "Nie można nawiązać połączenia z serwerem "+this.ServerUrl;
+                    else
+                      if (error == "SyntaxError: Unexpected token '<', \"<?xml vers\"... is not valid JSON")
+                          this.ErrorMessage = "Błąd: nie odnaleziono zasobu.";
+                      else
+                        this.ErrorMessage = 'Wyjątek: ' + error;
+              });
+  
+    },        
  
 	  
   },
@@ -460,7 +509,11 @@ export default {
                 </div>
 				        <div  class="col-auto">
                     <input class="form-control me-2" type="search" placeholder="Szukaj" aria-label="Szukaj" v-model="SearchDomainText">
-                </div>    
+                </div> 
+                <div  class="col-auto" v-if="auth.isGlobalAdmin">
+                  <button class="btn btn-outline-danger"  v-on:click="SendCommand"  v-if="auth.isGlobalAdmin">
+                  <i class="fa-solid fa-rotate-right"></i>  Pzeładuj usługę SOGo</button>
+                </div>   
             </div>
 			
 			

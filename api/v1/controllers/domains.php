@@ -4,6 +4,7 @@ include("./core/BaseController.php");
 include("./core/DB.php");
 include("./core/Session.php");
 include("./lib/DomainsClass.php");
+include("./lib/JobClass.php");
 
 class Controller extends BaseController
 {
