@@ -18,6 +18,9 @@
 --
 -- Table structure for table `accounts`
 --
+USE admin_pabel;
+
+
 
 DROP TABLE IF EXISTS `accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -41,7 +44,7 @@ CREATE TABLE `accounts` (
   KEY `fk_accounts_2_idx` (`client_id`),
   CONSTRAINT `fk_accounts_1` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`domain_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_accounts_2` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -122,7 +125,6 @@ CREATE TABLE `accounts_services` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
 --
 -- Table structure for table `admins`
 --
@@ -156,7 +158,7 @@ CREATE TABLE `admins` (
 LOCK TABLES `admins` WRITE;
 /*!40000 ALTER TABLE `admins` DISABLE KEYS */;
 INSERT INTO `admins` VALUES
-(1,NULL,'GlobalAdmin','f36ce1a4e44a154fa2fff77b18235397','global','Dariusz Marcisz','test@mail.pl','2023-01-01 12:00:00','2023-08-26 10:21:54','2023-08-27 21:43:08','2023-08-26 10:21:54'),
+(1,NULL,'GlobalAdmin','f36ce1a4e44a154fa2fff77b18235397','global','Dariusz Marcisz','test@mail.pl','2023-01-01 12:00:00','2023-08-26 10:21:54','2023-09-03 12:12:31','2023-08-26 10:21:54'),
 (2,NULL,'k.klimczyk','bf058be667ba9a24f3dd3f4c5f83ba2a','global','Krzysztof Klimczyk','k.klimczyk@heban.net','2023-08-26 09:21:45',NULL,NULL,NULL),
 (3,NULL,'pkul','bf058be667ba9a24f3dd3f4c5f83ba2a','global','Paweł Kulikiewicz','','2023-08-26 09:22:17',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `admins` ENABLE KEYS */;
@@ -239,7 +241,7 @@ CREATE TABLE `domains` (
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `fk_domains_1_idx` (`client_id`),
   CONSTRAINT `fk_domains_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -259,7 +261,6 @@ CREATE TABLE `events_log` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
 --
 -- Table structure for table `jobs_work`
 --
@@ -269,13 +270,14 @@ DROP TABLE IF EXISTS `jobs_work`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jobs_work` (
   `job_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `created` varchar(45) NOT NULL DEFAULT 'NOW()',
+  `created` datetime NOT NULL DEFAULT current_timestamp(),
+  `startJob` datetime NOT NULL DEFAULT current_timestamp(),
   `runscript` varchar(45) NOT NULL,
   `scriptargs` varchar(255) DEFAULT NULL,
   `username` varchar(65) NOT NULL,
   `desc` text DEFAULT NULL,
   PRIMARY KEY (`job_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -290,8 +292,7 @@ CREATE TABLE `jobs_work` (
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `admin_panel`.`jobs_work_AFTER_DELETE` AFTER DELETE ON `jobs_work` FOR EACH ROW
 BEGIN
-	INSERT INTO `admin_panel`.`events_logs` (event_created, event_type, username, event_desc) VALUES
-    (NOW(), 'removeAccount', OLD.username, OLD.desc);
+	INSERT INTO events_log (event_created, event_type, username, event_desc) VALUES (NOW(), 'removeAccount', OLD.username, OLD.desc);
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -316,7 +317,7 @@ CREATE TABLE `mail_forwardings` (
   KEY `ACCOUNT_IDX` (`account_id`),
   KEY `ALIAS_DX` (`alias`),
   KEY `ADDRESS_IDX` (`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin COMMENT='alias = 0 - adres główny\nalias = 1 - alians\nalias = 2 - forward';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin COMMENT='alias = 0 - adres główny\nalias = 1 - alians\nalias = 2 - forward';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -356,7 +357,42 @@ INSERT INTO `services` VALUES
 /*!40000 ALTER TABLE `services` ENABLE KEYS */;
 UNLOCK TABLES;
 
+--
+-- Temporary table structure for view `sogo_contacts`
+--
 
+DROP TABLE IF EXISTS `sogo_users`;
+/*!50001 DROP VIEW IF EXISTS `sogo_contacts`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `sogo_contacts` AS SELECT
+ 1 AS `c_uid`,
+  1 AS `c_password`,
+  1 AS `c_name`,
+  1 AS `c_cn`,
+  1 AS `mail`,
+  1 AS `domain` */;
+SET character_set_client = @saved_cs_client;
+
+
+
+--
+-- Final view structure for view `sogo_contacts`
+--
+
+/*!50001 DROP VIEW IF EXISTS `sogo_contacts`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `sogo_users` AS select `accounts`.`username` AS `c_uid`,`accounts`.`password` AS `c_password`,`accounts`.`name` AS `c_name`,`accounts`.`name` AS `c_cn`,`accounts`.`username` AS `mail`,`domains`.`name` AS `domain` from (`accounts` left join `domains` on(`domains`.`domain_id` = `accounts`.`domain_id`)) where `accounts`.`account_id` in (select `accounts_quota`.`account_id` from `accounts_quota`) and `accounts`.`active` = 1 */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -367,4 +403,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-08-27 21:43:45
+-- Dump completed on 2023-09-03 12:42:18
