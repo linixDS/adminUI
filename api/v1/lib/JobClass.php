@@ -109,7 +109,7 @@ class JobClass extends BaseClass
         try {
             $desc = "Change struture domain(".$domain.") in service sogo";
             $argument = $action." ".$domain;
-            $this->insertRecord($db, $conn, "config-domain.sh", $argument, "SYSTEM", $desc, false);
+            $this->insertRecord($db, $conn, "config-domain.sh", $argument, "SYSTEM", $desc, true);
         } catch (Exception $e) {
             $this->sendError(500, "Error SQL 1:" . $e);
             return;
@@ -141,7 +141,7 @@ class JobClass extends BaseClass
     public function reloadServiceSOGo($db,$conn, $adminName){
         try {
             $desc = "Reload service sogo from admin ".$adminName;
-            $this->insertRecord($db, $conn, 'sogo-reload.sh', '', $adminName, $desc);
+            $this->insertRecord($db, $conn, 'sogo-reload.sh', '', $adminName, $desc, true);
         } catch (Exception $e) {
             $this->sendError(500, "Error SQL 1:" . $e);
             return;
