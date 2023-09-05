@@ -12,7 +12,7 @@
     }
 
 
-    if ($argv[1] != "add" || $argv[1] != "remove"){
+    if ($argv[1] != "add" && $argv[1] != "remove"){
         echo "Error: Command not found !\r\n";
         exit(-1);
     }
