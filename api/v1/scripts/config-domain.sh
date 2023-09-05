@@ -28,7 +28,7 @@
 
   if ($argv[1] == "add"){
         $replace  = "/*---[ BEGIN DOMAINS HEADER ]---*/\r\n\r\n";
-        $replace .= "#---[ BEGIN ".$argv[2]." ]---\r\n";
+        $replace .= "/*---[ BEGIN ".$argv[2]." ]---*/\r\n";
         $replace .= "\t".$argv[2]." = {\r\n";
         $replace .= "\t\t SOGoMailDomain = ".$argv[2].";\r\n";
         $replace .= "\t\t SOGoEnableDomainBasedUID = YES;\r\n";
@@ -36,10 +36,11 @@
         $replace .= "\t\t SOGoUserSources = ( {\r\n";
         $replace .= "\t\t\t type = sql;\r\n";
         $replace .= "\t\t\t DomainFieldName = \"domain\";\r\n";
-        $replace .= "\t\t\t viewURL = \"mysql://adminUI:adminUI@localhost:3306/admin_panel/sogo_users\";";
+        $replace .= "\t\t\t viewURL = \"mysql://adminUI:adminUI@localhost:3306/admin_panel/sogo_users\";\r\n";
         $replace .= "\t\t\t displayName = "Globalna Książka Adresowa";\r\n";
         $replace .= "\t\t\t canAuthenticate = YES;\r\n";
         $replace .= "\t\t\t isAddressBook = YES;\r\n";
+        $replace .= "\t\t}\r\n";
         $replace .= "\t\t);\r\n";
         $replace .= "\t};\r\n";
         $replace .= "/*---[ END ".$argv[2]." ]---*/\r\n";
@@ -50,8 +51,8 @@
         file_put_contents($filename, $new_content);
   }
     else {
-          $findBegin = "/*---[ BEGIN ".$argv[1]." ]---*/";
-          $findEnd = "/*---[ END ".$argv[1]." ]---*/";
+          $findBegin = "/*---[ BEGIN ".$argv[2]." ]---*/";
+          $findEnd = "/*---[ END ".$argv[2]." ]---*/";
           
           $start = strpos($file, $findBegin);
           if ($start === FALSE)
