@@ -1,6 +1,7 @@
 *.log
+api/v1/logs/*.*
 api/v1/config/db.php
 api/v1/config/ldap.php
 config/config.php
 api/v1/config/ldap.php
-.gitignore
+
