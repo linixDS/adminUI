@@ -1,0 +1,22 @@
+# Authentication for SQL users. Included from 10-auth.conf.
+#
+# https://doc.dovecot.org/configuration_manual/authentication/sql/
+
+passdb {
+  driver = ldap
+  args = /etc/dovecot/dovecot-ldap.conf.ext
+}
+
+userdb {
+    driver = static
+    args = uid=dovecot gid=dovecot home=/srv/mail/%d/%n
+}
+
+#userdb {
+#    driver = sql
+#    args = /etc/dovecot/dovecot-sql.conf.ext
+
+#    default_fields = uid=dovecot gid=dovecot home=/srv/mail/%d/%n
+#}
+
+

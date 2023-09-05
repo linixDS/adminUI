@@ -18,7 +18,7 @@
 #  args = password=test
 #}
 
-#userdb {
-#  driver = static
-#  args = uid=vmail gid=vmail home=/home/%u
-#}
+userdb {
+  driver = static
+  args = uid=dovecot gid=dovecto home=/srv/mail/%d/%n
+}
