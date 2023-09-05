@@ -37,7 +37,7 @@
         $replace .= "\t\t\t type = sql;\r\n";
         $replace .= "\t\t\t DomainFieldName = \"domain\";\r\n";
         $replace .= "\t\t\t viewURL = \"mysql://adminUI:adminUI@localhost:3306/admin_panel/sogo_users\";\r\n";
-        $replace .= "\t\t\t displayName = "Globalna Książka Adresowa";\r\n";
+        $replace .= "\t\t\t displayName = \"Globalna Książka Adresowa\";\r\n";
         $replace .= "\t\t\t canAuthenticate = YES;\r\n";
         $replace .= "\t\t\t isAddressBook = YES;\r\n";
         $replace .= "\t\t}\r\n";
