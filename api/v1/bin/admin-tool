@@ -25,6 +25,19 @@
     include "/srv/www/adminUI/api/v1/lib/JobClass.php";  
 
 
+    function commandRun($command){
+        $pipe = popen($command, 'r');
+
+        while($pipe) {
+            $line = fgets($pipe);
+            if ($line === FALSE) break;
+            echo $line;
+        }
+
+        pclose($pipe);
+        echo "\r\n";
+    }
+
     function Jobs(){
         $db = new DB();
         $conn = $db->getConnection();
@@ -58,7 +71,11 @@
         echo "usage: admin-tool <command>\r\n\r\n";
         echo "Command\r\n";
         echo "----------------------\r\n";
-        echo "get-jobs\tPrint all waiting jobsr\n";
+        echo "get-jobs\tPrint all waiting jobs\r\n";
+        echo "postfix-queue\tPrint postfix queue\r\n";
+        echo "postfix-qshape\tPrint postfix qshape\r\n";
+        echo "dovecot-errors\tPrint errors dovecot\r\n";
+        echo "dovecot-stats\tPrint stats dovecot\r\n";
     }
 
     if(count($argv) != 2)
@@ -68,19 +85,35 @@
     }
 
 
-    if ($argv[1] != "get-jobs"){
-        echo "Error: Command not found !\r\n";
-        exit(-1);
-    }
-
     if ($argv[1] == "get-jobs"){
         Jobs();
         exit(0);
     }
 
+    if ($argv[1] == "postfix-queue"){
+        commandRun("postqueue -p");
+        exit(0);
+    }
+
+    if ($argv[1] == "postfix-qshape"){
+        commandRun("qshape deferred");
+        exit(0);
+    }
+
+
+    if ($argv[1] == "dovecot-errors"){
+        commandRun("doveadm log errors");
+        exit(0);
+    }    
   
+    if ($argv[1] == "dovecot-stats"){
+        commandRun("doveadm stats dump");
+        exit(0);
+    } 
 
 
+    echo "Error: Command not found !\r\n";
+    exit(-1);
 
 
 ?>
