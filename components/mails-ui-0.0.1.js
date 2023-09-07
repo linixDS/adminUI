@@ -226,7 +226,7 @@ export default {
     },
 
     WebLoginMail(mail) {
-      window.open(this.SOGoAddress);
+      window.open('https://onet.pl');
     },    
     
     mounted() {
@@ -366,14 +366,14 @@ export default {
                                         <i class="fas fa-pen"></i>
                                         Edycja
                                       </button>
-                                  </td>  
-                                  
-                                  <td>
+
                                       <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="WebLoginMail(mail)">
                                       <i class="fa-solid fa-right-to-bracket"></i>
                                         WebLogin
-                                      </button>
-                                  </td>                                    
+                                      </button>                                      
+                                  </td>  
+                                  
+                                  
                                 </tr>   
                                 
                                
