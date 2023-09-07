@@ -225,9 +225,6 @@ export default {
         
     },
 
-    WebLoginMail(mail) {
-      window.open('https://onet.pl');
-    },    
     
     mounted() {
       const url = new URL(document.URL);
@@ -366,11 +363,7 @@ export default {
                                         <i class="fas fa-pen"></i>
                                         Edycja
                                       </button>
-
-                                      <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="WebLoginMail(mail)">
-                                      <i class="fa-solid fa-right-to-bracket"></i>
-                                        WebLogin
-                                      </button>                                      
+                                 
                                   </td>  
                                   
                                   
