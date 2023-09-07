@@ -1,0 +1,10 @@
+#
+# This group is read by the client library
+# Use it for options that affect all clients, but not the server
+#
+
+[client]
+default-character-set = utf8mb4
+
+# use it for MariaDB-only client options
+[client-mariadb]
