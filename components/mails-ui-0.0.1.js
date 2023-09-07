@@ -28,6 +28,7 @@ export default {
                 showForwardsContent: false,
                 showAliasContent: false,
 
+                SOGoAddress: '',
              
                 titlePage: 'Konta pocztowe:',
                 mailData: [],
@@ -223,6 +224,10 @@ export default {
         },         
         
     },
+
+    WebLoginMail(mail) {
+      window.open(this.SOGoAddress);
+    },    
     
     mounted() {
       const url = new URL(document.URL);
@@ -230,6 +235,7 @@ export default {
       const host = url.host;
   
       this.ServerUrl = protocol+'//'+host+'/api/v1/';
+      this.SOGoAddress = protocol+'//'+host+'/SOGo';
 
       this.GetClients();
     },
@@ -360,8 +366,17 @@ export default {
                                         <i class="fas fa-pen"></i>
                                         Edycja
                                       </button>
-                                  </td>                                  
-                                </tr>   					
+                                  </td>  
+                                  
+                                  <td>
+                                      <button type="button" class="btn btn-outline-primary" style="width: 100px;" @click="WebLoginMail(mail)">
+                                      <i class="fa-solid fa-right-to-bracket"></i>
+                                        WebLogin
+                                      </button>
+                                  </td>                                    
+                                </tr>   
+                                
+                               
                     </tbody>
               </table>
             </div>
