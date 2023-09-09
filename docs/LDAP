@@ -53,8 +53,7 @@ ldapadd -x -D cn=admin,dc=system,dc=local -W -f users.ldif
 
 ldapadd -x -D cn=admin,dc=system,dc=local -W -f groups.ldif
 
-Wyszukiwanie wg grupy
-ldapsearch -D "cn=admin,dc=system,dc=local" -W -b "cn=sogo,ou=groups,dc=system,dc=local" "(&(cn=sogo)(objectclass=groupOfNames))"
+
 
 
 UWAGI w bazie musi znalesc sie home, gid, uid

@@ -20,6 +20,13 @@ export default {
   
     
     methods: {
+        getImg(){
+            if (this.auth.isGlobalAdmin)
+               return '../img/globaladmin.png';
+            else
+              return '../img/admin.png';
+        },
+
         showProfileEvent() {
             this.$emit('showprofile-event', { eventData: 'Hello from the child component!' });
         },
@@ -56,6 +63,14 @@ export default {
         const protocol = url.protocol;
         const host = url.host;
 
+
+        if (this.auth.isGlobalAdmin)
+          this.AdminLogo = "./img/globaladmin.png";
+        else
+          this.AdminLogo = "./img/admin.png";
+
+          console.log(this.AdminLogo);
+
         this.ServerUrl = protocol+'//'+host+'/api/v1/';
         console.log('SERVER: '+this.ServerUrl);
     },
@@ -67,7 +82,7 @@ export default {
     `
     <div class="dropdown" >
     <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-      <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+      <img :src="getImg()" alt="" width="32" height="32" class="rounded-circle me-2">
       {{ auth.DisplayName }}
     </a>
     <ul class="dropdown-menu dropdown-menu-dark text-small shadow">

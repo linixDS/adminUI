@@ -1,0 +1,10 @@
+dn: dc=system
+objectClass: dcObject
+objectClass: organization
+dc: system
+o: system
+
+dn: ou=users,dc=system
+objectClass: top
+objectClass: organizationalUnit
+ou: users

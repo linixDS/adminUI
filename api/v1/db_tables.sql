@@ -375,6 +375,29 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 
+CREATE VIEW `vmail_alias` AS
+    SELECT 
+        `mail_forwardings`.`address` AS `source`,
+        `mail_forwardings`.`forwarding` AS `destinantion`
+    FROM
+        (`mail_forwardings`
+        LEFT JOIN `accounts` ON (`accounts`.`account_id` = `mail_forwardings`.`account_id`))
+    WHERE
+        `accounts`.`active` = 1
+            AND `mail_forwardings`.`alias` = 1
+    ORDER BY `mail_forwardings`.`address`;
+
+CREATE VIEW `vmail_forwardings` AS
+    SELECT 
+        `mail_forwardings`.`address` AS `source`,
+        `mail_forwardings`.`forwarding` AS `destinantion`
+    FROM
+        (`mail_forwardings`
+        LEFT JOIN `accounts` ON (`accounts`.`account_id` = `mail_forwardings`.`account_id`))
+    WHERE
+        `accounts`.`active` = 1
+            AND `mail_forwardings`.`alias` = 0
+    ORDER BY `mail_forwardings`.`address`;
 
 --
 -- Final view structure for view `sogo_contacts`
