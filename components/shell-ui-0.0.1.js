@@ -5,6 +5,7 @@ import ProfileUi from './profile-ui-0.0.1.js';
 import AccountsUi from './accounts-ui-0.0.1.js';
 import ProfilemenuUi from './profilemenu-ui-0.0.1.js';
 import MailsUi from './mails-ui-0.0.1.js';
+import PanelUi from './panel-ui-0.0.1.js';
 
 export default {
 
@@ -14,12 +15,13 @@ export default {
 
         data(){
             return {
+                IsAuth: false,
                 ServerUrl: '',
                 SessToken: '',
                 ErrorMessage: '',
                 AuthData: {},
                 Pages: [
-                            {name: 'HOME', show: true},
+                            {name: 'HOME', show: true, needAdmin: false},
                             {name: 'CLIENTS', show: false, needAdmin: true},
                             {name: 'DOMAINS', show: false,  needAdmin: false},
                             {name: 'ADMINS', show: false,  needAdmin: false},
@@ -37,6 +39,7 @@ export default {
             ProfileUi,
             ProfilemenuUi,
             AccountsUi,
+            PanelUi,
             MailsUi
         },        
 
@@ -94,6 +97,7 @@ export default {
                   } else {
                     this.AuthData = json.result;
                     console.log('Authorize');
+                    this.IsAuth = true;
                     console.log(this.AuthData);
                   }
                 })
@@ -123,6 +127,8 @@ export default {
             let decodedWordArray =  CryptoJS.enc.Base64.parse(this.token);
             this.SessToken = decodedWordArray.toString(CryptoJS.enc.Utf8);
 
+            console.log("AUTH DATA = ");
+            console.log(this.AuthData);
             this.Authorize();
         },
         
@@ -133,12 +139,12 @@ export default {
 
 		<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark" style="width: 280px;">
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-              <span class="fs-4">AdminPanel</span>
+              <span class="fs-4">OS4B</span>
             </a>
 		        <hr>
             <ul class="nav nav-pills flex-column mb-auto">
               <li class="nav-item">
-                <a href="#" v-bind:class="[IsViewPage('HOME') ? 'nav-link active' : 'nav-link text-white']" aria-current="page">
+                <a href="#" v-bind:class="[IsViewPage('HOME') ? 'nav-link active' : 'nav-link text-white']" aria-current="page" v-on:click="LoadPage('HOME')">
                   <i class="fas fa-home" style="color: white;"></i>
                   Home
                 </a>
@@ -187,30 +193,35 @@ export default {
   
 		<!--- Display content main --->
 		<div style="margin: 30px 30px 30px 30px; width: 100%; overflow-x: hidden; overflow-y: auto;">
-          <clients-ui v-if="IsViewPage('CLIENTS')"
+
+          <clients-ui v-if="IsViewPage('CLIENTS') && IsAuth"
                 :auth="AuthData">
           </clients-ui>
 
-          <domains-ui v-if="IsViewPage('DOMAINS')"
+          <domains-ui v-if="IsViewPage('DOMAINS') && IsAuth"
                 :auth="AuthData">
           </domains-ui>
 
 
-          <admins-ui v-if="IsViewPage('ADMINS')"
+          <admins-ui v-if="IsViewPage('ADMINS') && IsAuth"
                 :auth="AuthData">
           </admins-ui>
 
-          <profile-ui v-if="IsViewPage('PROFILE')"
+          <profile-ui v-if="IsViewPage('PROFILE') && IsAuth"
                 :auth="AuthData">
           </profile-ui> 
           
-          <accounts-ui v-if="IsViewPage('ACCOUNTS')"
+          <accounts-ui v-if="IsViewPage('ACCOUNTS') && IsAuth"
                 :auth="AuthData">
           </accounts-ui> 
           
-          <mails-ui v-if="IsViewPage('MAILS')"
+          <mails-ui v-if="IsViewPage('MAILS') && IsAuth"
                 :auth="AuthData">
-          </mails-ui>              
+          </mails-ui>   
+          
+          <panel-ui v-if="IsViewPage('HOME') && IsAuth"
+              :auth="AuthData">
+          </panel-ui>          
 		</div>
     
 	</main>

@@ -15,6 +15,37 @@ class DomainsClass extends BaseClass
         $this->args = $args;
     }
 
+    public function getCountDomainsRaw($db, $conn)
+    {
+        if ( (!isset($db)) || (!isset($conn)) )
+            return false;
+
+        $sess = new SessionController();
+        $cid = $sess->GetClientID();
+
+        try{
+            if ($sess->IsGlobalAdmin()) {
+                $query = "SELECT COUNT(*) as domains FROM domains;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute();
+            } else {
+                $query = "SELECT COUNT(*) as domains FROM domains WHERE client_id=?;";
+                $sth = $db->prepare($conn, $query);
+                $sth->execute([$cid]);
+            }
+    
+            $data = $sth->fetch(PDO::FETCH_ASSOC);
+
+            $result['name'] = "domains";
+            $result['desc'] = "Liczba zarejestrowanych domen";
+            $result['value'] = $data['domains'];
+            return $result;
+
+        } catch (Exception $e) {
+            return false;
+        }
+    }    
+
     public function getDomains($token)
     {
         if (!isset($token))

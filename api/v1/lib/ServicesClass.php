@@ -317,11 +317,9 @@ class ServicesClass extends BaseClass
     }    
 
 
-    private function getCountClientServiceResultData($db, $conn, $client_id, $service_id){
+    public function getCountClientServiceResultData($db, $conn, $client_id, $service_id){
         if (!isset($client_id))  return false;        
         if (!isset($service_id))  return false;  
-
-        $sess = new SessionController();
 
 
         try {
@@ -336,7 +334,24 @@ class ServicesClass extends BaseClass
             $this->exceptionWrite($e);
             return false;
         }
-    }    
+    } 
+    
+    public function getCountAllServiceResultData($db, $conn, $service_id){
+        if (!isset($service_id))  return false;  
+
+        try {
+            $query = "SELECT COUNT(*) as active_accounts FROM accounts_services WHERE service_id=?;";
+            $sth = $db->prepare($conn, $query);            
+            $sth->execute([$service_id]);
+ 
+            $data = $sth->fetch(PDO::FETCH_ASSOC);
+            return $data;
+        } catch (Exception $e) {
+            $this->exceptionWrite($e);
+            return false;
+        }
+    }     
+    
     
     public function getAllServicesResultData($db, $conn)
     {
