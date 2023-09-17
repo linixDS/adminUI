@@ -54,21 +54,9 @@ export default {
               this.isValidClient = true;
               
 
-            if  (this.domainData.name.length < 5) {
-                this.isValidName = false;
-                return false;
-            }
-
-
-            if (this.domainData.name.indexOf('.') == -1){
-              this.isValidName = false;
-              return false;
-            }
-            else
-                  this.isValidName = true;             
-    
-     
-             
+            this.isValidName = this.validateDomainName();
+            if  (!this.isValidName) return false;
+            
             return true;
     },    
 
@@ -98,6 +86,24 @@ export default {
 
         this.ShowDomains();
     },
+
+    validateDomainName() {
+
+      if (this.domainData.name.length  < 4) return false;
+
+      const regex = /^[a-zA-Z0-9][-a-zA-Z0-9]+[a-zA-Z0-9].[a-z]{2,3}(.[a-z]{2,3})?(.[a-z]{2,3})?$/i;
+
+      if (regex.test(this.domainData.name)) {
+        if (this.ErrorMessage == "Nieprawidłowy format nazwy domeny !")
+            this.ErrorMessage = "";   
+     
+        return true;
+      }
+      else {
+        this.ErrorMessage = "Nieprawidłowy format nazwy domeny !";    
+        return false;
+      }
+    },    
 
     CopyDomainData(client){
         this.updateDomainData = {name: '', client: -1};
@@ -512,7 +518,7 @@ export default {
                 </div> 
                 <div  class="col-auto" v-if="auth.isGlobalAdmin">
                   <button class="btn btn-outline-danger"  v-on:click="SendCommand"  v-if="auth.isGlobalAdmin">
-                  <i class="fa-solid fa-rotate-right"></i>  Pzeładuj usługę SOGo</button>
+                  <i class="fa-solid fa-rotate-right"></i>  Przeładuj usługę SOGo</button>
                 </div>   
             </div>
 			

@@ -72,12 +72,8 @@ export default {
  
 
       CheckForm:function() {
-              if  (this.accountData.username.length < 3) {
-                this.isValidUser = false;
-                return false;
-              }
-                else
-              this.isValidUser = true;   
+              this.isValidUser = this.validateUserName();
+              if  (!this.isValidUser) return false;   
 
               if  (this.accountData.name.length < 3) {
                   this.isValidName = false;
@@ -86,6 +82,11 @@ export default {
                 else
                 this.isValidName = true;   
               
+
+              if (this.isNeedMail && this.accountData.mail != null){
+                  this.isValidMail = this.validateEmail();
+                  if  (!this.isValidMail) return false;   
+              }                  
 
               if (this.isChangePassword){
                       if (this.password1.length < 8){
@@ -109,14 +110,7 @@ export default {
               if (this.ChoiceServices.length < 1 && !this.isEditable)
                 return false;   
               
-              if (this.isNeedMail && this.accountData.mail != null){
-                  if  (this.accountData.mail.length < 5) {
-                      this.isValidMail = false;
-                      return false;
-                  }
-                    else
-                  this.isValidMail = true;
-              }                
+             
 
               return true;
         },        
@@ -141,6 +135,38 @@ export default {
           }          
           this.ShowAccounts();
       },
+
+      validateEmail() {
+        if (this.accountData.mail.length  < 6) return false;
+        
+        const regex = /^[a-z\d]+[\w\d.-]*@(?:[a-z\d]+[a-z\d-]+\.){1,5}[a-z]{2,6}$/i;
+        if (regex.test(this.accountData.mail)) {
+          if (this.ErrorMessage == "Nieprawidłowy format adresu E-Mail !")
+              this.ErrorMessage = "";   
+       
+          return true;
+        }
+        else {
+          this.ErrorMessage = "Nieprawidłowy format adresu E-Mail !";    
+          return false;
+        }
+      },  
+      
+      validateUserName() {
+        if (this.accountData.username.length  < 3) return false;
+        
+        const regex = /[a-z0-9]$/g;
+        if (regex.test(this.accountData.username)) {
+          if (this.ErrorMessage == "Wprowadzono niedozwolone znaki w polu LOGIN !")
+              this.ErrorMessage = "";   
+       
+          return true;
+        }
+        else {
+          this.ErrorMessage = "Wprowadzono niedozwolone znaki w polu LOGIN !";    
+          return false;
+        }
+      },         
 
       onChangeQuota(){
         if (this.accountData.maxquota < this.accountData.bytes)

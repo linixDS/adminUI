@@ -69,10 +69,10 @@ export default {
               else
               this.isValidNIP = true;              
 
-            if  (this.clientData.mail.length < 6) {
-                this.isValidMail = false;
-                return false;
-            }
+
+            this.isValidMail = this.validateEmail();
+            if  (!this.isValidMail) return false;
+
 
             if  (this.clientData.admins < 1 || this.clientData.admins > 50) {
               console.log('LIMIT IS INCORRECT !!!');
@@ -82,14 +82,6 @@ export default {
               else
               this.isValidAdmins = true;
       
-   
-
-            if (this.clientData.mail.indexOf('@') == -1 || this.clientData.mail.indexOf('.') == -1){
-                  this.isValidMail = false;
-                  return false;
-            }
-            else
-                  this.isValidMail = true; 
             
             if (this.clientChoiceServices.length < 1 && !this.isEditable)
                 return false;
@@ -108,7 +100,6 @@ export default {
   },
 
 
-  
   methods: {
     BackPage(){
         console.log("BACK !!!");
@@ -124,6 +115,23 @@ export default {
 
 
         this.ShowClients();
+    },
+
+    validateEmail() {
+      if (this.clientData.mail.length  < 6) return false;
+
+      const regex = /^[a-z\d]+[\w\d.-]*@(?:[a-z\d]+[a-z\d-]+\.){1,5}[a-z]{2,6}$/i;
+
+      if (regex.test(this.clientData.mail)) {
+        if (this.ErrorMessage == "Nieprawidłowy format adresu E-Mail !")
+            this.ErrorMessage = "";   
+     
+        return true;
+      }
+      else {
+        this.ErrorMessage = "Nieprawidłowy format adresu E-Mail !";    
+        return false;
+      }
     },
 
     onChangeQuota(){
@@ -739,7 +747,7 @@ export default {
               <label class="col-form-label">E-mail: </label>
             </div>
             <div class="col-4">
-              <input type="text" maxlength="85" :class="isValidMail ? 'form-control is-valid' : 'form-control is-invalid'" v-model="clientData.mail" :disabled="isDisableInputs">
+              <input type="text" maxlength="85" :class="isValidMail ? 'form-control is-valid' : 'form-control is-invalid'" v-model="clientData.mail"  :disabled="isDisableInputs">
             </div>
           </div>
           

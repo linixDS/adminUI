@@ -16,6 +16,7 @@ export default {
                 isValidPass1: false,
                 isValidPass2: false,
                 isValidClient: false,
+                isValidMail: false,
                 isChangePassword: false,
 
                 Admins : [],
@@ -65,19 +66,18 @@ export default {
                     this.isValidClient = true; 
             }
   
-              if  (this.adminData.username.length < 3) {
-                  this.isValidUser = false;
-                  return false;
-              }
-                else
-                this.isValidUser = true;
+              this.isValidUser = this.validateUserName();
+              if  (!this.isValidUser) return false;  
 
               if  (this.adminData.name.length < 5) {
                   this.isValidName = false;
                   return false;
               }
                 else
-                this.isValidName = true;                
+                this.isValidName = true;   
+              
+              this.isValidMail = this.validateEmail();
+              if  (!this.isValidMail) return false;                
   
               if (this.isChangePassword){
                       if (this.password1.length < 8){
@@ -125,6 +125,39 @@ export default {
           this.password2 = '';
           this.isChangePassword = true;
       },
+
+      validateUserName() {
+        if (this.adminData.username.length  < 3) return false;
+        
+        const regex = /[a-z0-9]$/g;
+        if (regex.test(this.adminData.username)) {
+          if (this.ErrorMessage == "Wprowadzono niedozwolone znaki w polu LOGIN !")
+              this.ErrorMessage = "";   
+       
+          return true;
+        }
+        else {
+          this.ErrorMessage = "Wprowadzono niedozwolone znaki w polu LOGIN !";    
+          return false;
+        }
+      }, 
+
+
+      validateEmail() {
+        if (this.adminData.mail.length  < 6) return false;
+        
+        const regex = /^[a-z\d]+[\w\d.-]*@(?:[a-z\d]+[a-z\d-]+\.){1,5}[a-z]{2,6}$/i;
+        if (regex.test(this.adminData.mail)) {
+          if (this.ErrorMessage == "Nieprawidłowy format adresu E-Mail !")
+              this.ErrorMessage = "";   
+       
+          return true;
+        }
+        else {
+          this.ErrorMessage = "Nieprawidłowy format adresu E-Mail !";    
+          return false;
+        }
+      },      
 
       changeClientData(){
           console.log("change: "+this.adminData.client);
@@ -180,6 +213,7 @@ export default {
             this.isValidName = false;
             this.isValidPass1 = false;
             this.isValidPass2 = false;
+            this.isValidMail = false;
             this.isValidClient = false;
             this.isChangePassword = true;
   
@@ -222,7 +256,7 @@ export default {
             this.CopyData(client);
             this.adminData = client;
 
-  
+            this.isValidMail = false;  
             this.isValidUser = true;
             this.isValidName = true;
             this.isValidPass1 = true;
@@ -702,7 +736,7 @@ export default {
                   <label class="col-form-label">E-mail:  </label>
                 </div>
                 <div class="col-4">
-                  <input type="text" maxlength="65" class="form-control" v-model="adminData.mail"  :disabled="isDisableInputs">
+                  <input type="text" maxlength="65" :class="isValidMail ? 'form-control is-valid' : 'form-control is-invalid'" v-model="adminData.mail"  :disabled="isDisableInputs">
                 </div>
             </div> 
 
