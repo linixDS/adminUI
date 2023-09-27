@@ -10,6 +10,7 @@ export default {
         return {
                     ErrorMessage: '',
                     ServicesInfo : [],
+                    SystemInfo : [],
                     titlePage: 'Panel Administracyjny'
               }
     },
@@ -33,6 +34,7 @@ export default {
                       this.ErrorMessage = json.error.message;
                     } else {
                       this.ServicesInfo = json.result.services;
+                      this.SystemInfo = json.result.system;
                     }
                   })
                   .catch((error) => {
@@ -86,6 +88,8 @@ export default {
             </div>
         </div>  
     </div>
+
+ 
 
 
     `
