@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="Dariusz Marcisz">
-    <title>AdminPanel UI</title>
+    <title>OS4B - Admin Panel</title>
 </head>
 <body>
     <div id="app"></div>

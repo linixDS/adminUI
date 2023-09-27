@@ -101,6 +101,10 @@ export default {
                 <div class="col-lg-3 col-md-2"></div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="text-center" style="margin-top: 50px;color: #cccccc;">Copyright&copy; 2023 by OS4B - Open Source for Business</div>
+        </div>
     </div>    
     `
 }
